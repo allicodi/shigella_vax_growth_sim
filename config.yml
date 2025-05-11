@@ -714,8 +714,6 @@ optimistic_settings:
   shig_coef_mild: -0.1
   shig_coef_severe: -0.15
   sd: 0.5096
-  G_X_model: "G ~ X"
-  Yinf_X_model: "Y_inf ~ X"
   return_se: TRUE
   est: 
     - "gcomp"

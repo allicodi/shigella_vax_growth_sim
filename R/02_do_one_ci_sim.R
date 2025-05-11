@@ -42,8 +42,8 @@ do_one_ci_sim <- function(
                       est = est, 
                       n_boot = n_boot,
                       seed = params$seed, 
-                      G_X_model = params$G_X_model, 
-                      Y_X_model = params$Yinf_X_model, 
+                      #G_X_model = params$G_X_model, 
+                      #Y_X_model = params$Yinf_X_model, 
                       null_hypothesis_value = null_hypothesis_value, 
                       alpha_level = alpha_level, 
                       family = "gaussian", 
@@ -55,9 +55,9 @@ do_one_ci_sim <- function(
                        "hudgens_lower_res_doomed", "hudgens_upper_res_doomed")){
       df <- data.frame(
         pt_est = x$obs_diff,
-        se = NA,
-        lower_ci = NA,
-        upper_ci = NA,
+        se = x$se,
+        lower_ci = x$lower_ci,
+        upper_ci = x$upper_ci,
         reject = x$reject,
         pval = x$pval,
         class = class(x),
