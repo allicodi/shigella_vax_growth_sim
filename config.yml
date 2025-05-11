@@ -1,0 +1,728 @@
+default:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: 0.6940
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+
+sd_low:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 150000
+    - 200000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: 0.5096
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+two_year:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 150000
+    - 200000
+  incidence_shigella: 0.1236
+  incidence_severe_shigella: 0.0492
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: 0.6940
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+gambia:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 125000
+    - 150000
+  incidence_shigella: 0.1444
+  incidence_severe_shigella: 0.0612
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: 0.6940
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+two_year_gambia:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 60000
+    - 75000
+    - 100000
+  incidence_shigella: 0.2888
+  incidence_severe_shigella: 0.1224
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: 0.6940
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+
+two_year_gambia_low_sd:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 10000
+    - 25000
+    - 40000
+    - 50000
+    - 75000
+  incidence_shigella: 0.2888
+  incidence_severe_shigella: 0.1224
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: 0.5096
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+
+zhifei:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size: 
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 75000
+    - 100000
+    - 125000
+    - 150000
+  incidence_shigella: 0.0938
+  incidence_severe_shigella: 0.0339
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: 0.5096
+  zhifei: TRUE
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+inc_shig_coef_default: 
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.1
+  shig_coef_severe: -0.15
+  sd: 0.6940
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+inc_shig_coef_ideal: 
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 2000
+    - 4000
+    - 6000
+    - 8000
+    - 10000
+    - 20000
+    - 40000
+  incidence_shigella: 0.2888
+  incidence_severe_shigella: 0.1224
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.1
+  shig_coef_severe: -0.15
+  sd: 0.5096
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+inc_shig_coef_zhifei: 
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size: 
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 75000
+  incidence_shigella: 0.0938
+  incidence_severe_shigella: 0.0339
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.1
+  shig_coef_severe: -0.15
+  sd: 0.5096
+  zhifei: TRUE
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+# ---------------------------------------------------------------------
+# New for longitudinal growth measurement / lower sd from zlen
+
+default_bg:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+
+default_one_month:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "prev-1"
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+default_two_month:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "prev-2"
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+zhifei_bg:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size: 
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 75000
+    - 100000
+    - 125000
+    - 150000
+  incidence_shigella: 0.0938
+  incidence_severe_shigella: 0.0339
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  zhifei: TRUE
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+zhifei_one_month:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size: 
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 75000
+    - 100000
+    - 125000
+    - 150000
+  incidence_shigella: 0.0938
+  incidence_severe_shigella: 0.0339
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "prev-1"
+  zhifei: TRUE
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+zhifei_two_month:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size: 
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 75000
+    - 100000
+    - 125000
+    - 150000
+  incidence_shigella: 0.0938
+  incidence_severe_shigella: 0.0339
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "prev-2"
+  zhifei: TRUE
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    
+test_chop_lump:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+    - "choplump"
+    
+break_chop_lump:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: 0
+  shig_coef_severe: 0
+  sd: "baseline"
+  est: 
+    - "gcomp"
+    - "choplump"
+    
+test_hudgens:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 5000
+    - 10000
+    - 50000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  est: 
+    - "hudgens_lower"
+    - "hudgens_upper"
+
+catch_up_prev-1:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "prev-1"
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+  catch_up: TRUE
+
+catch_up_prev-2:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 4000
+    - 8000
+    - 10000
+    - 25000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "prev-2"
+  est: 
+    - "gcomp_pop_estimand"
+    - "gcomp"
+  catch_up: TRUE
+ 
+test_new_tmle_aipw:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 10000
+    - 50000
+    - 100000
+    - 250000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  est: 
+    - "efficient_aipw"
+    - "efficient_tmle"
+
+small_new_tmle_aipw:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 10000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  est: 
+    - "efficient_aipw"
+    - "efficient_tmle"
+    
+# ---------------------------------------------------------------------
+# New to test doubly-robust properties of tmle/aipw estimators
+# ---------------------------------------------------------------------
+
+dr_both_correct:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 50000
+    - 100000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  G_X_model: "G ~ X"
+  Yinf_X_model: "Y_inf ~ X"
+  est: 
+    - "gcomp"
+    - "efficient_aipw"
+    - "efficient_tmle"
+    
+dr_outcome_incorrect:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 50000
+    - 100000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  G_X_model: "G ~ I(X > 0.5)"
+  Yinf_X_model: "Y_inf ~ X"
+  est: 
+    - "gcomp"
+    - "efficient_aipw"
+    - "efficient_tmle"
+
+# note this is incorrect with the quadratic model
+dr_Yinf_incorrect:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 50000
+    - 100000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  G_X_model: "G ~ X"
+  Yinf_X_model: "Y_inf ~ X"
+  est: 
+    - "gcomp"
+    - "efficient_aipw"
+    - "efficient_tmle"
+    
+dr_both_incorrect:
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 4000
+    - 8000
+    - 50000
+    - 100000
+    - 400000
+  incidence_shigella: 0.0618
+  incidence_severe_shigella: 0.0246
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.052
+  shig_coef_severe: -0.072
+  sd: "baseline"
+  G_X_model: "G ~ I(X > 0.5)"
+  Yinf_X_model: "Y_inf ~ X"
+  est: 
+    - "gcomp"
+    - "efficient_aipw"
+    - "efficient_tmle"
+    
+optimistic_settings: 
+  n_seeds: 1000
+  n_boot: 1000
+  n_sample_size:
+    - 1000
+    - 2000
+    - 4000
+    - 8000
+    - 10000
+    - 20000
+    - 40000
+  incidence_shigella: 0.2888
+  incidence_severe_shigella: 0.1224
+  VE_mild: 0.40
+  VE_severe: 0.60
+  lfaz_bl_effect_shig: -0.3147
+  lfaz_bl_effect_severe_shig: -0.1990
+  shig_coef_mild: -0.1
+  shig_coef_severe: -0.15
+  sd: 0.5096
+  G_X_model: "G ~ X"
+  Yinf_X_model: "Y_inf ~ X"
+  return_se: TRUE
+  est: 
+    - "gcomp"
+    - "efficient_aipw"
+    - "efficient_tmle"
+    - "hudgens_lower"
+    - "hudgens_upper"
+    - "hudgens_lower_doomed"
+    - "hudgens_upper_doomed"
+
