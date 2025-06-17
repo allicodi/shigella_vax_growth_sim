@@ -111,6 +111,9 @@ run_simulation <- function(n_seeds = 1000,
   prop_neg_df <- data.frame()
   ci_width_df <- data.frame()
   
+  
+  # STOPPED HERE -- TODO redo all the bias, coverage, etc evaluation functions for additive and multiplicative effects
+  # Also need to have truth for multiplicative effect?? 
   for(i in 1:nrow(evaluation_df)){
     # bias_df <- rbind(bias_df, unlist(get_bias(results, evaluation_df[i,], est)))
     # coverage_df <- rbind(coverage_df, unlist(get_coverage(results, evaluation_df[i,], est)))
@@ -152,10 +155,10 @@ run_simulation <- function(n_seeds = 1000,
 }
 
 # ------------------------------------------------------------------------
-# debug(run_simulation)
-test <- run_simulation(n_seeds = 1000,
-                       n_boot = 1000,
-                       n_sample_size = c(4000, 8000, 10000, 25000, 50000),
+debug(run_simulation)
+test <- run_simulation(n_seeds = 10,
+                       n_boot = 10,
+                       n_sample_size = 1e6,
                        incidence_shigella = 0.0618,
                        incidence_severe_shigella = 0.0246,
                        VE_mild = 0.4,
@@ -169,9 +172,56 @@ test <- run_simulation(n_seeds = 1000,
                        Yinf_X_model = c("Y_inf ~ X"),
                        est = c("gcomp", 
                                "efficient_aipw", "efficient_tmle",
-                               "hudgens_lower", "hudgens_upper", 
-                               "hudgens_lower_doomed", "hudgens_upper_doomed"))
+                               "hudgens_lower", "hudgens_upper"))
+                       
+                       # ,
+                       #         "hudgens_lower", "hudgens_upper", 
+                       #         "hudgens_lower_doomed", "hudgens_upper_doomed"))
 
 # TODO
 # Check plotting functions
 # Make cluster version + run
+
+
+# -------------------------------------------------------------
+# just plot old results from 'ideal' overly optimistic setting
+
+results <- readRDS(here::here("../shigella_ve/results/inc_shig_coef_ideal_results.Rds"))
+
+power_results <- results$power_df
+
+power_results_long <- power_results %>%
+  select(n, power_gcomp, power_gcomp_pop_estimand) %>%
+  pivot_longer(cols = starts_with("power_"),
+               names_to = "estimand",
+               values_to = "power") %>%
+  mutate(estimand = recode(estimand,
+                           power_gcomp = "Naturally Infected",
+                           power_gcomp_pop_estimand = "ITT"))
+
+plot_poster <- ggplot(power_results_long, aes(x = n, y = power, color = estimand)) +
+  geom_line(size = 2) +
+  geom_point(size = 4) +
+  geom_hline(yintercept = 0.8, linetype = "dashed", size = 1.5, color = "red") +
+  scale_y_continuous(
+    limits = c(0, 1),
+    breaks = seq(0, 1, by = 0.2),
+    labels = percent_format(accuracy = 1),
+    name = "Power"
+  ) +
+  scale_x_continuous(name = "Sample Size") +
+  scale_color_manual(
+    values = c(
+      "Naturally Infected" = "#2ca02c",  # dark navy blue
+      "ITT" = "#2f4b7c"                 # lighter navy blue
+    )
+  ) +
+  labs(
+    title = "Power vs sample size curve by estimand",
+    subtitle = "Shigella vaccine trial simulation",
+    color = "Estimand"
+  ) +
+  theme_minimal(base_size = 24) +
+  theme(legend.position = "bottom")
+
+ggsave(here::here("vaccine_sim_poster_figure.png"), plot_poster, width = 9, height = 6)

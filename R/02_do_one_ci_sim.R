@@ -47,17 +47,22 @@ do_one_ci_sim <- function(
                       null_hypothesis_value = null_hypothesis_value, 
                       alpha_level = alpha_level, 
                       family = "gaussian", 
-                      return_models = FALSE)
+                      return_models = FALSE,
+                      return_se = TRUE)
   
-  # Unlist to get in old format?
+  # TODO STOPPED HERE NEED TO FIX FOR MULTIPLICATIVE
   results_df <- lapply(results, function(x) {
     if(class(x) %in% c("choplump_res", "hudgens_lower_res", "hudgens_upper_res",
                        "hudgens_lower_res_doomed", "hudgens_upper_res_doomed")){
       df <- data.frame(
-        pt_est = x$obs_diff,
-        se = x$se,
-        lower_ci = x$lower_ci,
-        upper_ci = x$upper_ci,
+        pt_est_additive = x$obs_diff,
+        se_additive = x$se,
+        lower_ci_additive = x$lower_ci,
+        upper_ci_additive = x$upper_ci,
+        pt_est_mult = NA,
+        se_log_mult = NA,
+        lower_ci_mult = NA,
+        upper_ci_mult = NA,
         reject = x$reject,
         pval = x$pval,
         class = class(x),
@@ -65,10 +70,14 @@ do_one_ci_sim <- function(
       )
     } else{
       df <- data.frame(
-        pt_est = x$pt_est,
-        se = x$se,
-        lower_ci = unname(x$lower_ci),
-        upper_ci = unname(x$upper_ci),
+        pt_est_additive = x$pt_est_additive,
+        se_additive = x$se_additive,
+        lower_ci_additive = unname(x$lower_ci_additive),
+        upper_ci_additive = unname(x$upper_ci_additive),
+        pt_est_mult = x$pt_est_mult,
+        se_log_mult = x$se_log_mult,
+        lower_ci_mult = unname(x$lower_ci_mult),
+        upper_ci_mult = unname(x$upper_ci_mult),
         reject = x$reject,
         pval = NA,
         class = class(x),

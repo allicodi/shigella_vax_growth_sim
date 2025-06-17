@@ -51,6 +51,8 @@ generate_EFGH_complex <- function(n = 1000,
   # get intercept baseline log-odds 
   bl_log_odds_shigella <- qlogis(incidence_shigella)
   
+  #y0 time and y1 time here
+  
   prob_Y0is1 <- plogis(bl_log_odds_shigella + lfaz_bl_effect_shig*(X - mean_X))
   Y_inf_V0 <- rbinom(n, 1, prob_Y0is1)
   prob_Y1is1 <- rep(0, n)
