@@ -57,6 +57,7 @@ simulate_data <- function(n = 1e6,
   # All MAD, TAC attributable, quadrivalent targets (2a, 3a, 6, S. sonnei)
   efgh_age <- readRDS(here::here("data/efgh/boot_all_agegrps_2025-06-24.RDS"))
   
+  # Reported in incidence / 100 child years, get in years
   mad_inc <- as.numeric(efgh_age$est[efgh_age$country == enroll_site &
                                        efgh_age$tac_culture == "tac" &
                                        efgh_age$inc_type == "quad" &
@@ -89,6 +90,7 @@ simulate_data <- function(n = 1e6,
   
   ### Infection (general medically attended diarrhea) 
   # QUESTION incidence is never remotely close unless drop intercept by a lot...
+  # is that because hazard has t0=12 monthly? 
   intercept_S_inf_range <- seq(effect_enr_haz_inf$inf_int - 5, 
                                effect_enr_haz_inf$inf_int + 0.5, 
                                by = 0.01)
@@ -145,7 +147,9 @@ simulate_data <- function(n = 1e6,
                          laz = X)
   
   S_inf_time_Z0 <- rgeom(n, prob = hazard_inf_i)
-  S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 12, S_inf_time_Z0, 0) # if infected after study end, 0
+  #S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 12, S_inf_time_Z0, 0)
+  # changed hazard ratio function t0 to 52? so it's in weeks?
+  S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 52, S_inf_time_Z0, 0) # if infected after study end, 0
   S_inf_Z0 <- ifelse(S_inf_time_Z0 != 0, 1, 0)
   
   hazard_sev_i <- rep(0,n)

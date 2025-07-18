@@ -39,9 +39,14 @@ hazard_ratio <- function(row){
 }
 
 risk_ratio <- function(row){
-  cum_inc_laz_mean <- cum_inc(hazard = row[['hazard_laz_mean']], t0 = 12)
-  cum_inc_laz_minus0.5 <- cum_inc(hazard = row[['hazard_laz_minus0.5']], t0 = 12)
-  cum_inc_laz_0.5 <- cum_inc(hazard = row[['hazard_laz_0.5']], t0 = 12)
+  # cum_inc_laz_mean <- cum_inc(hazard = row[['hazard_laz_mean']], t0 = 12)
+  # cum_inc_laz_minus0.5 <- cum_inc(hazard = row[['hazard_laz_minus0.5']], t0 = 12)
+  # cum_inc_laz_0.5 <- cum_inc(hazard = row[['hazard_laz_0.5']], t0 = 12)
+  
+  cum_inc_laz_mean <- cum_inc(hazard = row[['hazard_laz_mean']], t0 = 52)
+  cum_inc_laz_minus0.5 <- cum_inc(hazard = row[['hazard_laz_minus0.5']], t0 = 52)
+  cum_inc_laz_0.5 <- cum_inc(hazard = row[['hazard_laz_0.5']], t0 = 52)
+  
   risk_ratio <- cum_inc_laz_0.5 / cum_inc_laz_minus0.5
   
   return(data.frame(cum_inc_laz_mean = cum_inc_laz_mean,
