@@ -11,7 +11,7 @@ here::i_am("R/tune_parameters.R")
 cum_inc <- function(hazard, t0){
   sum(hazard * (1 - hazard)^((1:t0) - 1))
 }
-
+#expit
 hazard <- function(intercept, laz_coef, laz){
   plogis(intercept + laz_coef * laz)
 }

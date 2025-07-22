@@ -23,7 +23,8 @@ simulate_data <- function(n = 1e6,
                           VE_severe = 0.6,
                           effect_lsd_inf_growth = -0.056,
                           effect_msd_inf_growth = -0.089,
-                          enroll_site = "Total"){
+                          enroll_site = "Total",
+                          type = "counterfactual"){
   set.seed(seed)
   # ---------------------------------------------------------------------------
   # Z: Vaccination (RCT 1:1) --------------------------------------------------
@@ -111,34 +112,50 @@ simulate_data <- function(n = 1e6,
   rr_params_inf <- risk_ratio_combos_inf %>%
     filter(cum_inc_laz_mean > mad_inc - 0.005 & cum_inc_laz_mean < mad_inc + 0.005) %>% # cumulative incidence within +-0.005 of cumulative incidence from data
     mutate(dist = sqrt((cum_inc_laz_mean - mad_inc)^2 + # get distance from cum incidence & mean X, find row with the smallest distance
-                         (laz_coef - effect_enr_haz_inf$inf_coef)^2)) %>%
+                         (laz_coef - effect_enr_haz_inf$inf_coef)^2)) %>% # log of risk_ratio should be close to effect_enr_haz_inf$inf_coef
     filter(dist == min(dist)) # select combination with minimum distance
+  
+  # msd_inc = cumulative incidence from ^^^ * predictions from EFGH model (sev | infection model )
   
   ### Moderate to severe diarrhea (MSD) infection
   # same issues as above with intercept except more extreme...
   intercept_S_sev_range <- seq(effect_enr_haz_inf$sev_int - 8, 
-                               effect_enr_haz_inf$sev_int + 0.5, 
+                               effect_enr_haz_inf$sev_int + 2, 
                                by = 0.01)
+  
+  # fix this from the model in real data
   coef_S_sev_range <- seq(effect_enr_haz_inf$sev_coef - 0.1, 
                           effect_enr_haz_inf$sev_coef + 0.1, 
                           by = 0.01)
   
   S_sev_grid <- expand.grid(intercept = intercept_S_sev_range,
                             laz_coef = coef_S_sev_range,
-                            mean_X = bl_growth_param$mean)
+                            mean_X = bl_growth_param$mean,
+                            inf_param_mad = rr_params_inf$cum_inc_laz_mean,
+                            msd_inc = msd_inc)
   
+  S_sev_grid$cum_inc_sev_inf_laz_mean = S_sev_grid$inf_param_mad * plogis(S_sev_grid$intercept + S_sev_grid$laz_coef * S_sev_grid$mean_X)
+  rr_params_sev <- S_sev_grid %>%
+    mutate(dist = sqrt((cum_inc_sev_inf_laz_mean - msd_inc)^2 +
+                         (laz_coef - effect_enr_haz_inf$sev_coef)^2)) %>%
+    filter(dist == min(dist))
+  
+  # ^^ check this is correct
+  
+  ## OLD WAY
   # Get hazard for LAZ -0.5 & LAZ  + 0.5 --> hazard ratio for each intercept / LAZ coefficient combination 
-  hazard_ratio_combos_sev <- cbind(S_sev_grid, do.call(rbind, apply(S_sev_grid, 1, hazard_ratio)))
+  #hazard_ratio_combos_sev <- cbind(S_sev_grid, do.call(rbind, apply(S_sev_grid, 1, hazard_ratio)))
   # Use hazard results to iterate over again for risk ratio
-  risk_ratio_combos_sev <- cbind(hazard_ratio_combos_sev, do.call(rbind, apply(hazard_ratio_combos_sev, 1, risk_ratio)))
+  #risk_ratio_combos_sev <- cbind(hazard_ratio_combos_sev, do.call(rbind, apply(hazard_ratio_combos_sev, 1, risk_ratio)))
   
   # Tune such that cumulative incidence is comparable to msd_inc/year MSD
-  rr_params_sev <- risk_ratio_combos_sev %>%
-    filter(cum_inc_laz_mean > msd_inc - 0.005 & cum_inc_laz_mean < msd_inc + 0.005) %>% # cumulative incidence within +-0.005 of cumulative incidence from data
-    mutate(dist = sqrt((cum_inc_laz_mean - msd_inc)^2 + # get distance from cum incidence & mean X, find row with the smallest distance
-                         (laz_coef - effect_enr_haz_inf$sev_coef)^2)) %>%
-    filter(dist == min(dist)) # select combination with minimum distance
-  
+  # rr_params_sev <- risk_ratio_combos_sev %>%
+  #   mutate(msd_inc_param_mean = rr_params_inf$cum_inc_laz_mean ) %>% #* pred from model)
+  #   filter(cum_inc_laz_mean > msd_inc - 0.005 & cum_inc_laz_mean < msd_inc + 0.005) %>% # cumulative incidence within +-0.005 of cumulative incidence from data
+  #   mutate(dist = sqrt((cum_inc_laz_mean - msd_inc)^2 + # get distance from cum incidence & mean X, find row with the smallest distance
+  #                        (laz_coef - effect_enr_haz_inf$sev_coef)^2)) %>%
+  #   filter(dist == min(dist)) # select combination with minimum distance
+  # 
   # 4) Use the conditional hazard with intercept + coef found above to model infection / severe infection time??? in absence of vaccine?
   # help idk what im doing
   
@@ -149,15 +166,16 @@ simulate_data <- function(n = 1e6,
   S_inf_time_Z0 <- rgeom(n, prob = hazard_inf_i)
   #S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 12, S_inf_time_Z0, 0)
   # changed hazard ratio function t0 to 52? so it's in weeks?
-  S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 52, S_inf_time_Z0, 0) # if infected after study end, 0
+  S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 52, S_inf_time_Z0, 0) # if infected after study end, censor at 52 (change to 52 at end, leave 0 temp for ease of other things)
   S_inf_Z0 <- ifelse(S_inf_time_Z0 != 0, 1, 0)
+  #S_inf_time_Z0 <- ifelse(S_inf_time_Z0 == 0, 52, S_inf_time_Z0)
   
   hazard_sev_i <- rep(0,n)
   hazard_sev_i[S_inf_Z0 == 1] <- hazard(intercept = rr_params_sev$intercept,
                                      laz_coef = rr_params_sev$laz_coef,
                                      laz = X[S_inf_Z0 == 1])
   
-  S_sev_Z0 <- rbinom(n, 1, prob = hazard_sev_i / hazard_inf_i)
+  S_sev_Z0 <- rbinom(n, 1, prob = hazard_sev_i) 
   S_sev_Z0 <- ifelse(is.na(S_sev_Z0), 0, S_sev_Z0)
   
   # 5) Now add in vaccine? Just doing the way we were before, not sure if this should impact hazard, timing, etc 
@@ -171,6 +189,8 @@ simulate_data <- function(n = 1e6,
   prob_S_sev_Z1 <- rep(0, n)
   prob_S_sev_Z1[S_sev_Z0 == 1 & S_inf_Z1 == 1] <- (1 - VE_severe) / (1 - VE_mild)
   S_sev_Z1 <- rbinom(n, 1, prob_S_sev_Z1)
+  
+  # ^^ i think vaccine efficacy is > 40% and 60% so something might be off? but this is how we did it originally
   
   # ---------------------------------------------------------------------------
   # X_1 through X_12: Monthly HAZ outcome 
@@ -206,6 +226,7 @@ simulate_data <- function(n = 1e6,
   
   # Get infection adjustments from meta-analysis
   # 'catch up growth' from other version? aka subtract from one timepoint only?
+  # subtract from all going forward
   growth_adj_Z0 <- ifelse(S_sev_Z0, effect_msd_inf_growth,
                           ifelse(S_inf_Z0, effect_lsd_inf_growth, 0))
   growth_adj_Z1 <- ifelse(S_sev_Z1, effect_msd_inf_growth,
@@ -213,13 +234,17 @@ simulate_data <- function(n = 1e6,
   
   # Simulate monthly growth based on sd_monthly
   
+  # convert weeks to months
+  S_inf_time_Z0_month <- ceiling(S_inf_time_Z0 / (52 / 12))
+  S_inf_time_Z1_month <- ceiling(S_inf_time_Z1 / (52 / 12))
+  
   # noise first so same for each Z0 and Z1
   noise_matrix <- sapply(1:12, function(i) rnorm(n, mean = 0, sd = sd_monthly$sd[i]))
   
   X_vec_Z0 <- vector(mode = "list", length = 12) 
-  X_vec_Z0[[1]] <- sd_monthly$beta_0[1] + sd_monthly$beta_1[1] * X + as.numeric(S_inf_time_Z0 == 1)*growth_adj_Z0 + noise_matrix[,1]
-  for(i in 2:length(X_vec_Z0)){
-    X_vec_Z0[[i]] <- sd_monthly$beta_0[i] + sd_monthly$beta_1[i] * X + as.numeric(S_inf_time_Z0 == i)*growth_adj_Z0 + noise_matrix[,i]
+  #X_vec_Z0[[1]] <- sd_monthly$beta_0[1] + sd_monthly$beta_1[1] * X + as.numeric(S_inf_time_Z0_month == 1)*growth_adj_Z0 + noise_matrix[,1]
+  for(i in 1:length(X_vec_Z0)){
+    X_vec_Z0[[i]] <- sd_monthly$beta_0[i] + sd_monthly$beta_1[i] * X + as.numeric(S_inf_time_Z0_month >= i)*growth_adj_Z0 + noise_matrix[,i]
   }
   
   X_df_Z0 <- data.frame(X_vec_Z0)
@@ -227,46 +252,78 @@ simulate_data <- function(n = 1e6,
                       "X_7_Z0", "X_8_Z0", "X_9_Z0", "X_10_Z0", "X_11_Z0", "X_12_Z0")
   
   X_vec_Z1 <- vector(mode = "list", length = 12) 
-  X_vec_Z1[[1]] <- sd_monthly$beta_0[1] + sd_monthly$beta_1[1] * X + as.numeric(S_inf_time_Z1 == 1)*growth_adj_Z1 + noise_matrix[,1]
-  for(i in 2:length(X_vec_Z0)){
-    X_vec_Z1[[i]] <- sd_monthly$beta_0[i] + sd_monthly$beta_1[i] * X + as.numeric(S_inf_time_Z1 == i)*growth_adj_Z1 + noise_matrix[,i]
+  #X_vec_Z1[[1]] <- sd_monthly$beta_0[1] + sd_monthly$beta_1[1] * X + as.numeric(S_inf_time_Z1 == 1)*growth_adj_Z1 + noise_matrix[,1]
+  for(i in 1:length(X_vec_Z1)){
+    X_vec_Z1[[i]] <- sd_monthly$beta_0[i] + sd_monthly$beta_1[i] * X + as.numeric(S_inf_time_Z1 >= i)*growth_adj_Z1 + noise_matrix[,i]
   }
   
   X_df_Z1 <- data.frame(X_vec_Z1)
   colnames(X_df_Z1) <- c("X_1_Z1", "X_2_Z1", "X_3_Z1", "X_4_Z1", "X_5_Z1", "X_6_Z1",
                          "X_7_Z1", "X_8_Z1", "X_9_Z1", "X_10_Z1", "X_11_Z1", "X_12_Z1")
   
+  
+  # Finally convert inf_time_0 to censor at 52
+  S_inf_time_Z0 <- ifelse(S_inf_time_Z0 == 0, 52, S_inf_time_Z0)
+  S_inf_time_Z1 <- ifelse(S_inf_time_Z1 == 0, 52, S_inf_time_Z1)
+  
   # ---------------------------------------------------------------------------
   # Construct final dataset, paramaters, effects 
   # ---------------------------------------------------------------------------
   
   # Counterfactual
-  truth_data <- data.frame(id = 1:n,
-                         X = X,
-                         Z = Z,
-                         S_inf_Z0 = S_inf_Z0,
-                         S_sev_Z0 = S_sev_Z0,
-                         S_inf_time_Z0 = S_inf_time_Z0,
-                         S_inf_Z1 = S_inf_Z1,
-                         S_sev_Z1 = S_sev_Z1,
-                         S_inf_time_Z1 = S_inf_time_Z1)
-  
-  truth_data <- cbind(truth_data, X_df_Z0, X_df_Z1)
-  
-  # Observed only
-  analysis_data <- data.frame(id = 1:n,
-                              X = X,
-                              Z = Z)
-  
-  analysis_data$S_inf <- ifelse(Z == 0, truth_data$S_inf_Z0, truth_data$S_inf_Z1)
-  analysis_data$S_sev <- ifelse(Z == 0, truth_data$S_sev_Z0, truth_data$S_sev_Z1)
-  analysis_data$S_inf_time <- ifelse(Z == 0, truth_data$S_inf_time_Z0, truth_data$S_inf_time_Z1)
-  
-  for (i in 1:12) {
-    colname <- paste0("X_", i)
-    analysis_data[[colname]] <- ifelse(Z == 0, 
-                                       truth_data[[paste0(colname, "_Z0")]], 
-                                       truth_data[[paste0(colname, "_Z1")]])
+  if(type == "counterfactual"){
+    data <- data.frame(id = 1:n,
+                       X = X,
+                       Z = Z,
+                       S_inf_Z0 = S_inf_Z0,
+                       S_sev_Z0 = S_sev_Z0,
+                       S_inf_time_Z0 = S_inf_time_Z0,
+                       S_inf_Z1 = S_inf_Z1,
+                       S_sev_Z1 = S_sev_Z1,
+                       S_inf_time_Z1 = S_inf_time_Z1)
+    
+    data <- cbind(data, X_df_Z0, X_df_Z1)
+  } else if(type == "observed"){
+    # Observed only
+    data <- data.frame(id = 1:n,
+                        X = X,
+                        Z = Z)
+    
+    data$S_inf <- ifelse(Z == 0, S_inf_Z0, S_inf_Z1)
+    data$S_sev <- ifelse(Z == 0, S_sev_Z0, S_sev_Z1)
+    data$S_inf_time <- ifelse(Z == 0, S_inf_time_Z0, S_inf_time_Z1)
+    
+    for (i in 1:12) {
+      colname <- paste0("X_", i)
+      data[[colname]] <- ifelse(Z == 0, 
+                                X_df_Z0[,i], 
+                                X_df_Z1[,i])
+    }
+  } else{
+    # Both
+    data <- data.frame(id = 1:n,
+                       X = X,
+                       Z = Z,
+                       S_inf_Z0 = S_inf_Z0,
+                       S_sev_Z0 = S_sev_Z0,
+                       S_inf_time_Z0 = S_inf_time_Z0,
+                       S_inf_Z1 = S_inf_Z1,
+                       S_sev_Z1 = S_sev_Z1,
+                       S_inf_time_Z1 = S_inf_time_Z1)
+    
+    data <- cbind(data, X_df_Z0, X_df_Z1)
+    
+    data$S_inf <- ifelse(Z == 0, S_inf_Z0, S_inf_Z1)
+    data$S_sev <- ifelse(Z == 0, S_sev_Z0, S_sev_Z1)
+    data$S_inf_time <- ifelse(Z == 0, S_inf_time_Z0, S_inf_time_Z1)
+    
+    for (i in 1:12) {
+      colname <- paste0("X_", i)
+      data[[colname]] <- ifelse(Z == 0, 
+                                X_df_Z0[,i], 
+                                X_df_Z1[,i])
+    }
+    
   }
   
   # Parameters
@@ -282,10 +339,8 @@ simulate_data <- function(n = 1e6,
                  final_sev_params = rr_params_sev,
                  monthly_growth_model = sd_monthly)
   
-  return(list(truth_data = truth_data,
-              analysis_data = analysis_data, 
+  #separate params from data generation
+  return(list(data = data,
               params = params))
 
 }
-
-sim <- simulate_data()
