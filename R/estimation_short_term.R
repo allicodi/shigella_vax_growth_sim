@@ -7,7 +7,7 @@ here::i_am("R/estimation_short_term.R")
 source(here::here("R/simulate_data_short_term.R"))
 
 # type = counterfactual, observed, both
-sim_data <- simulate_data(n = 1e4, type = "observed")
+sim_data <- simulate_data(n = 1e5, type = "observed")
 data <- sim_data$data
 params <- sim_data$params
 
@@ -60,6 +60,7 @@ weekly_hazard_preds_Z0$lambda_1 <- predict(fit, newdata = weekly_hazard_preds_Z0
 weekly_hazard_preds_Z1$lambda_1 <- predict(fit, newdata = weekly_hazard_preds_Z1, type = 'response')
 weekly_hazard_preds$lambda_1 <- predict(fit, newdata = data, type = 'response')
 
+# maybe vectorize??
 for(week in 2:52){
   pred_col <- paste0("lambda_", week)
   # constant for every time point
@@ -103,31 +104,31 @@ for(week in 2:52){
 # Growth models
 # ----------------------------------------------------------------------------
 
+umax <- 52
+pool <- TRUE
+
 # E[Y_Vu | Z = 1, S_u-1 = 0, X] ----------------------------------------------
 
 # 1. subset to vaccinated
 data_Z1 <- data[data$Z == 1,]
 
-# 2. determine which growth measurement we are considering for outcome of the regression 
-#.   based on the value of u. ex. if u = 1 we select the three month growth outcome
-
-data_Z1$X_out <- ifelse(data_Z1$S_inf_time <= 4.3, data_Z1$X_3,
-                       ifelse(data_Z1$S_inf_time > 4.3 & data_Z1$S_inf_time <= 17.3, data_Z1$X_6,
-                              ifelse(data_Z1$S_inf_time > 17.3 & data_Z1$S_inf_time <= 30.4, data_Z1$X_9,
-                                     ifelse(data_Z1$S_inf_time > 30.4 & data_Z1$S_inf_time <= 43.5, data_Z1$X_12, 
-                                            ifelse(data_Z1$S_inf_time > 43.5 & data_Z1$S_inf == 1, NA, data_Z1$X_12)))))
-
-# QUESTION if infected at >= 43.5, drop??
-data_Z1 <- data_Z1[-which(is.na(data_Z1$X_out)),]
-
-# 3. Further subset the data to individuals who have not yet become ill by u (i.e. 
-#.   remain illness free through u - 1). This subset of data will potentially include individuals
-#.   who become infected either at u or between date and V(u)th visit. That's ok
-
 pred_X_out__Z1_Suminus1_0_X <- data.frame(id = 1:nrow(data),
-                                          setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = 52)),
-                                                   paste0("pred_", 1:52)))
-for(u in 1:52){
+                                          setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = umax)),
+                                                   paste0("pred_", 1:umax)))
+for(u in 1:umax){
+  
+  # 2. determine which growth measurement we are considering for outcome of the regression 
+  #.   based on the value of u. ex. if u = 1 we select the three month growth outcome
+  
+  data_Z1$u_temp <- u
+  data_Z1$X_out <- ifelse(data_Z1$u_temp <= 4.3, data_Z1$X_3,
+                          ifelse(data_Z1$u_temp > 4.3 & data_Z1$u_temp <= 17.3, data_Z1$X_6,
+                                 ifelse(data_Z1$u_temp > 17.3 & data_Z1$u_temp <= 30.4, data_Z1$X_9,
+                                        ifelse(data_Z1$u_temp > 30.4 & data_Z1$u_temp <= umax, data_Z1$X_12, NA))))
+  
+  # 3. Further subset the data to individuals who have not yet become ill by u (i.e. 
+  #.   remain illness free through u - 1). This subset of data will potentially include individuals
+  #.   who become infected either at u or between date and V(u)th visit. That's ok
   data_Z1_u <- data_Z1[which(data_Z1$S_inf_time >= u), ]
   
   # 4. Regress selected growth outcome on X in this subset of data. This gives your estimate of E[Y_Vu | Z = 1, S_u-1 = 0, X]
@@ -136,234 +137,180 @@ for(u in 1:52){
                                     data = data_Z1_u,
                                     family = gaussian())
   
-  # QUESTION Now predict on full data??
+  # predict on full data
   pred_X_out__Z1_Suminus1_0_X[,u+1] <- predict(fit_X_out__Z1_Suminus1_0_X, newdata = data)
 }
-
-E_X_out__Z1_Suminus1_0_X <- colMeans(pred_X_out__Z1_Suminus1_0_X[,2:ncol(pred_X_out__Z1_Suminus1_0_X)])
 
 # E[Y_Vu | Z = 0, S_u-1 = 1, X] ----------------------------------------------
 
 ### If not dense in u (version 1): ###
 
-# unclear if implemented correctly/how to average at the end, think i misinterpreted something in the directions
-
-# 1. subset to unvaccinated
-# data_Z0 <- data[data$Z == 0,]
-# 
-# pred_X_out__Z0_Suminus1_1_X <- vector("list", length = 4)
-# names(pred_X_out__Z0_Suminus1_1_X) <- c("v_3", "v_6", "v_9", "v_12")
-# 
-# # 2. further subset to all individuals who fall ill on any u in U-1(v)
-# for(v in c(3,6,9,12)){
-#   
-#   if(v == 3){
-#     umax <- 4.3
-#   } else if(v == 6){
-#     umax <- 17.3
-#   } else if(v == 9){
-#     umax <- 30.4
-#   } else{
-#     umax <- 43.5
-#   }
-#   
-#   data_Z0_Uminus1_v <- data_Z0[which(data_Z0$S_inf_time <= umax),]
-#   
-#   # 3. create a variable for each individual, say Ti, indicating the time period at which each individual 
-#   #    falls ill, ie set Ti equal to the u such that dSu,i = 1
-#   
-#   # QUESTION is that not already S_inf_time??
-#   data_Z0_Uminus1_v$Ti <- data_Z0_Uminus1_v$S_inf_time
-#   
-#   # QUESTION also assume need to get X_out same way as the other one?
-#   data_Z0_Uminus1_v$X_out <- ifelse(data_Z0_Uminus1_v$Ti <= 4.3, data_Z0_Uminus1_v$X_3,
-#                           ifelse(data_Z0_Uminus1_v$Ti > 4.3 & data_Z0_Uminus1_v$Ti <= 17.3, data_Z0_Uminus1_v$X_6,
-#                                  ifelse(data_Z0_Uminus1_v$Ti > 17.3 & data_Z0_Uminus1_v$Ti <= 30.4, data_Z0_Uminus1_v$X_9,
-#                                         ifelse(data_Z0_Uminus1_v$Ti > 30.4 & data_Z0_Uminus1_v$Ti <= 43.5, data_Z0_Uminus1_v$X_12, 
-#                                                ifelse(data_Z0_Uminus1_v$Ti > 43.5 & data_Z0_Uminus1_v$S_inf == 1, NA, data_Z0_Uminus1_v$X_12)))))
-#   
-#   
-#   # 4. regress the selected growth outcome on X and T in this subset of data
-#   fit_X_out__Z0_Suminus1_1_X_T <- glm(X_out ~ X + Ti,
-#                                       data = data_Z0_Uminus1_v,
-#                                       family = gaussian())
-#   
-#   # 5. predicting from this model setting T = u for all individuals provides an estimate of E[Y_Vu | Z = 0, dSu = 1, X]
-#   # QUESTION but we have this * 4 V(u)s so unsure how to average at the end??
-#   
-#   pred_X_out__Z0_Suminus1_1_X_v <- data.frame(id = 1:nrow(data),
-#                                               setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = floor(umax))),
-#                                                        paste0("pred_", 1:floor(umax))))
-#   for(u in 1:floor(umax)){
-#     data_u <- data; data$Ti <- u
-#     pred_X_out__Z0_Suminus1_1_X_v[,u+1] <- predict(fit_X_out__Z0_Suminus1_1_X_T,
-#                                                    newdata = data_u,
-#                                                    type = 'response')
-#   }
-#   
-#   pred_X_out__Z0_Suminus1_1_X[[paste0("v_",v)]] <- pred_X_out__Z0_Suminus1_1_X_v
-#   
-# }
-
-# not sure how to average bc we have set of preds for each v?
-
-### If not dense in u (version 2- pool across visits): ###
-
-# 1. Subset data to unvaccinated individuals
-data_Z0 <- data[data$Z == 0,]
-
-# 2. Further subset data to all individuals who fall ill on any u <= umax
-# QUESTION is umax == 52? so that's just everyone who is infected?
-# or is it 43.5 so eligible to look at end growth?
-umax <- 43.5
-data_Z0_umax <- data_Z0[which(data_Z0$S_inf == 1 & data_Z0$S_inf_time <= umax),]
-
-# 5. Create a variable, say Ti (as above), indicating the exact time period at which the individual was infected.
-data_Z0_umax$Ti <- data_Z0_umax$S_inf_time
-
-# 3. For each individual i, identify the growth outcome that is appropriately proximal to their illness date.
-# i.e., let Ti denote the time period at which individual i became ill, then the outcome for this pooled
-# model is Yi = YV (Ti). In other words, if you become ill in the first month, we set your outcome to Y3,
-# if you become ill in months 2-4, we set your outcome to Y6, etc...
-
-data_Z0_umax$X_out <- ifelse(data_Z0_umax$Ti <= 4.3, data_Z0_umax$X_3,
-                                  ifelse(data_Z0_umax$Ti > 4.3 & data_Z0_umax$Ti <= 17.3, data_Z0_umax$X_6,
-                                         ifelse(data_Z0_umax$Ti > 17.3 & data_Z0_umax$Ti <= 30.4, data_Z0_umax$X_9,
-                                                ifelse(data_Z0_umax$Ti > 30.4 & data_Z0_umax$Ti <= 43.5, data_Z0_umax$X_12, 
-                                                       ifelse(data_Z0_umax$Ti > 43.5 & data_Z0_umax$S_inf == 1, NA, data_Z0_umax$X_12)))))
-
-# 4. Create a variable, say Vi, indicating which visit’s outcome was used for each individual.
-data_Z0_umax$V <- ifelse(data_Z0_umax$Ti <= 4.3, "v_3",
-                                  ifelse(data_Z0_umax$Ti > 4.3 & data_Z0_umax$Ti <= 17.3, "v_6",
-                                         ifelse(data_Z0_umax$Ti > 17.3 & data_Z0_umax$Ti <= 30.4, "v_9",
-                                                ifelse(data_Z0_umax$Ti > 30.4 & data_Z0_umax$Ti <= 43.5, "v_12", 
-                                                       ifelse(data_Z0_umax$Ti > 43.5 & data_Z0_umax$S_inf == 1, NA, "v_12")))))
-
-data_Z0_umax$V <- factor(data_Z0_umax$V, levels = c("v_3", "v_6", "v_9", "v_12"))
-
-# 6. Regress the pooled growth outcome createde on X, V, and T
-fit_X_out__Z0_Suminus1_1_X_T_V <- glm(X_out ~ X + Ti + V,
-                                    data = data_Z0_umax,
-                                    family = gaussian())
-
-# 7. Predicting from this model setting T = u and V = V(u) for all individuals provides 
-#.   an estimate of E[Y_V(u) | Z = 0, dS_u = 1, X] 
-
-# QUESTION should this be just combos that apply to each V? so u=1-4 --> V_3, u=5-17 --> V_6, ...
-
-# add Ti and V to full dataset
-data$Ti <- data$S_inf_time
-data$V <- ifelse(data$Ti <= 4.3, "v_3",
-                  ifelse(data$Ti > 4.3 & data$Ti <= 17.3, "v_6",
-                         ifelse(data$Ti > 17.3 & data$Ti <= 30.4, "v_9",
-                                ifelse(data$Ti > 30.4 & data$Ti <= 43.5, "v_12", 
-                                       ifelse(data$Ti > 43.5 & data$S_inf == 1, NA, "v_12")))))
-
-pred_X_out__Z0_Suminus1_1_X <- data.frame(id = 1:nrow(data),
-                      setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = floor(umax))),
-                               paste0("pred_", 1:floor(umax))))
-
-i <- 2
-
-for(v in c("v_3", "v_6", "v_9", "v_12")){
-  if(v == "v_3"){
-    for(u in 1:4){
-      pred_data <- data
-      pred_data$V <- v; pred_data$Ti <- u
-      
-      pred_X_out__Z0_Suminus1_1_X[,i] <- predict(fit_X_out__Z0_Suminus1_1_X_T_V, 
-                             newdata = pred_data, 
-                             type = 'response')
-      i <- i+1
+if(!pool){
+  # 1. subset to unvaccinated
+  data_Z0 <- data[data$Z == 0,]
+  
+  pred_X_out__Z0_Suminus1_1_X <- data.frame(id = 1:nrow(data),
+                                            setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = floor(umax))),
+                                                     paste0("pred_", 1:floor(umax))))
+  
+  # # 2. further subset to all individuals who fall ill on any u in U-1(v)
+  for(v in c(3,6,9,12)){
+    
+    # this should be min, max ranges for each v
+    if(v == 3){
+      v_umin <- 0; v_umax <- 4.3
+    } else if(v == 6){
+      v_umin <- 4.3; v_umax <- 17.3
+    } else if(v == 9){
+      v_umin <- 17.3; v_umax <- 30.4
+    } else{
+      # just make v_umax == umax i guess?? otherwise don't have preds for 44-52
+      # v_umin <- 30.4; v_umax <- 43.5
+      v_umin <- 30.4; v_umax <- umax
     }
-  } else if(v == "v_6"){
-    for(u in 5:17){
-      pred_data <- data
-      pred_data$V <- v; pred_data$Ti <- u
-      
-      pred_X_out__Z0_Suminus1_1_X[,i] <- predict(fit_X_out__Z0_Suminus1_1_X_T_V, 
-                             newdata = pred_data, 
-                             type = 'response')
-      i <- i+1
+    
+    data_Z0_Uminus1_v <- data_Z0[which(data_Z0$S_inf_time > v_umin & data_Z0$S_inf_time <= v_umax),] # bigger than min and less than max
+    
+    # 3. create a variable for each individual, say Ti, indicating the time period at which each individual
+    #    falls ill, ie set Ti equal to the u such that dSu,i = 1
+    
+    # same as S_inf_time
+    data_Z0_Uminus1_v$Ti <- data_Z0_Uminus1_v$S_inf_time
+    
+    # QUESTION also assume need to get X_out same way as the other one?
+    
+    if(v == 3){
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_3
+    } else if(v == 6){
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_6
+    } else if(v == 9){
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_9
+    } else{
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_12
     }
-  } else if(v == "v_9"){
-    for(u in 18:30){
-      pred_data <- data
-      pred_data$V <- v; pred_data$Ti <- u
-      
-      pred_X_out__Z0_Suminus1_1_X[,i] <- predict(fit_X_out__Z0_Suminus1_1_X_T_V, 
-                             newdata = pred_data, 
-                             type = 'response')
-      i <- i+1
-    }
-  } else{
-    for(u in 31:43){
-      pred_data <- data
-      pred_data$V <- v; pred_data$Ti <- u
-      
-      pred_X_out__Z0_Suminus1_1_X[,i] <- predict(fit_X_out__Z0_Suminus1_1_X_T_V, 
-                             newdata = pred_data, 
-                             type = 'response')
-      i <- i+1
+    
+    # 4. regress the selected growth outcome on X and T in this subset of data
+    fit_X_out__Z0_Suminus1_1_X_T <- glm(X_out ~ X + Ti,
+                                        data = data_Z0_Uminus1_v,
+                                        family = gaussian())
+    
+    # 5. predicting from this model setting T = u for all individuals provides an estimate of E[Y_Vu | Z = 0, dSu = 1, X]
+    # QUESTION but we have this * 4 V(u)s so unsure how to average at the end??
+    
+    for(u in ceiling(v_umin):floor(v_umax)){
+      data_u <- data; data$Ti <- u
+      pred_X_out__Z0_Suminus1_1_X[,u+1] <- predict(fit_X_out__Z0_Suminus1_1_X_T,
+                                                   newdata = data_u,
+                                                   type = 'response')
     }
   }
 }
 
-E_X_out__Z0_Suminus1_1_X <- colMeans(pred_X_out__Z0_Suminus1_1_X[,2:ncol(pred_X_out__Z0_Suminus1_1_X)])
+### If not dense in u (version 2- pool across visits): ###
 
-# ------------------------------------------------------------------------
+if(pool){
+  # 1. subset to unvaccinated
+  data_Z0 <- data[data$Z == 0,]
+  
+  pred_X_out__Z0_Suminus1_1_X <- data.frame(id = 1:nrow(data),
+                                            setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = floor(umax))),
+                                                     paste0("pred_", 1:floor(umax))))
+  
+  pred_data <- data.frame()
+  
+  # # 2. further subset to all individuals who fall ill on any u in U-1(v)
+  for(v in c(3,6,9,12)){
+    
+    # this should be min, max ranges for each v
+    if(v == 3){
+      v_umin <- 0; v_umax <- 4.3
+    } else if(v == 6){
+      v_umin <- 4.3; v_umax <- 17.3
+    } else if(v == 9){
+      v_umin <- 17.3; v_umax <- 30.4
+    } else{
+      # just make v_umax == umax i guess?? otherwise don't have preds for 44-52
+      # v_umin <- 30.4; v_umax <- 43.5
+      v_umin <- 30.4; v_umax <- umax
+    }
+    
+    data_Z0_Uminus1_v <- data_Z0[which(data_Z0$S_inf_time > v_umin & data_Z0$S_inf_time <= v_umax),] # bigger than min and less than max
+    
+    # 3. create a variable for each individual, say Ti, indicating the time period at which each individual
+    #    falls ill, ie set Ti equal to the u such that dSu,i = 1
+    
+    # same as S_inf_time
+    data_Z0_Uminus1_v$Ti <- data_Z0_Uminus1_v$S_inf_time
+    
+    # QUESTION also assume need to get X_out same way as the other one?
+    
+    if(v == 3){
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_3
+      data_Z0_Uminus1_v$V <- "v_3"
+    } else if(v == 6){
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_6
+      data_Z0_Uminus1_v$V <- "v_6"
+    } else if(v == 9){
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_9
+      data_Z0_Uminus1_v$V <- "v_9"
+    } else{
+      data_Z0_Uminus1_v$X_out <- data_Z0_Uminus1_v$X_12
+      data_Z0_Uminus1_v$V <- "v_12"
+    }
+    
+    pred_data <- rbind(pred_data, data_Z0_Uminus1_v)
+  }
+  
+  pred_data$V <- factor(pred_data$V, levels = c("v_3", "v_6", "v_9", "v_12"))
+  
+  # 6. Regress the pooled growth outcome createde on X, V, and T
+  fit_X_out__Z0_Suminus1_1_X_T_V <- glm(X_out ~ X + Ti + V,
+                                        data = pred_data,
+                                        family = gaussian())
+  
+  for(u in 1:umax){
+    
+    temp_data <- data
+    temp_data$Ti <- u
+    
+    # hardcoding u ranges for now??
+    if(u %in% 1:4){
+      temp_data$V <- "v_3"
+    } else if(u %in% 5:17){
+      temp_data$V <- "v_6"
+    } else if(u %in% 18:30){
+      temp_data$V <- "v_9"
+    } else{
+      temp_data$V <- "v_12"
+    }
+    
+    pred_X_out__Z0_Suminus1_1_X[,u+1] <- predict(fit_X_out__Z0_Suminus1_1_X_T,
+                                                 newdata = temp_data,
+                                                 type = 'response')
+    
+  }
+}
 
-# Put the final estimand together
+# Put the final estimand together ----------------------------------------------
 
 # P(S_umax = 1 | Z = 0) == incidence of infection in the unvaccinated? pre week 43?
 
-# but has to be end of study otherwise 1? so maybe umax shouldn't be 43?
-P_S_umax_1__Z_0 <- mean(data$S_inf[data$Z == 0])
+#make just preds not 4:end
+P_Sumax_1__Z0_X <- rowSums(weekly_hazard_preds_Z0[,4:ncol(weekly_hazard_preds_Z0)])
+P_Sumax_1__Z0 <- mean(P_Sumax_1__Z0_X )
 
-# but can only go to 43 here??
-estimate <- vector("numeric", length = 43)
-for(u in 1:43){
+# P_S_umax_1__Z_0 <- mean(data$S_inf[data$Z == 0 & data$S_inf_time<=umax])
+
+estimate <- vector("numeric", length = umax)
+for(u in 1:umax){
   P_dSu_1__Z_0_X <- weekly_hazard_preds_Z0[,paste0("lambda_",u)]
   E_Y_Vu__Z1_Suminus1_0_X <- pred_X_out__Z1_Suminus1_0_X[,paste0("pred_",u)]
   E_Y_Vu__Z0_Suminus1_1_X <- pred_X_out__Z0_Suminus1_1_X[,paste0("pred_",u)]
   
-  estimate[u] <- mean((P_dSu_1__Z_0_X / P_S_umax_1__Z_0) * (E_Y_Vu__Z1_Suminus1_0_X - E_Y_Vu__Z0_Suminus1_1_X))
+  estimate[u] <- mean((P_dSu_1__Z_0_X / P_Sumax_1__Z0) * (E_Y_Vu__Z1_Suminus1_0_X - E_Y_Vu__Z0_Suminus1_1_X))
 }
 
 final_growth_effect <- sum(estimate)
 
-# If dense in u (which it won't be): 
-
-# # 1. subset to unvaccinated
-# data_Z0 <- data[data$Z == 0,]
-# 
-# # 2. determine which growth measurement we are considering for outcome of the regression 
-# #.   based on the value of u. ex. if u = 1 we select the three month growth outcome
-# 
-# data_Z0$X_out <- ifelse(data_Z0$S_inf_time <= 4.3, data_Z0$X_3,
-#                         ifelse(data_Z0$S_inf_time > 4.3 & data_Z0$S_inf_time <= 17.3, data_Z0$X_6,
-#                                ifelse(data_Z0$S_inf_time > 17.3 & data_Z0$S_inf_time <= 30.4, data_Z0$X_9,
-#                                       ifelse(data_Z0$S_inf_time > 30.4 & data_Z0$S_inf_time <= 43.5, data_Z0$X_12, 
-#                                              ifelse(data_Z0$S_inf_time > 43.5 & data_Z0$S_inf == 1, NA, data_Z0$X_12)))))
-# 
-# # QUESTION if infected at >= 43.5, drop??
-# data_Z0 <- data_Z0[-which(is.na(data_Z0$X_out)),]
-# 
-# # 3. Further subset data to individuals who fall ill on u
-# 
-# pred_X_out__Z0_Suminus1_1_X <- data.frame(id = 1:nrow(data),
-#                                           setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = 52)),
-#                                                    paste0("pred_", 1:52)))
-# 
-# for(u in 1:52){
-#   data_Z0_u <- data_Z0[which(data_Z0$S_inf_time == u), ]
-#   
-#   # 4. Regress selected growth outcome on X in this subset of data. This gives your estimate of E[Y_Vu | Z = 1, S_u-1 = 0, X]
-#   # TODO could be smart and look to see if ppl infected in between
-#   fit_X_out__Z0_Suminus1_1_X <- glm(X_out ~ X, 
-#                                     data = data_Z0_u,
-#                                     family = gaussian())
-#   
-#   # Now predict on full data??
-#   pred_X_out__Z0_Suminus1_1_X[,u+1] <- predict(fit_X_out__Z0_Suminus1_1_X, newdata = data)
-# }
+# No pooling: -0.003540928
+# Pooling: 0.01780015
