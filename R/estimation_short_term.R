@@ -6,6 +6,10 @@ here::i_am("R/estimation_short_term.R")
 
 source(here::here("R/simulate_data_short_term.R"))
 
+# parameters
+umax <- 52
+pool <- FALSE
+
 # type = counterfactual, observed, both
 sim_data <- simulate_data(n = 1e5, type = "observed")
 data <- sim_data$data
@@ -104,9 +108,6 @@ for(week in 2:52){
 # Growth models
 # ----------------------------------------------------------------------------
 
-umax <- 52
-pool <- TRUE
-
 # E[Y_Vu | Z = 1, S_u-1 = 0, X] ----------------------------------------------
 
 # 1. subset to vaccinated
@@ -198,7 +199,7 @@ if(!pool){
     # QUESTION but we have this * 4 V(u)s so unsure how to average at the end??
     
     for(u in ceiling(v_umin):floor(v_umax)){
-      data_u <- data; data$Ti <- u
+      data_u <- data; data_u$Ti <- u
       pred_X_out__Z0_Suminus1_1_X[,u+1] <- predict(fit_X_out__Z0_Suminus1_1_X_T,
                                                    newdata = data_u,
                                                    type = 'response')
@@ -264,7 +265,7 @@ if(pool){
   pred_data$V <- factor(pred_data$V, levels = c("v_3", "v_6", "v_9", "v_12"))
   
   # 6. Regress the pooled growth outcome createde on X, V, and T
-  fit_X_out__Z0_Suminus1_1_X_T_V <- glm(X_out ~ X + Ti + V,
+  fit_X_out__Z0_Suminus1_1_X_T_V <- glm(X_out ~ X + Ti + V ,
                                         data = pred_data,
                                         family = gaussian())
   
@@ -284,7 +285,7 @@ if(pool){
       temp_data$V <- "v_12"
     }
     
-    pred_X_out__Z0_Suminus1_1_X[,u+1] <- predict(fit_X_out__Z0_Suminus1_1_X_T,
+    pred_X_out__Z0_Suminus1_1_X[,u+1] <- predict(fit_X_out__Z0_Suminus1_1_X_T_V,
                                                  newdata = temp_data,
                                                  type = 'response')
     
@@ -312,5 +313,10 @@ for(u in 1:umax){
 
 final_growth_effect <- sum(estimate)
 
-# No pooling: -0.003540928
-# Pooling: 0.01780015
+# No pooling: -0.003774984
+# Pooling (w/o interactions): -0.004450281
+
+# ---------------------------------------------
+# check:
+# pooling X_out ~ X * Ti * V = -0.003607585
+# no pooling X_out ~ X * Ti = -0.003607585
