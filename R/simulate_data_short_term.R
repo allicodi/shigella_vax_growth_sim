@@ -14,8 +14,17 @@ source(here::here("R/simulate_parameters.R"))
 # S_sev = severe infection (moderate to severe Shigella)
 # Y_t = outcome (lfazd90)
 
-parameters <- simulate_parameters()
-
+#' Function to simulate data for short-term growth simulation
+#' 
+#' @param parameters parameters object from simulate_parameters
+#' @param n number of observations to simulate
+#' @param VE_mild vaccine efficacy for less-severe disease
+#' @param VE_severe vaccine efficacy for GEMS defined MSD
+#' @param seed seed to set for replicability
+#' @param type type of data to return; observed, counterfactual, or both
+#' 
+#' @returns dataframe of simulation data with baseline HAZ (X), vaccine (Z), Shigella infection (S_inf), 
+#' severe Shigella infection (S_sev), Shigella infection time (S_inf_time), monthly growth measurements Y_t
 simulate_data <- function(parameters,
                           n = 1e6,
                           VE_mild = 0.40,
