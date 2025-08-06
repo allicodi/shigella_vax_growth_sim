@@ -79,7 +79,7 @@ simulate_data <- function(parameters,
                                                                 haz_coef = parameters$hazard_S_sev__X_coef_0_6,
                                                                 haz = X[S_inf_Z0 == 1 & S_inf_time_Z0 <= 26])
   
-  S_sev_Z0 <- rbinom(n, 1, prob = hazard_sev_0_6) 
+  S_sev_Z0_0_6 <- rbinom(n, 1, prob = hazard_sev_0_6) 
   
   # Severe Shigella months 6-12 post-baseline
   hazard_sev_6_12 <- rep(0, n)
@@ -88,7 +88,8 @@ simulate_data <- function(parameters,
                                                                  haz = X[S_inf_Z0 == 1 & S_inf_time_Z0 > 26])
   # save separately then combine all the 1s
   S_sev_Z0_6_12 <- rbinom(n, 1, prob = hazard_sev_6_12)
-  S_sev_Z0 <- ifelse(S_sev_Z0 == 0, S_sev_Z0_6_12, S_sev_Z0)
+  S_sev_Z0 <- S_sev_Z0_0_6 + S_sev_Z0_6_12
+  #S_sev_Z0 <- ifelse(S_sev_Z0 == 0, S_sev_Z0_6_12, S_sev_Z0)
   
   # 5) Add in vaccine
   prob_S_inf_Z1 <- rep(0,n)
@@ -105,26 +106,32 @@ simulate_data <- function(parameters,
   # Y_t1 to Y_t12: Monthly HAZ outcome 
   # ---------------------------------------------------------------------------
   
-  if(parameters$dose_schedule == "6mo"){
-    matrix_range <- 7:18
-  } else{
-    matrix_range <- 13:24
-  }
+  # Changed back to 1:12 for each setting for ease of estimation later
+  matrix_range <- 1:12
+  
+  # if(parameters$dose_schedule == "6mo"){
+  #   matrix_range <- 7:18
+  # } else{
+  #   matrix_range <- 13:24
+  # }
   
   # noise first so same for each Z0 and Z1
   noise_matrix <- sapply(matrix_range, function(i) rnorm(n, mean = 0, sd = parameters$monthly_growth_model$sd[i]))
   
   ### Simulate growth in absence of infection ----------------------------------
   Y_vec_no_inf <- vector(mode = "list", length = 12)
-  for(i in 1:length(Y_vec_no_inf)){
+  Y_vec_no_inf[[1]] <- parameters$monthly_growth_model$beta_0[matrix_range[1]] +
+    parameters$monthly_growth_model$beta_1[matrix_range[1]] * X + # baseline growth
+    noise_matrix[,1]
+  
+  for(i in 2:length(Y_vec_no_inf)){
     Y_vec_no_inf[[i]] <- parameters$monthly_growth_model$beta_0[matrix_range[i]] +
-      parameters$monthly_growth_model$beta_1[matrix_range[i]] * X + 
+      parameters$monthly_growth_model$beta_1[matrix_range[i]] * Y_vec_no_inf[[i-1]] +  # previous month's growth
       noise_matrix[,i]
   }
   
   Y_df_no_inf <- data.frame(Y_vec_no_inf)
   colnames(Y_df_no_inf) <- paste0("Y_", matrix_range)
-  
   
   ### Simulate growth with infection under Z0 and under Z1 ---------------------
   
@@ -145,21 +152,24 @@ simulate_data <- function(parameters,
                                              Y_df_no_inf,
                                              parameters){
     # Convert infection time to months
-    S_inf_time_month <- ceiling(S_inf_time / (52 / 12))
+    # maybe no round
+    S_inf_time_month <- S_inf_time / (52 / 12)
     
     # Get months past infection for spline model based on infection time variable
     Y_t_df <- matrix(0, nrow = n, ncol = length(matrix_range))
     
     # skip for 0 and 12 (0 = no infection, 12 = no follow up month)
     valid_idx <- which(S_inf_time_month > 0 & S_inf_time_month < 12)
-    start_months <- S_inf_time_month[valid_idx] + 1
-    
+    start_months <- S_inf_time_month[valid_idx]
     
     # fill in 0s up until/including infection time
     # fill rest with sequence starting at 1 go until total n 0s + other = 12
-    # ex. if infection time = 4, start = 5, fill in 0 0 0 0 1 2 3 4 5 6 7 8
+    # ex. if infection time = 4.3, ceiling(start) = 5, fill in 0 0 0 0 0.7 1.7 2.7 3.7 4.7 5.7 6.7 7.7
     filled_rows <- lapply(start_months, function(start) {
-      c(rep(0, start - 1), seq_len(length(matrix_range) - start + 1))
+      n_mnth_before_inf <- ceiling(start) - 1
+      n_mnth_after_inf <- length(matrix_range) - ceiling(start) + 1
+      starting_inf_adj <- start - floor(start)
+      c(rep(0, n_mnth_before_inf), seq(starting_inf_adj, starting_inf_adj + n_mnth_after_inf - 1, by = 1))
     })
     
     # Assign each row into Y_t_df
@@ -174,7 +184,7 @@ simulate_data <- function(parameters,
     # Easiest to get preds columnwise in both cases then rebuild??
     adj_df_lsd <- matrix(nrow = nrow(Y_t_df), ncol = ncol(Y_t_df)) # adjustment given LSD at time t
     adj_df_msd <- matrix(nrow = nrow(Y_t_df), ncol = ncol(Y_t_df)) # adjustment given MSD at time t
-    
+    # make 0 if 0
     for (col in 1:ncol(Y_t_df)) {
       adj_df_lsd[, col] <- predict(parameters$effect_shigella_growth_fits$lsd, 
                                    newdata = data.frame(x = Y_t_df[, col]))
