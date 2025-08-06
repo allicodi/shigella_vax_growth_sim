@@ -1,5 +1,5 @@
 # ------------------------------------------------------------------------------
-# Script to find intercept & LAZ coefficient for desired parameter combinations
+# Script to find intercept & haz coefficient for desired parameter combinations
 # ------------------------------------------------------------------------------
 
 library(tidyverse)
@@ -11,48 +11,22 @@ here::i_am("R/tune_parameters.R")
 cum_inc <- function(hazard, t0){
   sum(hazard * (1 - hazard)^((1:t0) - 1))
 }
+
 #expit
-hazard <- function(intercept, laz_coef, laz){
-  plogis(intercept + laz_coef * laz)
+hazard <- function(intercept, haz_coef, haz){
+  plogis(intercept + haz_coef * haz)
 }
 
-hazard_ratio <- function(row){
-  
-  hazard_laz_mean <- hazard(intercept = row[['intercept']],
-                            laz_coef = row[['laz_coef']],
-                            laz = row[['mean_X']])
-  
-  hazard_laz_minus0.5 <- hazard(intercept = row[['intercept']],
-                                laz_coef = row[['laz_coef']],
-                                laz = row[['mean_X']] -0.5)
-  
-  hazard_laz_0.5 <- hazard(intercept = row[['intercept']],
-                           laz_coef = row[['laz_coef']],
-                           laz = row[['mean_X']] + 0.5)
-  
-  hazard_ratio <- hazard_laz_0.5 / hazard_laz_minus0.5
-  
-  return(data.frame(hazard_laz_mean = hazard_laz_mean,
-                    hazard_laz_minus0.5 = hazard_laz_minus0.5,
-                    hazard_laz_0.5 = hazard_laz_0.5, 
-                    hazard_ratio = hazard_ratio))
-}
+cum_inc_by_row <- function(row){
 
-risk_ratio <- function(row){
-  # cum_inc_laz_mean <- cum_inc(hazard = row[['hazard_laz_mean']], t0 = 12)
-  # cum_inc_laz_minus0.5 <- cum_inc(hazard = row[['hazard_laz_minus0.5']], t0 = 12)
-  # cum_inc_laz_0.5 <- cum_inc(hazard = row[['hazard_laz_0.5']], t0 = 12)
+  hazard_haz_mean <- hazard(intercept = row[['intercept']],
+                            haz_coef = row[['haz_coef']],
+                            haz = row[['mean_X']])
   
-  cum_inc_laz_mean <- cum_inc(hazard = row[['hazard_laz_mean']], t0 = 52)
-  cum_inc_laz_minus0.5 <- cum_inc(hazard = row[['hazard_laz_minus0.5']], t0 = 52)
-  cum_inc_laz_0.5 <- cum_inc(hazard = row[['hazard_laz_0.5']], t0 = 52)
+  cum_inc_haz_mean <- cum_inc(hazard = hazard_haz_mean, t0 = 26)
+   
+  return(cum_inc_haz_mean)
   
-  risk_ratio <- cum_inc_laz_0.5 / cum_inc_laz_minus0.5
-  
-  return(data.frame(cum_inc_laz_mean = cum_inc_laz_mean,
-                    cum_inc_laz_minus0.5 = cum_inc_laz_minus0.5,
-                    cum_inc_laz_0.5 = cum_inc_laz_0.5,
-                    risk_ratio = risk_ratio))
 }
 
 # ------------------------------------------------------------------------------
@@ -63,12 +37,12 @@ risk_ratio <- function(row){
 # Cumulative incidence of moderate to severe Shigella - 0.0246 / year
 # NOTE: these should be updated based on final EFGH data
 
-# effect of baseline LAZ on (all) Shigella = LAZ coefficient?? should reflect Liz risk ratio 0.73
+# effect of baseline haz on (all) Shigella = haz coefficient?? should reflect Liz risk ratio 0.73
 # NOTE Liz would rather get this from data as we did for MSD below
 
 # updated from efgh data: -0.064
 
-# effect of baseline LAZ on moderate to severe Shigella = -0.199
+# effect of baseline haz on moderate to severe Shigella = -0.199
 # NOTE this should be updated based on final EFGH data
 
 # updated from efgh data: -0.222
@@ -79,18 +53,18 @@ risk_ratio <- function(row){
 # 
 # # Incidence = 0.068 / year Shigella, Risk Ratio = 0.73
 # 
-# # QUESTION - cumulative incidence should = 0.06 at what value of LAZ?? mean?? 
+# # QUESTION - cumulative incidence should = 0.06 at what value of haz?? mean?? 
 # 
 # # Grid to search over to best match risk ratio / cumulative incidence
 # intercept <- seq(-8, 5, by = 0.05)
-# laz_coef <- log(seq(0.01, 1, by = 0.01))
+# haz_coef <- log(seq(0.01, 1, by = 0.01))
 # mean_X <- -0.9395
 # 
 # combos <- expand.grid(intercept = intercept, 
-#                       laz_coef = laz_coef,
+#                       haz_coef = haz_coef,
 #                       mean_X = mean_X)
 # 
-# # Get hazard for LAZ = -0.5 & LAZ = 0.5, hazard ratio for each intercept / LAZ coefficient combination 
+# # Get hazard for haz = -0.5 & haz = 0.5, hazard ratio for each intercept / haz coefficient combination 
 # hazard_ratio_combos <- cbind(combos, do.call(rbind, apply(combos, 1, hazard_ratio)))
 # 
 # # Use hazard results to iterate over again for risk ratio
@@ -99,11 +73,11 @@ risk_ratio <- function(row){
 # # Find risk ratio close to 0.73 & cumulative incidence at mean close to 0.0618
 # subset_rr <- risk_ratio_combos %>%
 #   filter(risk_ratio > 0.72 & risk_ratio < 0.74) %>%
-#   filter(cum_inc_laz_mean > 0.055 & cum_inc_laz_mean < 0.065)
+#   filter(cum_inc_haz_mean > 0.055 & cum_inc_haz_mean < 0.065)
 # 
-# # Manually choose closest: Intercept = -5.55, LAZ coef = -0.3285041 (log(0.72))
+# # Manually choose closest: Intercept = -5.55, haz coef = -0.3285041 (log(0.72))
 # 
-# # intercept   laz_coef  mean_X hazard_laz_mean hazard_laz_minus0.5 hazard_laz_0.5 hazard_ratio cum_inc_laz_mean cum_inc_laz_minus0.5 cum_inc_laz_0.5 risk_ratio
+# # intercept   haz_coef  mean_X hazard_haz_mean hazard_haz_minus0.5 hazard_haz_0.5 hazard_ratio cum_inc_haz_mean cum_inc_haz_minus0.5 cum_inc_haz_0.5 risk_ratio
 # #  -5.55 -0.3285041    -0.9395      0.00526513         0.006199189    0.004471177    0.7212519       0.06138367           0.07190557      0.05235415  0.7280959
 # 
 # # ------------------------------------------------------------------------------
@@ -134,14 +108,14 @@ risk_ratio <- function(row){
 # 
 # # Grid to search over to best match risk ratio / cumulative incidence
 # intercept <- seq(-8, 2, by = 0.01)       # should be ~ -0.175 ??? except cumulative incidence high around that so drop intercept?
-# laz_coef <- seq(-0.25, -0.15, by = 0.01) # should be ~ -0.199
+# haz_coef <- seq(-0.25, -0.15, by = 0.01) # should be ~ -0.199
 # mean_X <- -0.9395
 # 
 # combos <- expand.grid(intercept = intercept, 
-#                       laz_coef = laz_coef,
+#                       haz_coef = haz_coef,
 #                       mean_X = mean_X)
 # 
-# # Get hazard for LAZ = -0.5 & LAZ = 0.5, hazard ratio for each intercept / LAZ coefficient combination 
+# # Get hazard for haz = -0.5 & haz = 0.5, hazard ratio for each intercept / haz coefficient combination 
 # hazard_ratio_combos <- cbind(combos, do.call(rbind, apply(combos, 1, hazard_ratio)))
 # 
 # # Use hazard results to iterate over again for risk ratio
@@ -149,9 +123,9 @@ risk_ratio <- function(row){
 # 
 # # Find risk ratio close to 0.73 & cumulative incidence at mean close to 0.0618
 # subset_rr <- risk_ratio_combos %>%
-#   filter(cum_inc_laz_mean > 0.022 & cum_inc_laz_mean < 0.026)
+#   filter(cum_inc_haz_mean > 0.022 & cum_inc_haz_mean < 0.026)
 
-# Manually choose closest: Intercept = -6.36, LAZ coef = -0.20
+# Manually choose closest: Intercept = -6.36, haz coef = -0.20
 
-# intercept laz_coef  mean_X hazard_laz_mean hazard_laz_minus0.5 hazard_laz_0.5 hazard_ratio cum_inc_laz_mean cum_inc_laz_minus0.5 cum_inc_laz_0.5 risk_ratio
+# intercept haz_coef  mean_X hazard_haz_mean hazard_haz_minus0.5 hazard_haz_0.5 hazard_ratio cum_inc_haz_mean cum_inc_haz_minus0.5 cum_inc_haz_0.5 risk_ratio
 #   -6.36     -0.2 -0.9395     0.002082503         0.002301018      0.0018847    0.8190724       0.02470579           0.02726543      0.02238343  0.8209454

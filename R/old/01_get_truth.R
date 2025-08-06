@@ -210,7 +210,7 @@ get_truth <- function(n = 1e6,
       
       G_V0 <- -0.08162686 + 0.9565905*X_11_V0 + I(Y_time_V0 == 12)*infection_adjustment_V0
       
-      # Growth in the unvaccinated
+      # Growth in the vaccinated
       X_1_V1 <- -0.13083351 + 0.9690976*X + I(Y_time_V1 == 1)*infection_adjustment_V1 + rnorm(n, mean = 0, sd = 0.2120328)
       X_2_V1 <- -0.13359784 + 0.9658743*X_1_V1 + I(Y_time_V1 == 2)*infection_adjustment_V1 + rnorm(n, mean = 0, sd = 0.2096142)
       X_3_V1 <- -0.02840903 + 0.9964731*X_2_V1 + I(Y_time_V1 == 3)*infection_adjustment_V1 + rnorm(n, mean = 0, sd = 0.2143073)
