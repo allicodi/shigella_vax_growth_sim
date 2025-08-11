@@ -1,6 +1,6 @@
 #' Function for estimation of short term growth effect
 #' 
-#' @param data dataset from simulate_data_short_term 
+#' @param data dataset of observed data from simulate_data_short_term 
 #' @param parameters parameters from simulate_parameters
 #' @param V_u_months months to measure growth 
 #' @param V_u_week_interval intervals in weeks corresponding to the infection times that fall into each V_u_month measurement. Length should be length(V_u_months) + 1
