@@ -2,7 +2,7 @@
 # Function to simulate data based on geometric distribution, other misc changes
 # ------------------------------------------------------------------------------
 
-here::i_am("R/simulate_data_short_term.R")
+here::i_am("R/simulate_data.R")
 
 source(here::here("R/simulate_parameters.R"))
 
@@ -58,7 +58,8 @@ simulate_data <- function(parameters,
                            haz_coef = parameters$hazard_S__X_coef_0_6,
                            haz = X)
   
-  S_inf_time_Z0 <- rgeom(n, prob = hazard_inf_0_6)
+  # SHOULD THIS BE +1 ?? bc could be 0? then those are getting lumped in with the uninfecteds
+  S_inf_time_Z0 <- rgeom(n, prob = hazard_inf_0_6) + 1
   S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 26, S_inf_time_Z0, 0) # if infected after week 26, simulate second half infection (fill in 0 temp, add 26 later)
   
   # Shigella months 6-12 post-baseline
@@ -66,7 +67,7 @@ simulate_data <- function(parameters,
                             haz_coef = parameters$hazard_S__X_coef_6_12,
                             haz = X)
   
-  S_inf_time_Z0[S_inf_time_Z0 == 0] <- 26 + rgeom(length(S_inf_time_Z0[S_inf_time_Z0 == 0]), hazard_inf_6_12[S_inf_time_Z0 == 0])
+  S_inf_time_Z0[S_inf_time_Z0 == 0] <- 26 + rgeom(length(S_inf_time_Z0[S_inf_time_Z0 == 0]), hazard_inf_6_12[S_inf_time_Z0 == 0]) + 1
   S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 52, S_inf_time_Z0, 0) # if infected after week 52, censor at 52 (0 temp, fill in 52 later)
   
   S_inf_Z0 <- ifelse(S_inf_time_Z0 != 0, 1, 0)
