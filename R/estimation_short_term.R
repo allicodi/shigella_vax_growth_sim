@@ -4,6 +4,8 @@
 
 here::i_am("R/estimation_short_term.R")
 
+library(survival)
+library(tidyverse)
 source(here::here("R/simulate_parameters.R"))
 source(here::here("R/simulate_data_short_term.R"))
 
@@ -20,6 +22,7 @@ params <- simulate_parameters(dose_schedule = "12mo",
                               incidence_shigella_6_12 = 0.05796, 
                               incidence_severe_shigella_0_6 = 0.02025, 
                               incidence_severe_shigella_6_12 = 0.02548)
+
 data <- simulate_data(parameters = params, n = 1e5, type = "observed")
 
 # mod to be as described in notes
@@ -48,15 +51,13 @@ weekly_hazard <- expand.grid(id = 1:nrow(data),
   arrange(id) %>%
   left_join(og_data[,c("id", "X", "Z")]) 
 
-weekly_hazard_preds_Z0_0_6 <- data.frame(id = 1:nrow(data),
+weekly_density_preds_Z0_0_6 <- data.frame(id = 1:nrow(data),
                                      X = data$X,
-                                     Z = 0,
                                     setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = 26)),
                                              paste0("lambda_", 1:26)))
 
-weekly_hazard_preds_Z0_6_12 <- data.frame(id = 1:nrow(data),
+weekly_density_preds_Z0_6_12 <- data.frame(id = 1:nrow(data),
                                          X = data$X,
-                                         Z = 0,
                                          setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = 26)),
                                                   paste0("lambda_", 27:52)))
 
@@ -84,16 +85,36 @@ weekly_hazard_preds_Z0_6_12 <- data.frame(id = 1:nrow(data),
 #                                       setNames(as.data.frame(matrix(NA_real_, nrow = nrow(data), ncol = 26)),
 #                                                paste0("lambda_", 27:52)))
 
-fit_0_6 <- glm(I_shig ~ Z + X, 
-               data = long_data_0_6, 
+fit_0_6_Z0 <- glm(I_shig ~ X, 
+               data = long_data_0_6[long_data_0_6$Z == 0, ], 
                family = binomial())
 
-fit_6_12 <- glm(I_shig ~ Z + X, 
-               data = long_data_6_12, 
+fit_6_12_Z0 <- glm(I_shig ~ X, 
+               data = long_data_6_12[long_data_6_12$Z == 0, ], 
                family = binomial())
 
-weekly_hazard_preds_Z0_0_6$lambda_1 <- predict(fit_0_6, newdata = weekly_hazard_preds_Z0_0_6, type = 'response')
-weekly_hazard_preds_Z0_6_12$lambda_27 <- predict(fit_6_12, newdata = weekly_hazard_preds_Z0_6_12, type = 'response')
+haz_Z0_0_6 <- predict(fit_0_6_Z0, newdata = weekly_density_preds_Z0_0_6, type = 'response')
+density_Z0_0_6 <- do.call(rbind, sapply(haz_Z0_0_6, function(haz){
+  haz * (1 - haz)^((1:26) - 1)
+}, simplify = FALSE))
+
+haz_Z0_6_12 <- predict(fit_6_12_Z0, newdata = weekly_density_preds_Z0_0_6, type = 'response')
+cuminc_Z0_0_6 <- rowSums(density_Z0_0_6)
+
+density_Z0_6_12 <- do.call(rbind, 
+  mapply(
+    haz_6_12 = haz_Z0_6_12, cum_inc_0_6 = cuminc_Z0_0_6, 
+    FUN = function(haz_6_12, cum_inc_0_6){
+      haz_6_12 * (1 - haz_6_12)^((1:26) - 1) * (1 - cum_inc_0_6)
+    }, SIMPLIFY = FALSE
+  )
+)
+
+density_Z0_0_12 <- cbind(density_Z0_0_6, density_Z0_6_12)
+# cuminc_0_12 <- rowSums(density_Z0_0_12)
+# mean(cuminc_0_12)
+
+# weekly_hazard_preds_Z0_6_12$lambda_27 <- predict(fit_6_12_Z0, newdata = weekly_hazard_preds_Z0_6_12, type = 'response')
 
 # weekly_hazard_preds_Z1_0_6$lambda_1 <- predict(fit_0_6, newdata = weekly_hazard_preds_Z1_0_6, type = 'response')
 # weekly_hazard_preds_Z1_6_12$lambda_27 <- predict(fit_6_12, newdata = weekly_hazard_preds_Z1_6_12, type = 'response')
@@ -355,7 +376,13 @@ if(pool){
 # P(S_umax = 1 | Z = 0) == incidence of infection in the unvaccinated? pre week 43?
 
 #make just preds not 4:end
-P_Sumax_1__Z0_X <- rowSums(weekly_hazard_preds_Z0[,4:ncol(weekly_hazard_preds_Z0)])
+
+# cuminc_0_12 <- rowSums(density_Z0_0_12)
+# mean(cuminc_0_12)
+
+P_Sumax_1__Z0_X <- rowSums(density_Z0_0_12)
+#colnames(P_Sumax_1__Z0_X) <- paste0("lambda_",1:52)
+
 P_Sumax_1__Z0 <- mean(P_Sumax_1__Z0_X )
 
 # P_S_umax_1__Z_0 <- mean(data$S_inf[data$Z == 0 & data$S_inf_time<=umax])
