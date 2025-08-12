@@ -10,8 +10,10 @@ load("misc/provide_data/provide_f10_r1-3bk7-.RData")
 shigella_diarrhea <- diarrhea4 %>%
   filter(shigella_eiec_afe > 0.5) %>%
   mutate(case = 1) %>%
+  mutate(ruuska_sev = if_else(ruuska >= 11, 1, 0)) %>%
   select(sid, 
          case,
+         ruuska_sev,
          dedt, 
          daysbirth,
          adenovirus_40_41,
@@ -31,7 +33,7 @@ shigella_diarrhea <- diarrhea4 %>%
          TEPEC, 
          v_cholerae, 
          ETECLT, 
-         EAEC)
+         EAEC) 
 
 # Get severity information for cases
 
@@ -52,13 +54,13 @@ shigella_diarrhea <- diarrhea4 %>%
 
 severity_df <- mgmt_bv_ddep_f10 %>%
   filter(sid %in% unique(shigella_diarrhea$sid)) %>%
-  mutate(MSD = if_else(dehyd > 1, 1, 0)) %>%    # dehyd >= 2 means skin tenting, sunken eyes, and/or dry mucus membrane
-  mutate(MSD = if_else(rehyd == 3, 1, MSD)) %>% # rehyd == 3 means IV rehydration 
+  mutate(GEMS_MSD = if_else(dehyd > 1, 1, 0)) %>%    # dehyd >= 2 means skin tenting, sunken eyes, and/or dry mucus membrane
+  mutate(GEMS_MSD = if_else(rehyd == 3, 1, GEMS_MSD)) %>% # rehyd == 3 means IV rehydration 
   mutate(high_fever = if_else(feversc >= 2, 1, 0),
          dehyd_bin = if_else(dehyd == -9, NA,
                              if_else(dehyd > 1, 1, 0)),
          epidate = as.Date(epidate)) %>%
-  select(sid,epidate, daysbirth, MSD, high_fever, dehyd_bin, vomtdays, episevrt, epidays) %>%
+  select(sid,epidate, daysbirth, GEMS_MSD, high_fever, dehyd_bin, vomtdays, episevrt, epidays) %>%
   rename('lsstools' = episevrt,
          'daysvomit' = vomtdays, 
          'epi_duration' = epidays)
@@ -86,9 +88,52 @@ hosp_match <- lapply(1:nrow(shigella_diarrhea), function(i){
   else return(0)
 }) 
 
-# incorporate hosp into MSD definition
+# incorporate hosp into GEMS_MSD definition
 shigella_diarrhea$hosp <- as.numeric(hosp_match)
-shigella_diarrhea$MSD <- ifelse(shigella_diarrhea$hosp, 1, shigella_diarrhea$MSD)
+shigella_diarrhea$GEMS_MSD <- ifelse(shigella_diarrhea$hosp, 1, shigella_diarrhea$GEMS_MSD)
+
+# Get antibiotics info for cases
+
+# Antibiotic use
+
+abx_key <- c(
+  'azithromycin',
+  'erythromycin',
+  'metronidazole',
+  'ciprofloxacin',
+  'nalidixic acid',
+  'pivmecillinam',
+  'cephradine',
+  'co-trimoxazole',
+  'amoxycillin',
+  'cefixime',
+  'ceftazidime',
+  'cefuroxime',
+  'ceftriaxone',
+  'fluclocaxillin',
+  'other'
+)
+
+abx_who <- c('azithromycin','ciprofloxacin','ceftriaxone','pivmecillinam')
+abx_maybe <- c('erythromycin','nalidixic acid','amoxycillin','cefixime','ceftazidime', 'cefuroxime','co-trimoxazole')
+abx_no <- c('metronidazole','cephradine','fluclocaxillin','other')
+
+bv_dep_diarrheal_episode_f10$dedt <- as.Date(bv_dep_diarrheal_episode_f10$dedt)
+
+abx_df <- shigella_diarrhea %>%
+  left_join(bv_dep_diarrheal_episode_f10, by = c("sid", "dedt")) %>%
+  mutate(antb = factor(antb, levels = 1:3, labels = c("None", "Pre-visit", "At-visit")),
+         antb1 = if_else(antb1 == 99, NA, antb1),
+         antb2 = if_else(antb2 == 99, NA, antb2), 
+         antb1 = factor(antb1, levels = 1:15, labels = abx_key),
+         antb2 = factor(antb2, levels = 1:15, labels = abx_key)) %>%
+  group_by(sid, dedt) %>%
+  summarise(all_abx = if_else(any(antb1 %in% abx_who) | any(antb2 %in% abx_who), "Guideline recommended",
+                               if_else(any(antb1 %in% abx_maybe) | any(antb2 %in% abx_maybe), "Possibly effective", "No or ineffective")))
+
+
+shigella_diarrhea <- left_join(shigella_diarrhea, abx_df, by = c("sid", "dedt") )
+shigella_diarrhea$all_abx <- factor(shigella_diarrhea$all_abx)
 
 # make smaller to cases only
 haz_long <- mgmt_bv_danth_f10 %>%
@@ -98,7 +143,7 @@ haz_long <- mgmt_bv_danth_f10 %>%
          agemonth = ageday / 30.44,
          vstwk_num = str_remove(vstwk, "^Week\\s+"))
 
-targets_months <- c(3, 6, 9, 12)
+targets_months <- c(1, 3, 6, 9, 12)
 
 shigella_diarrhea <- lapply(1:nrow(shigella_diarrhea), function(i) {
   row <- shigella_diarrhea[i, , drop = FALSE]
@@ -123,7 +168,7 @@ shigella_diarrhea <- lapply(1:nrow(shigella_diarrhea), function(i) {
       filter(sid == row$sid,
              ageday != -9,
              ageday > agedays_inf,
-             abs(ageday - target_day) <= 30) %>%
+             abs(ageday - target_day) <= 45) %>%
       slice_min(abs(ageday - target_day), n = 1, with_ties = FALSE)
     
     if (nrow(match_row) == 0) {
@@ -143,7 +188,7 @@ shigella_diarrhea <- lapply(1:nrow(shigella_diarrhea), function(i) {
       id_cols = sid,
       names_from = target_month,
       values_from = c(haz, ageday, agemonth),
-      names_glue = "{.value}_fu_{target_month}m"
+      names_glue = "{.value}_{target_month}m"
     ) %>%
     select(-sid)  # drop sid to avoid duplicates
   
@@ -159,6 +204,13 @@ shigella_diarrhea <- lapply(1:nrow(shigella_diarrhea), function(i) {
 
 shigella_diarrhea$case_id <- 1:nrow(shigella_diarrhea)
 
+# Get rid of controls that only have 2 or less observations (early dropout?)
+mgmt_bv_danth_f10_filtered <- mgmt_bv_danth_f10 %>%
+  filter(haz != -9) %>%
+  group_by(sid) %>%
+  filter(n() >= 3 ) %>%
+  ungroup()
+
 control_data <- lapply(1:nrow(shigella_diarrhea), function(i) {
   
   row <- shigella_diarrhea[i, , drop = FALSE]
@@ -168,7 +220,7 @@ control_data <- lapply(1:nrow(shigella_diarrhea), function(i) {
   date_max_dob <- as.Date(row$dob) + days(15)
   
   # Find potential controls matching gender, enrollment visit, DOB window, exclude case itself
-  potential_controls <- mgmt_bv_danth_f10 %>%
+  potential_controls <- mgmt_bv_danth_f10_filtered %>%
     filter(gender == row$gender,
            vstwk == "Enrollment") %>%
     mutate(dob = as.Date(dob)) %>%
@@ -190,16 +242,16 @@ control_data <- lapply(1:nrow(shigella_diarrhea), function(i) {
   controls_long <- lapply(1:nrow(controls), function(j) {
     ctrl <- controls[j, , drop = FALSE]
     
-    ctrl_haz <- mgmt_bv_danth_f10 %>%
+    ctrl_haz <- mgmt_bv_danth_f10_filtered %>%
       filter(sid == ctrl$sid) %>%
       mutate(haz = if_else(haz == -9, NA_real_, haz),
              ageday = if_else(ageday == -9, NA_real_, ageday),
              agemonth = ageday / 30.44)
     
-    # Baseline closest to case baseline HAZ age ±30 days (no before restriction)
+    # Baseline closest to case baseline HAZ age ±45 days (no before restriction)
     bl_row <- ctrl_haz %>%
       filter(!is.na(ageday),
-             abs(ageday - row$ageday_bl) <= 30) %>%
+             abs(ageday - row$ageday_bl) <= 45) %>%
       slice_min(abs(ageday - row$ageday_bl), n = 1, with_ties = FALSE) %>%
       mutate(dob = as.Date(dob)) %>%  
       select(sid, dob, ageday, agemonth, gender, haz) %>%
@@ -220,9 +272,9 @@ control_data <- lapply(1:nrow(shigella_diarrhea), function(i) {
     }
     
     # Follow-up target ages from case
-    target_months <- c(3, 6, 9, 12)
+    target_months <- c(1, 3, 6, 9, 12)
     target_days <- bl_row$ageday_bl + target_months * 30.44
-    names(target_days) <- c("3m", "6m", "9m", "12m")
+    names(target_days) <- c("1m", "3m", "6m", "9m", "12m")
     
     followup_row <- lapply(seq_along(target_days), function(idx) {
       target_day <- target_days[idx]
@@ -239,7 +291,7 @@ control_data <- lapply(1:nrow(shigella_diarrhea), function(i) {
       } else {
         match_row <- ctrl_haz %>%
           filter(!is.na(ageday),
-                 abs(ageday - target_day) <= 30) %>%
+                 abs(ageday - target_day) <= 45) %>%
           slice_min(abs(ageday - target_day), n = 1, with_ties = FALSE)
         
         if (nrow(match_row) == 0) {
@@ -262,7 +314,7 @@ control_data <- lapply(1:nrow(shigella_diarrhea), function(i) {
         id_cols = sid,
         names_from = target_month,
         values_from = c(haz, ageday, agemonth),
-        names_glue = "{.value}_fu_{target_month}"
+        names_glue = "{.value}_{target_month}"
       ) %>%
       select(-sid)
     
@@ -278,126 +330,109 @@ control_data <- lapply(1:nrow(shigella_diarrhea), function(i) {
 }) %>% bind_rows()
 
 # NEED TO COMBINE CASE & CONTROL, THEN GET BASELINE COVARIATES (ses, edu, etc)
+# Prepare cases dataframe
+# Prepare cases: rename sid to case_sid
+cases_combined <- shigella_diarrhea %>%
+  mutate(case = 1) %>%
+  select(case_id, sid, case, everything()) %>%
+  mutate(dob = as.Date(dob))
 
-# maled covariates --> provide covariates
-# "site" -- NA?
-# "sex" -- sex
-# "agemonths" -- age at infection? / control matched
-# "baseline_haz" -- get HAZ at 6months
-# "mated_bin" -- yes
-# "drinkimp" -- yes
-# "sanitimp" -- yes
-# wami_quintile -- make SES quintile
+controls_combined <- control_data %>%
+  mutate(case = 0) %>%
+  select(case_id, sid, case, everything()) %>%
+  mutate(dob = as.Date(dob))
 
-# "adenovirus_40_41_new",      - yes            
-# "aeromonas_new",             - yes         
-# "astrovirus_new",            - yes       
-# "campylobacter_pan_new",     - c jejuni
-# "cryptosporidium_new",       - yes           
-# "cyclospora_new",            - yes  
-# "e_histolytica_new",         - yes          
-# "isospora_new",              - yes    
-# "norovirus_new",             - yes         
-# "rotavirus_new",             - duh       
-# "salmonella_new",            - yes        
-# "sapovirus_new",             - yes
-# "shigella_new",              - yes
-# "st_etec_new",               - yes         
-# "tEPEC_new",                 - yes           
-# "v_cholerae_new",            - yes       
-# "ETEC_new",                  - yes       
-# "e_bieneusi_new",            - no       
-# "eaec_new",                  - yes
-
-# "dysentery",
-# "fever", -- yes
-# "fever_days", 
-# "dehyd", -- yes
-# "lsstools", -- episevrt (number of stool / 24hr)
-# "daysvomit" -- yes
-
-# GEMS MSD definition = 
-# sunken eyes  --- in dehydration assessment
-# loss of skin tugor (slow return) --- in dehydration assessment
-# IV rehydration admin --- rehyd
-# dysentery - no 
-# hospitalized with diarrhea or dysentery -- we have SAEs?? 
-
-# get cases
-# make controls matching on same criteria as MAL-ED
-# Get growth outcomes X time later 
-
-# growth measured at 
-
-# approx every three months with some flexibility 
-
-# enrollment
-# week 6 
-# week 10 
-# week 12 
-# week 14 
-# week 17 
-# week 18 
-# week 24 
-# week 39 
-# week 40 
-# week 52 
-# week 65
-# week 78
-# week 91
-# week 104
+combined_df <- bind_rows(
+  cases_combined,
+  controls_combined
+) %>%
+  arrange(case_id, desc(case))
 
 
-# MAL-ED Control matching
 
-# matched_controls <- lapply(1:nrow(case_data), function(i, case_data, all_controls, tac_data){
-#   row <- case_data[i,]
-#   
-#   # get age range to match depending on case age
-#   # age range = 0-11 months (1-364 days) --> +- 2mo (30.44*2 mo= 61 days)
-#   # age range = 12+ months (365 days +) --> +- 4mo (30.44*4 mo = 122 days)
-#   if(row$agedays < 365){
-#     min_age <- max(0, row$agedays - 61)
-#     max_age <- min(row$agedays + 61, 364)
-#   } else{
-#     min_age <- max(365, row$agedays - 122)
-#     max_age <- row$agedays + 122
-#   }
-#   
-#   # match sex, site, time, age, not their own control
-#   matching_controls <- all_controls %>%
-#     filter(cafsex == row$cafsex) %>%
-#     filter(country_id == row$country_id) %>%
-#     filter(date < (row$date + days(15)) & date > row$date - days(15)) %>%
-#     filter(agedays >= min_age & agedays <= max_age) %>%
-#     filter(pid != row$pid) %>%
-#     group_by(pid) %>%
-#     slice_max(order_by = date, n = 1) %>% # Keep the latest sample per individual
-#     ungroup()
-#   
-#   # for each matching control, make sure no diarrhea 7 days prior
-#   control_eligible <- rep(TRUE, nrow(matching_controls))
-#   for(j in 1:nrow(matching_controls)){
-#     control_row <- matching_controls[j,]
-#     tac_data_match <- tac_data %>%
-#       filter(pid == control_row$pid) %>%
-#       filter(date <= control_row$date & date > control_row$date - days(7))
-#     
-#     if(any(tac_data_match$stooltype == "D1")){
-#       control_eligible[j] <- FALSE
-#     } 
-#   }
-#   
-#   # eliminate ineligible controls
-#   matching_controls <- matching_controls[control_eligible,]
-#   
-#   matching_controls$case_pid <- row$pid
-#   matching_controls$case_sid <- row$sid
-#   
-#   return(matching_controls)
-#   
-# }, case_data = case_data, all_controls = all_controls, tac_data = tac_data)
+# Baseline SES related covariates
 
-# get age range to match depending on case age
-# age range = 0-11 months (1-364 days) --> +- 2mo (30.44*2 mo= 61 days)
-# age range = 12+ months (365 days +) --> +- 4mo (30.44*4 mo = 122 days)
+# Number of siblings <5years
+# Number of people sleeping in household
+# Mother education
+# Father education
+# Total monthly income
+# Electricity
+# Cooking gas
+# TV
+# Drinking water source
+# Toilet
+# Food availability
+
+cols_for_pca <- c("elec",  "gas",   "phon" , "almr"  ,"tabl",  "chair", "bench" ,"clock" ,"bed"   ,"radio","tv"  ,  "bcycl" ,"mcycl" ,"sewm"  ,"fan")
+
+ses_pca <- prcomp(bv_ses_water_f10[complete.cases(bv_ses_water_f10[,cols_for_pca]), cols_for_pca], 
+                  center = TRUE, scale = TRUE)
+
+pca_score <- as.matrix(bv_ses_water_f10[, cols_for_pca]) %*% ses_pca$rotation[, 1]
+
+bv_ses_water_f10$ses_score <- pca_score[, 1]  
+bv_ses_water_f10 <- bv_ses_water_f10 %>%
+  mutate(ses_quintile = ntile(ses_score, 5)) 
+
+sub_ses <- bv_ses_water_f10 %>%
+  select(sid,
+         sb5y,
+         pepl,
+         medu,
+         ses_quintile,
+         watr,
+         toil) %>% 
+  rename('num_hh_lt_5' = sb5y,
+         'num_hh_sleep' = pepl)
+
+data <- left_join(combined_df, sub_ses, by = "sid")
+
+# Transform factors 
+data$gender <- factor(data$gender)
+data$medu <- factor(data$medu, levels = 1:18, labels = c("No formal education",
+                                                         "1st year",
+                                                         "2nd year",
+                                                         "3rd year",
+                                                         "4th year",
+                                                         "5th year",
+                                                         "6th year",
+                                                         "7th year",
+                                                         "8th year",
+                                                         "9th year",
+                                                         "SSC_Dakhil passed",
+                                                         "HSC_Fazil passed",
+                                                         "Vocational_diploma_homeopathy_LMF_etc",
+                                                         "Degree_Alim passed",
+                                                         "Hons passed_3 or 4yr hons",
+                                                         "Master_Kamil passed",
+                                                         "MBBS_MD_FCPS_FRCP",
+                                                         "BSC Engineer_MSc_PhD_etc"))
+# Make edu vars with fewer categories
+data <- data %>%
+  mutate(
+    medu_cat = case_when(
+      medu %in% c("No formal education") ~ 1,
+      medu %in% c("1st year", "2nd year", "3rd year", 
+                  "4th year", "5th year") ~ 2,
+      medu %in% c("6th year", "7th year") ~ 3,
+      medu %in% c("8th year", "9th year", "SSC_Dakhil passed", "Degree_Alim passed", "Vocational_diploma_homeopathy_LMF_etc", 
+                  "HSC_Fazil passed", "Hons passed_3 or 4yr hons", 
+                  "Master_Kamil passed", "MBBS_MD_FCPS_FRCP", "BSC Engineer_MSc_PhD_etc") ~ 4,
+      TRUE ~ NA_real_
+    ), medu_cat = factor(medu_cat, levels = 1:4, labels = c("No formal education",
+                                                           "Primary",
+                                                           "Secondary",
+                                                           "Higher")))
+
+data$watr <- factor(data$watr, levels = 1:3, labels = c("Municipality supply_piped",
+                                                        "Own arrangement by pump",
+                                                        "Tube well"))
+
+data$toil <- factor(data$toil, levels = 1:5, labels = c("Septic tank or toilet",
+                                                        "Water sealed or slap latrine",
+                                                        "Pit latrine",
+                                                        "Open latrine",
+                                                        "Hanging latrine"))
+
+saveRDS(data, here::here("misc/provide_data/shigella_provide_case_control.Rds"))
