@@ -18,5 +18,5 @@ $(TRUTH_FILE).Rds: $(CONFIG_FILE) $(PARAMETERS_FILE).Rds get_truth.R
 run_analysis: $(PARAMETERS_FILE) run_simulation.sh run_analysis.R
 	./run_simulation.sh $(PARTITION) $(SETTING) $(PARAMETERS_FILE) 1000
 
-#evaluate_performance: evaluate_performance.R 
-#	Rscript evaluate_performance.R $(SETTING)
+evaluate_performance: evaluate_performance.R 
+	Rscript evaluate_performance.R $(SETTING) $(TRUTH_FILE)
