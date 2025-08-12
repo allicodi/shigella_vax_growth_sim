@@ -6,8 +6,7 @@ TRUTH_DIR := /projects/dbenkes/allison/shigella_vaccine_trial/truth
 TRUTH_FILE := $(TRUTH_DIR)/truth_$(SETTING).Rds
 PARTITION := empire
 
-#full_analysis: run_analysis evaluate_performance
-full_analysis: run_analysis 
+full_analysis: run_analysis evaluate_performance
 
 $(PARAMETERS_FILE).Rds: $(CONFIG_FILE) get_parameters.R
 	Rscript get_parameters.R $(SETTING) $(PARAMETERS_DIR)
