@@ -4,6 +4,7 @@
 
 here::i_am("run_analysis.R")
 
+source(here::here("R/parameter_generation_fns.R"))
 source(here::here("R/simulate_data.R"))
 source(here::here("R/estimation_fn.R"))
 source(here::here("R/bootstrap.R"))

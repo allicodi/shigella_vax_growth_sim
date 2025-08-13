@@ -2,9 +2,9 @@
 # Function to simulate data based on geometric distribution, other misc changes
 # ------------------------------------------------------------------------------
 
-here::i_am("R/simulate_data.R")
+# here::i_am("R/simulate_data.R")
 
-source(here::here("R/simulate_parameters.R"))
+# source(here::here("R/simulate_parameters.R"))
 
 # Data structure: 
 

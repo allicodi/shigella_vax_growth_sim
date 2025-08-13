@@ -1,7 +1,7 @@
 
-here::i_am("R/simulate_parameters.R")
+# here::i_am("R/simulate_parameters.R")
 
-source(here::here("R/parameter_generation_fns.R"))
+# source(here::here("R/parameter_generation_fns.R"))
 
 #' Function to simulate parameters for Shigella VE growth simulation
 #'
