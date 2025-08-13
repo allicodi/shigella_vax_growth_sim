@@ -50,8 +50,8 @@ one_boot <- function(data, config){
   if(config$short_term){
     est_short_term <- estimate_short_term(data = boot_data, 
                                           parameters = paramaters, 
-                                          V_u_months = config$V_u_months, 
-                                          V_u_week_interval = config$V_u_week_interval, 
+                                          V_u_months = as.numeric(config$V_u_months), 
+                                          V_u_week_interval = as.numeric(config$V_u_week_interval), 
                                           pool = config$pool, 
                                           I_S__X_Z0_0_6_formula = config$I_S__X_Z0_0_6_formula,
                                           I_S__X_Z0_6_12_formula = config$I_S__X_Z0_6_12_formula, 
