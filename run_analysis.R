@@ -8,6 +8,9 @@ options(echo = TRUE)
 
 here::i_am("run_analysis.R")
 
+sessionInfo()
+.libPaths()
+
 source(here::here("R/parameter_generation_fns.R"))
 source(here::here("R/simulate_data.R"))
 source(here::here("R/estimation_fn.R"))
