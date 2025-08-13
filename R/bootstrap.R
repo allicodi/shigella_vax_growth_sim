@@ -5,6 +5,8 @@ one_boot <- function(data, config, parameters){
   n <- dim(data)[1]
   boot_row_idx <- sample(1:n, replace=TRUE)
   boot_data <- data[boot_row_idx,]
+  boot_data$og_id <- boot_data$id
+  boot_data$id <- 1:nrow(boot_data)
   
   # Long term & population effect estimation -----------------------------
   
