@@ -2,7 +2,8 @@
 # Function to get parameters for given config setting
 # ---------------------------------------------------------------------------------------------
 
-.libPaths("~/Rlibs")
+.libPaths("~/Rlibs_ve_trial")
+#.libPaths("~/Rlibs")
 
 options(echo = TRUE)
 

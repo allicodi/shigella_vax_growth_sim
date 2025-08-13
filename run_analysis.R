@@ -2,9 +2,14 @@
 # Script to run analysis for given configuration settings 
 # ------------------------------------------------------------------------------
 
-.libPaths("~/Rlibs")
+.libPaths(c("/apps/R/4.4.0/lib64/R/site/library","/apps/R/4.4.0/lib64/R/library", "~/Rlibs_ve_trial"))
+#.libPaths("/apps/R/4.4.0/lib64/R/site/library")
+#.libPaths(c("/home/acodi/Rlibs", "/apps/R/4.4.0/lib64/R/site/library", .libPaths()))
+#.libPaths(c("~/Rlibs", .libPaths()))
 
 options(echo = TRUE)
+
+Sys.getenv("PATH")
 
 here::i_am("run_analysis.R")
 
