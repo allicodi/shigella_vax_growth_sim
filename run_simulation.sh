@@ -11,4 +11,4 @@ sbatch --array=1-$NSEEDS \
 	--output=/projects/dbenkes/allison/shigella/scratch/%a_%J.out \
 	--job-name=shigella_%a \
 	--export=SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID,SETTING=$SETTING,PARAMATERS_FALSE=$PARAMATERS_FILE \
-	--wrap "Rscript run_analysis.R"
+	--wrap "/apps/R/4.4.0/bin/Rscript run_analysis.R"

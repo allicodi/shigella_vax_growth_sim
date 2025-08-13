@@ -6,8 +6,10 @@ library(ggplot2)
 library(dplyr)
 library(purrr)
 library(SuperLearner)
+library(survival)
 
-devtools::load_all("~/Documents/shigella_projects/packages/abxGrowth/")
+# not ideal but don't want to deal w HPC install issues rn
+devtools::load_all("~/abxGrowth/")
 
 source(here::here("misc/SL.wrappers.R"))
 

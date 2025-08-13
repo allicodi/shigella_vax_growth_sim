@@ -2,6 +2,10 @@
 # Function to get parameters for given config setting
 # ---------------------------------------------------------------------------------------------
 
+.libPaths("~/Rlibs")
+
+options(echo = TRUE)
+
 here::i_am("get_parameters.R")
 
 source(here::here("R/parameter_generation_fns.R"))

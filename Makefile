@@ -9,14 +9,14 @@ PARTITION := empire
 full_analysis: run_analysis evaluate_performance
 
 $(PARAMETERS_FILE): $(CONFIG_FILE) get_parameters.R
-	Rscript get_parameters.R $(SETTING) $(PARAMETERS_DIR)
+	/apps/R/4.4.0/bin/Rscript get_parameters.R $(SETTING) $(PARAMETERS_DIR)
 	
 $(TRUTH_FILE): $(CONFIG_FILE) $(PARAMETERS_FILE).Rds get_truth.R
-	Rscript get_truth.R $(SETTING) $(PARAMETERS_FILE) $(TRUTH_DIR)
+	/apps/R/4.4.0/bin/Rscript get_truth.R $(SETTING) $(PARAMETERS_FILE) $(TRUTH_DIR)
 
 run_analysis: $(PARAMETERS_FILE) run_simulation.sh run_analysis.R
 	./run_simulation.sh $(PARTITION) $(SETTING) $(PARAMETERS_FILE) 1000
 
 evaluate_performance: evaluate_performance.R 
-	Rscript evaluate_performance.R $(SETTING) $(TRUTH_FILE)
+	/apps/R/4.4.0/bin/Rscript evaluate_performance.R $(SETTING) $(TRUTH_FILE)
 
