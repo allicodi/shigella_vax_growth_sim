@@ -39,7 +39,7 @@ one_boot <- function(data, config){
   }
   
   if(config$population){
-    est_pop <- vegrowth::do_gcomp_pop(data = boot_data, models = models, Z_name = "Z", X_name = "X")['additive_effect']
+    est_pop <- vegrowth::do_gcomp_pop(data = boot_data, models = pkg_models, Z_name = "Z", X_name = "X")['additive_effect']
   } else{
     est_pop <- NULL
   }
