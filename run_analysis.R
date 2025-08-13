@@ -109,6 +109,23 @@ results <- lapply(config$n_sample_size, function(n){
   boot_res <- replicate(config$n_boot, one_boot(data, config, parameters))
   boot_res_df <- as.data.frame(t(boot_res))
   
+  # ^^ if any are NA, should I repeat?
+  any_NA <- any(is.na(boot_res_df$est_short_term))
+  attempt <- 1
+  while(any_NA & attempt <= 5){
+    idx <- which(is.na(boot_res_df$est_short_term))
+    
+    # assuming won't happen again
+    boot_res_2 <- replicate(length(idx), one_boot(data, config, parameters))
+    boot_res_df_2 <- as.data.frame(t(boot_res_2))
+    
+    boot_res_df[idx,] <- boot_res_df_2
+    
+    any_NA <- any(is.na(boot_res_df$est_short_term))
+    attempt <- attempt + 1
+    
+  }
+  
   # 2. Get bootstrap CIs & hypothesis test
   if(config$long_term){
     long_term_se <- sd(boot_res_df$est_long_term)
