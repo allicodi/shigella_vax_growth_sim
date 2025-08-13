@@ -2,6 +2,10 @@
 # Functions to generate parameters for Shigella VE simulations
 # ------------------------------------------------------------------------------
 
+.libPaths("~/Rlibs")
+
+options(echo = TRUE)
+
 library(ggplot2)
 library(tidyverse)
 library(purrr)
