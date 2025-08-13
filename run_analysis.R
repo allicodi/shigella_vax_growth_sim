@@ -93,15 +93,15 @@ results <- lapply(config$n_sample_size, function(n){
   
   # 1. Do n_boot bootstrap replicates
   boot_res <- replicate(config$n_boot, one_boot(data, config, parameters))
-  boot_res <- data.frame(do.call(rbind, boot_res))
+  boot_res_df <- as.data.frame(t(boot_res))
   
   # 2. Get bootstrap CIs & hypothesis test
   if(config$long_term){
-    long_term_se <- sd(boot_res$est_long_term)
-    long_term_lower_ci <- quantile(boot_res$est_long_term, p = 0.025)
-    long_term_upper_ci <- quantile(boot_res$est_long_term, p = 0.975)
+    long_term_se <- sd(boot_res_df$est_long_term)
+    long_term_lower_ci <- quantile(boot_res_df$est_long_term, p = 0.025)
+    long_term_upper_ci <- quantile(boot_res_df$est_long_term, p = 0.975)
     
-    long_term_reject <- (abs(est_long_term - null_hypothesis_value) / long_term_se) > qnorm(1 - alpha_level/2)
+    long_term_reject <- (abs(est_long_term - config$null_hypothesis_value) / long_term_se) > qnorm(1 - config$alpha_level/2)
     
   } else{
     long_term_se <- NULL
@@ -112,11 +112,11 @@ results <- lapply(config$n_sample_size, function(n){
   }
   
   if(config$pop){
-    pop_se <- sd(boot_res$est_pop)
-    pop_lower_ci <- quantile(boot_res$est_pop, p = 0.025)
-    pop_upper_ci <- quantile(boot_res$est_pop, p = 0.975)
+    pop_se <- sd(boot_res_df$est_pop)
+    pop_lower_ci <- quantile(boot_res_df$est_pop, p = 0.025)
+    pop_upper_ci <- quantile(boot_res_df$est_pop, p = 0.975)
     
-    pop_reject <- (abs(est_pop - null_hypothesis_value) / pop_se) > qnorm(1 - alpha_level/2)
+    pop_reject <- (abs(est_pop - config$null_hypothesis_value) / pop_se) > qnorm(1 - config$alpha_level/2)
   } else{
     pop_se <- NULL
     pop_lower_ci <- NULL
@@ -124,11 +124,11 @@ results <- lapply(config$n_sample_size, function(n){
   }
   
   if(config$short_term){
-    short_term_se <- sd(boot_res$est_short_term)
-    short_term_lower_ci <- quantile(boot_res$est_short_term, p = 0.025)
-    short_term_upper_ci <- quantile(boot_res$est_short_term, p = 0.975)
+    short_term_se <- sd(boot_res_df$est_short_term)
+    short_term_lower_ci <- quantile(boot_res_df$est_short_term, p = 0.025)
+    short_term_upper_ci <- quantile(boot_res_df$est_short_term, p = 0.975)
     
-    short_term_reject <- (abs(est_short_term - null_hypothesis_value) / short_term_se) > qnorm(1 - alpha_level/2)
+    short_term_reject <- (abs(est_short_term - config$null_hypothesis_value) / short_term_se) > qnorm(1 - config$alpha_level/2)
   } else{
     short_term_se <- NULL
     short_term_lower_ci <- NULL

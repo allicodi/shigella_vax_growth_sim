@@ -62,8 +62,8 @@ one_boot <- function(data, config, parameters){
     est_short_term <- NULL
   }
   
-  return(list(est_short_term = est_short_term,
-                    est_pop = est_pop,
-                    est_long_term = est_long_term))
+  return(c(est_short_term = as.numeric(est_short_term),
+                    est_pop = as.numeric(est_pop),
+                    est_long_term = as.numeric(est_long_term)))
   
 }
