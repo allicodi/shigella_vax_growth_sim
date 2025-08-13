@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 
 library(ggplot2)
-library(dplyr)
+library(tidyverse)
 library(purrr)
 library(SuperLearner)
 library(survival)
@@ -224,8 +224,8 @@ hr_maled <- function(dose_schedule = "6mo"){
     left_join(end_date_2, by = "pid") %>%
     left_join(stool_data, by = "pid") %>%
     mutate(shigella_pos_overall = if_else(is.na(shigella_pos_overall), 0, shigella_pos_overall),
-           shigella_pos_1 = if_else(!is.na(diar_date) & diar_date <= cens_date_1, 1, 0), 
-           ftime1 = if_else(!is.na(diar_date) & diar_date <= cens_date_1,
+           shigella_pos_1 = if_else(!is.na(diar_date) & as.Date(diar_date) <= as.Date(cens_date_1), 1, 0), 
+           ftime1 = if_else(!is.na(diar_date) & as.Date(diar_date) <= as.Date(cens_date_1),
                             as.numeric(difftime(diar_date, bl_date, units = "weeks")),
                             as.numeric(difftime(cens_date_1, bl_date, units = "weeks")))) %>%
     filter(!is.na(ftime1)) 
@@ -233,8 +233,8 @@ hr_maled <- function(dose_schedule = "6mo"){
   # Make dataset for first 6mo, excluding people who had shigella or dropped out of study in the first six months
   data_2 <- data_1 %>%
     filter(!(shigella_pos_1 == 1)) %>%
-    mutate(shigella_pos_2 = if_else(!is.na(diar_date) & diar_date <= cens_date_2, 1, 0),
-           ftime2 = if_else(!is.na(diar_date) & diar_date <= cens_date_2,
+    mutate(shigella_pos_2 = if_else(!is.na(diar_date) & as.Date(diar_date) <= as.Date(cens_date_2), 1, 0),
+           ftime2 = if_else(!is.na(diar_date) & as.Date(diar_date) <= as.Date(cens_date_2),
                             as.numeric(difftime(diar_date, bl_date, units = "weeks")),
                             as.numeric(difftime(cens_date_2, bl_date, units = "weeks")))) %>%
     filter(!(cens_date_1 == cens_date_2))

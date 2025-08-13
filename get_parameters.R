@@ -18,9 +18,9 @@ parameter_dir <- cargs[2]
 
 config <- config::get(file = "config.yml", config = setting)
 
-paramaters <- simulate_parameters(dose_schedule = config$dose_schedule,
+parameters <- simulate_parameters(dose_schedule = config$dose_schedule,
                                   site = config$site,
-                                  incidence_shigella_0_6 = config$incidence_severe_shigella_0_6, 
+                                  incidence_shigella_0_6 = config$incidence_shigella_0_6, 
                                   incidence_severe_shigella_0_6 = config$incidence_severe_shigella_0_6, 
                                   incidence_shigella_6_12 = config$incidence_shigella_6_12, 
                                   incidence_severe_shigella_6_12 = config$incidence_severe_shigella_0_6, 
