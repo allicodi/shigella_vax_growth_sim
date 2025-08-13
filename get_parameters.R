@@ -6,13 +6,13 @@
 
 options(echo = TRUE)
 
+sessionInfo()
+.libPaths()
+
 here::i_am("get_parameters.R")
 
 source(here::here("R/parameter_generation_fns.R"))
 source(here::here("R/simulate_parameters.R"))
-
-sessionInfo()
-.libPaths()
 
 # get setting from bash script
 cargs <- commandArgs(TRUE)
