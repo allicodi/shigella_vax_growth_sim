@@ -2,6 +2,10 @@
 # Script to run analysis for given configuration settings 
 # ------------------------------------------------------------------------------
 
+.libPaths("~/Rlibs")
+
+options(echo = TRUE)
+
 here::i_am("run_analysis.R")
 
 source(here::here("R/parameter_generation_fns.R"))
