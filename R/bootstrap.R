@@ -50,7 +50,7 @@ one_boot <- function(data, config, parameters){
   
   # 1. Call effect estimation function (models fit within)
   if(config$short_term){
-    est_short_term <- estimate_short_term(data = boot_data, 
+    est_short_term <- tryCatch(estimate_short_term(data = boot_data, 
                                           parameters = parameters, 
                                           V_u_months = as.numeric(config$V_u_months), 
                                           V_u_week_interval = as.numeric(config$V_u_week_interval), 
@@ -59,7 +59,11 @@ one_boot <- function(data, config, parameters){
                                           I_S__X_Z0_6_12_formula = config$I_S__X_Z0_6_12_formula, 
                                           Y_out__Z1_Suminus10_X_formula = config$Y_out__Z1_Suminus10_X_formula,
                                           Y_out__Z0_Suminus11_X_T_formula = config$Y_out__Z0_Suminus11_X_T_formula, 
-                                          Y_out__Z0_Suminus11_X_T_V_formula = config$Y_out__Z0_Suminus11_X_T_V_formula)
+                                          Y_out__Z0_Suminus11_X_T_V_formula = config$Y_out__Z0_Suminus11_X_T_V_formula),
+                               error = function(e){
+                                 message("Error in bootstrap replicate")
+                                 return(NA)
+                               })
   } else{
     est_short_term <- NULL
   }

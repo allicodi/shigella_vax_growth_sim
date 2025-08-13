@@ -92,6 +92,20 @@ results <- lapply(config$n_sample_size, function(n){
   # Bootstrap Estimates ----------------------------------------
   
   # 1. Do n_boot bootstrap replicates
+  
+  # boot_res <- vector("list", config$n_boot)
+  # 
+  # for (i in seq_len(config$n_boot)) {
+  #   message("Running bootstrap replicate ", i, " of ", config$n_boot)
+  #   boot_res[[i]] <- tryCatch(
+  #     one_boot(data, config, parameters),
+  #     error = function(e) {
+  #       message("Error in bootstrap replicate ", i, ": ", e$message)
+  #       return(NULL)  # Or NA
+  #     }
+  #   )
+  # }
+  
   boot_res <- replicate(config$n_boot, one_boot(data, config, parameters))
   boot_res_df <- as.data.frame(t(boot_res))
   
