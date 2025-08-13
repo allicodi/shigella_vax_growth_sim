@@ -1,5 +1,5 @@
 
-one_boot <- function(data, config){
+one_boot <- function(data, config, parameters){
   
   # Create bootstrap data
   n <- dim(data)[1]
@@ -49,7 +49,7 @@ one_boot <- function(data, config){
   # 1. Call effect estimation function (models fit within)
   if(config$short_term){
     est_short_term <- estimate_short_term(data = boot_data, 
-                                          parameters = paramaters, 
+                                          parameters = parameters, 
                                           V_u_months = as.numeric(config$V_u_months), 
                                           V_u_week_interval = as.numeric(config$V_u_week_interval), 
                                           pool = config$pool, 

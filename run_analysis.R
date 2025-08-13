@@ -92,7 +92,7 @@ results <- lapply(config$n_sample_size, function(n){
   # Bootstrap Estimates ----------------------------------------
   
   # 1. Do n_boot bootstrap replicates
-  boot_res <- replicate(config$n_boot, one_boot(data, config))
+  boot_res <- replicate(config$n_boot, one_boot(data, config, parameters))
   boot_res <- data.frame(do.call(rbind, boot_res))
   
   # 2. Get bootstrap CIs & hypothesis test
