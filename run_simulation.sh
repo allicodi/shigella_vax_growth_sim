@@ -17,6 +17,7 @@ export PATH=/apps/R/4.4.0/bin:/home/acodi/.local/bin:/home/acodi/bin:/home/acodi
 sbatch --array=1-$NSEEDS \
 	--partition=$PARTITION \
 	-n 1 \
+	--mem-per-cpu=8G \
 	--output=/projects/dbenkes/allison/shigella_vaccine_trial/scratch/%a_%J.out \
 	--job-name=shigella_%a \
 	--export=SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID,SETTING=$SETTING,PARAMETERS_FILE=$PARAMETERS_FILE \
