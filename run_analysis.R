@@ -166,26 +166,31 @@ results <- lapply(config$n_sample_size, function(n){
     short_term_upper_ci <- NULL
   }
   
-  return(list(n = n, 
-              est_long_term = est_long_term, 
-              long_term_se = long_term_se,
-              long_term_lower_ci = long_term_lower_ci, 
-              long_term_upper_ci = long_term_upper_ci, 
-              long_term_reject = long_term_reject, 
-              est_pop = est_pop,
-              pop_se = pop_se,
-              pop_lower_ci = pop_lower_ci, 
-              pop_upper_ci = pop_upper_ci, 
-              pop_reject = pop_reject,
-              est_short_term = est_short_term,
-              short_term_se = short_term_se,
-              short_term_lower_ci = short_term_lower_ci, 
-              short_term_upper_ci = short_term_upper_ci,
-              short_term_reject = short_term_reject))
+  result <- list(seed = seed, 
+                 n = n, 
+                 est_long_term = est_long_term, 
+                 long_term_se = long_term_se,
+                 long_term_lower_ci = long_term_lower_ci, 
+                 long_term_upper_ci = long_term_upper_ci, 
+                 long_term_reject = long_term_reject, 
+                 est_pop = est_pop,
+                 pop_se = pop_se,
+                 pop_lower_ci = pop_lower_ci, 
+                 pop_upper_ci = pop_upper_ci, 
+                 pop_reject = pop_reject,
+                 est_short_term = est_short_term,
+                 short_term_se = short_term_se,
+                 short_term_lower_ci = short_term_lower_ci, 
+                 short_term_upper_ci = short_term_upper_ci,
+                 short_term_reject = short_term_reject)
+  
+  # save list incrementally too so if gets killed don't need to start from scratch
+  saveRDS(results, "/projects/dbenkes/allison/shigella_vaccine_trial/results/", setting, "_n_", n, "_seed_", seed, ".Rds")
+
+  return(result)
   
 })
 
 results <- as.data.frame(do.call(rbind, results))
-results$seed <- seed
 
 saveRDS(results, "/projects/dbenkes/allison/shigella_vaccine_trial/results/", setting, "_seed_", seed, ".Rds")
