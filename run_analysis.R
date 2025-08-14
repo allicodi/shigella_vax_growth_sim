@@ -185,7 +185,7 @@ results <- lapply(config$n_sample_size, function(n){
                  short_term_reject = short_term_reject)
   
   # save list incrementally too so if gets killed don't need to start from scratch
-  saveRDS(results, "/projects/dbenkes/allison/shigella_vaccine_trial/results/", setting, "_n_", n, "_seed_", seed, ".Rds")
+  saveRDS(results, paste0("/projects/dbenkes/allison/shigella_vaccine_trial/results/", setting, "_n_", n, "_seed_", seed, ".Rds"))
 
   return(result)
   
@@ -193,4 +193,4 @@ results <- lapply(config$n_sample_size, function(n){
 
 results <- as.data.frame(do.call(rbind, results))
 
-saveRDS(results, "/projects/dbenkes/allison/shigella_vaccine_trial/results/", setting, "_seed_", seed, ".Rds")
+saveRDS(results, paste0("/projects/dbenkes/allison/shigella_vaccine_trial/results/", setting, "_seed_", seed, ".Rds"))
