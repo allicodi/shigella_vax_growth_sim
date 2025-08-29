@@ -22,7 +22,7 @@ pattern <- paste0("results/", setting, "_seed_.*\\.Rds$")
 all_files <- list.files(dir, pattern = pattern, full.names = TRUE)
 
 # Load and combine results
-results_list <- lapply(valid_files, readRDS)
+results_list <- lapply(all_files, readRDS)
 results <- do.call(rbind, results_list)
 
 bias_df <- data.frame()
