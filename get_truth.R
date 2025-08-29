@@ -2,6 +2,8 @@
 # Function to get truth for given config settings
 # ---------------------------------------------------------------------------------------------
 
+.libPaths(c("/apps/R/4.4.0/lib64/R/site/library","/apps/R/4.4.0/lib64/R/library", "~/Rlibs_ve_trial"))
+
 here::i_am("get_truth.R")
 
 source(here::here("R/simulate_data.R"))

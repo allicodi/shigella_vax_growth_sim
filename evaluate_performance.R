@@ -1,3 +1,6 @@
+
+.libPaths(c("/apps/R/4.4.0/lib64/R/site/library","/apps/R/4.4.0/lib64/R/library", "~/Rlibs_ve_trial"))
+
 here::i_am("evaluate_performance.R")
 
 source(here::here("R/evaluation_fns.R"))
