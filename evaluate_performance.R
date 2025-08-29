@@ -3,6 +3,8 @@ options(echo = TRUE)
 
 .libPaths(c("/apps/R/4.4.0/lib64/R/site/library","/apps/R/4.4.0/lib64/R/library", "~/Rlibs_ve_trial"))
 
+library(dplyr)
+
 here::i_am("evaluate_performance.R")
 
 source(here::here("R/evaluation_fns.R"))
@@ -19,13 +21,12 @@ config <- config::get(file = "config.yml", config = setting)
 truth_df <- readRDS(truth_file)
 
 # get list of results files matching pattern
-dir <- "/projects/dbenkes/allison/shigella_vaccine_trial/"
-pattern <- paste0("results/", setting, "_seed_.*\\.Rds$")
+dir <- "/projects/dbenkes/allison/shigella_vaccine_trial/results"
+pattern <- paste0(setting, "_seed_.*\\.Rds$")
 all_files <- list.files(dir, pattern = pattern, full.names = TRUE)
 
-# Load and combine results
 results_list <- lapply(all_files, readRDS)
-results <- do.call(rbind, results_list)
+results <- bind_rows(results_list)
 
 bias_df <- data.frame()
 coverage_df <- data.frame()
