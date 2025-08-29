@@ -5,8 +5,8 @@ default:
     - 10000
     - 20000
     - 40000
-    - 80000
-    - 160000
+    #- 80000
+    #- 160000
   dose_schedule: "6mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0253
