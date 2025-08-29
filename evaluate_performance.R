@@ -15,7 +15,7 @@ truth_df <- readRDS(truth_file)
 
 # get list of results files matching pattern
 dir <- "/projects/dbenkes/allison/shigella_vaccine_trial/"
-pattern <- paste0("results/setting_", setting, "_seed_.*\\.Rds$")
+pattern <- paste0("results/", setting, "_seed_.*\\.Rds$")
 all_files <- list.files(dir, pattern = pattern, full.names = TRUE)
 
 # Load and combine results

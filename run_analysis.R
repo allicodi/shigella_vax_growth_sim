@@ -112,6 +112,8 @@ results <- lapply(config$n_sample_size, function(n){
   # ^^ if any are NA, should I repeat?
   any_NA <- any(is.na(boot_res_df$est_short_term))
   attempt <- 1
+  
+  # return sum(any_NA)
   while(any_NA & attempt <= 5){
     idx <- which(is.na(boot_res_df$est_short_term))
     
