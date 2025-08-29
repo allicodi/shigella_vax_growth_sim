@@ -93,19 +93,6 @@ results <- lapply(config$n_sample_size, function(n){
   
   # 1. Do n_boot bootstrap replicates
   
-  # boot_res <- vector("list", config$n_boot)
-  # 
-  # for (i in seq_len(config$n_boot)) {
-  #   message("Running bootstrap replicate ", i, " of ", config$n_boot)
-  #   boot_res[[i]] <- tryCatch(
-  #     one_boot(data, config, parameters),
-  #     error = function(e) {
-  #       message("Error in bootstrap replicate ", i, ": ", e$message)
-  #       return(NULL)  # Or NA
-  #     }
-  #   )
-  # }
-  
   boot_res <- replicate(config$n_boot, one_boot(data, config, parameters))
   boot_res_df <- as.data.frame(t(boot_res))
   
@@ -117,7 +104,6 @@ results <- lapply(config$n_sample_size, function(n){
   while(any_NA & attempt <= 5){
     idx <- which(is.na(boot_res_df$est_short_term))
     
-    # assuming won't happen again
     boot_res_2 <- replicate(length(idx), one_boot(data, config, parameters))
     boot_res_df_2 <- as.data.frame(t(boot_res_2))
     
@@ -154,6 +140,8 @@ results <- lapply(config$n_sample_size, function(n){
     pop_se <- NULL
     pop_lower_ci <- NULL
     pop_upper_ci <- NULL
+    
+    pop_reject <- NULL
   }
   
   if(config$short_term){
@@ -166,6 +154,8 @@ results <- lapply(config$n_sample_size, function(n){
     short_term_se <- NULL
     short_term_lower_ci <- NULL
     short_term_upper_ci <- NULL
+    
+    short_term_reject <- NULL
   }
   
   result <- list(seed = seed, 

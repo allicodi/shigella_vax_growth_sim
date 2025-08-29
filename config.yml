@@ -6,8 +6,7 @@ default:
     - 20000
     - 30000
     - 40000
-    #- 80000
-    #- 160000
+    - 80000
   dose_schedule: "6mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0253
@@ -39,6 +38,7 @@ vax_6mo__measure_6mo:
     - 20000
     - 30000
     - 40000
+    - 80000
   dose_schedule: "6mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0373
@@ -70,6 +70,7 @@ vax_12mo__measure_3mo:
     - 20000
     - 30000
     - 40000
+    - 80000
   dose_schedule: "12mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0373
