@@ -10,13 +10,13 @@ full_analysis: run_analysis evaluate_performance
 
 $(PARAMETERS_FILE): $(CONFIG_FILE) get_parameters.R
 	/apps/R/4.4.0/bin/Rscript get_parameters.R $(SETTING) $(PARAMETERS_DIR)
-	
-$(TRUTH_FILE): $(CONFIG_FILE) $(PARAMETERS_FILE).Rds get_truth.R
+
+$(TRUTH_FILE): $(CONFIG_FILE) $(PARAMETERS_FILE) get_truth.R
 	/apps/R/4.4.0/bin/Rscript get_truth.R $(SETTING) $(PARAMETERS_FILE) $(TRUTH_DIR)
 
 run_analysis: $(PARAMETERS_FILE) run_simulation.sh run_analysis.R
 	./run_simulation.sh $(PARTITION) $(SETTING) $(PARAMETERS_FILE) 1000
 
-evaluate_performance: evaluate_performance.R 
+evaluate_performance: $(TRUTH_FILE) evaluate_performance.R 
 	/apps/R/4.4.0/bin/Rscript evaluate_performance.R $(SETTING) $(TRUTH_FILE)
 
