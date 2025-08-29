@@ -42,4 +42,4 @@ if(config$short_term){
                                        V_u_week_interval = as.numeric(config$V_u_week_interval))
 }
 
-saveRDS(truth, paste0(truth_dir, "truth_", setting, ".Rds"))
+saveRDS(truth, paste0(truth_dir, "/truth_", setting, ".Rds"))
