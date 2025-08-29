@@ -6,6 +6,7 @@
 
 here::i_am("get_truth.R")
 
+source(here::here("R/parameter_generation_fns.R"))
 source(here::here("R/simulate_data.R"))
 source(here::here("R/truth_fns.R"))
 
