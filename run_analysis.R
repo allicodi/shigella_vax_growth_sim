@@ -21,7 +21,11 @@ seed <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 setting <- Sys.getenv("SETTING")
 parameters <- readRDS(Sys.getenv("PARAMETERS_FILE"))
 
-config <- config::get(file = "config.yml", config = setting)
+# issues with weeks not being overwritten
+#config <- config::get(file = "config.yml", config = setting)
+
+cfg <- yaml::read_yaml("config.yml")
+config <- cfg[[setting]]
 
 results <- lapply(config$n_sample_size, function(n){
   
