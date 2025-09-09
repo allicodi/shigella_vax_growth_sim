@@ -49,4 +49,4 @@ final_results <- list(
   prop_neg_df = prop_neg_df
 )
 
-saveRDS(final_results, file = paste0(dir, "/results/", setting, "_evaluation_results.Rds"))
+saveRDS(final_results, file = paste0(dir, "/", setting, "_evaluation_results.Rds"))
