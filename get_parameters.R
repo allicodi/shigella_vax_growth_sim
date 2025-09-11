@@ -20,7 +20,8 @@ cargs <- commandArgs(TRUE)
 setting <- cargs[1]
 parameter_dir <- cargs[2]
 
-config <- config::get(file = "config.yml", config = setting)
+cfg <- yaml::read_yaml("config.yml")
+config <- cfg[[setting]]
 
 parameters <- simulate_parameters(dose_schedule = config$dose_schedule,
                                   site = config$site,
