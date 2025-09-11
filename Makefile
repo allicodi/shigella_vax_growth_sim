@@ -1,5 +1,5 @@
 CONFIG_FILE := config.yml
-SETTING := default
+SETTING := vax_6mo__measure_6mo
 PARAMETERS_DIR := /projects/dbenkes/allison/shigella_vaccine_trial/parameters
 PARAMETERS_FILE := $(PARAMETERS_DIR)/parameters_$(SETTING).Rds
 TRUTH_DIR := /projects/dbenkes/allison/shigella_vaccine_trial/truth

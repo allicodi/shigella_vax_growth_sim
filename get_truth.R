@@ -16,7 +16,7 @@ setting <- cargs[1]
 parameters_file <- cargs[2]
 truth_dir <- cargs[3]
 
-cfg <- yaml::read_yaml("config_contour.yml")
+cfg <- yaml::read_yaml("config.yml")
 config <- cfg[[setting]]
 
 parameters <- readRDS(parameters_file)
