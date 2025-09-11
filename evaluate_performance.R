@@ -15,7 +15,8 @@ setting <- cargs[1]
 truth_file <- cargs[2]
 
 # read in config file
-config <- config::get(file = "config.yml", config = setting)
+cfg <- yaml::read_yaml("config.yml")
+config <- cfg[[setting]]
 
 # read in truth file 
 truth_df <- readRDS(truth_file)
