@@ -6,7 +6,6 @@ default:
     - 20000
     - 30000
     - 40000
-    - 80000
   dose_schedule: "6mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0253
@@ -30,6 +29,35 @@ default:
   null_hypothesis_value: 0
   alpha_level: 0.05
   
+debug_default:
+  n_boot: 100
+  n_sample_size: 
+    - 5000
+    - 7500
+    - 10000
+  dose_schedule: "6mo"
+  site: "Overall"
+  incidence_shigella_0_6: 0.0253
+  incidence_severe_shigella_0_6: 0.0147
+  incidence_shigella_6_12: 0.0373
+  incidence_severe_shigella_6_12: 0.0203
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  VE_mild: 0.40
+  VE_severe: 0.60
+  long_term: TRUE
+  population: TRUE
+  short_term: TRUE
+  V_u_months: [3, 6, 9, 12]
+  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
+  pool: TRUE
+  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
+  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
+  Y_out__Z1_Suminus10_X_formula: "Y_out ~ ns(X, 3)"
+  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
+  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V"
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  
 vax_6mo__measure_6mo:
   n_boot: 1000
   n_sample_size: 
@@ -38,7 +66,6 @@ vax_6mo__measure_6mo:
     - 20000
     - 30000
     - 40000
-    - 80000
   dose_schedule: "6mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0253
@@ -70,7 +97,6 @@ vax_12mo__measure_3mo:
     - 20000
     - 30000
     - 40000
-    - 80000
   dose_schedule: "12mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0373
@@ -102,7 +128,6 @@ vax_12mo__measure_6mo:
     - 20000
     - 30000
     - 40000
-    - 80000
   dose_schedule: "12mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0373
