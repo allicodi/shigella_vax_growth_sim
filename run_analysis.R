@@ -79,7 +79,7 @@ results <- lapply(config$n_sample_size, function(n){
   
   # 1. Call effect estimation function (models fit within)
   if(config$short_term){
-    est_short_term <- estimate_short_term(data = data, 
+    all_est_short_term <- estimate_short_term(data = data, 
                                           parameters = paramaters, 
                                           V_u_months = as.numeric(config$V_u_months), 
                                           V_u_week_interval = as.numeric(config$V_u_week_interval), 
@@ -89,6 +89,9 @@ results <- lapply(config$n_sample_size, function(n){
                                           Y_out__Z1_Suminus10_X_formula = config$Y_out__Z1_Suminus10_X_formula,
                                           Y_out__Z0_Suminus11_X_T_formula = config$Y_out__Z0_Suminus11_X_T_formula, 
                                           Y_out__Z0_Suminus11_X_T_V_formula = config$Y_out__Z0_Suminus11_X_T_V_formula)
+    est_short_term <- all_est_short_term$growth_effect
+    est_short_term_Z0 <- all_est_short_term$estimate_Z0
+    est_short_term_Z1 <- all_est_short_term$estimate_Z1
   } else{
     est_short_term <- NULL
   }
@@ -175,6 +178,8 @@ results <- lapply(config$n_sample_size, function(n){
                  pop_upper_ci = pop_upper_ci, 
                  pop_reject = pop_reject,
                  est_short_term = est_short_term,
+                 est_short_term_Z0 = est_short_term_Z0,
+                 est_short_term_Z1 = est_short_term_Z1,
                  short_term_se = short_term_se,
                  short_term_lower_ci = short_term_lower_ci, 
                  short_term_upper_ci = short_term_upper_ci,

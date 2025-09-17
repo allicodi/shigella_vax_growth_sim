@@ -38,9 +38,15 @@ if(config$population){
 }
 
 if(config$short_term){
-  truth$short_term <- truth_short_term(data = data, 
-                                       V_u_months = config$V_u_months, 
-                                       V_u_week_interval = as.numeric(config$V_u_week_interval))
+  short_term <- truth_short_term(data = data, 
+                                 V_u_months = config$V_u_months, 
+                                 V_u_week_interval = as.numeric(config$V_u_week_interval))
+  
+  truth$short_term <- short_term$short_term
+  
+  # added for debugging bias
+  truth$short_term_Z0 <- short_term$short_term_Z0
+  truth$short_term_Z1 <- short_term$short_term_Z1
 }
 
 saveRDS(truth, paste0(truth_dir, "/truth_", setting, ".Rds"))

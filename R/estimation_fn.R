@@ -245,15 +245,26 @@ estimate_short_term <- function(data,
   # P_S_umax_1__Z_0 <- mean(data$S_inf[data$Z == 0 & data$S_inf_time<=umax])
   
   estimate <- vector("numeric", length = umax)
+  estimate_Z0 <- vector("numeric", length = umax)
+  estimate_Z1 <- vector("numeric", length = umax)
+  
   for(u in 1:umax){
     P_dSu_1__Z_0_X <- density_Z0_0_12[,u]
     E_Y_Vu__Z1_Suminus1_0_X <- pred_Y_out__Z1_Suminus1_0_X[,paste0("pred_",u)]
     E_Y_Vu__Z0_Suminus1_1_X <- pred_Y_out__Z0_Suminus1_1_X[,paste0("pred_",u)]
     
     estimate[u] <- mean((P_dSu_1__Z_0_X / P_Sumax_1__Z0) * (E_Y_Vu__Z1_Suminus1_0_X - E_Y_Vu__Z0_Suminus1_1_X))
+    
+    estimate_Z1[u] <- mean((P_dSu_1__Z_0_X / P_Sumax_1__Z0) * (E_Y_Vu__Z1_Suminus1_0_X))
+    estimate_Z0[u] <- mean((P_dSu_1__Z_0_X / P_Sumax_1__Z0) * (E_Y_Vu__Z0_Suminus1_1_X))
+    
   }
   
   final_growth_effect <- sum(estimate)
+  final_estimate_Z0 <- sum(estimate_Z0)
+  final_estimate_Z1 <- sum(estimate_Z1)
   
-  return(final_growth_effect)
+  return(list(growth_effect = final_growth_effect, 
+              estimate_Z0 = final_estimate_Z0,
+              estimate_Z1 = final_estimate_Z1))
 }

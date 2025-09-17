@@ -50,7 +50,7 @@ one_boot <- function(data, config, parameters){
   
   # 1. Call effect estimation function (models fit within)
   if(config$short_term){
-    est_short_term <- tryCatch(estimate_short_term(data = boot_data, 
+    all_est_short_term <- tryCatch(estimate_short_term(data = boot_data, 
                                           parameters = parameters, 
                                           V_u_months = as.numeric(config$V_u_months), 
                                           V_u_week_interval = as.numeric(config$V_u_week_interval), 
@@ -64,12 +64,21 @@ one_boot <- function(data, config, parameters){
                                  message("Error in bootstrap replicate")
                                  return(NA)
                                })
+    
+    est_short_term <- all_est_short_term$growth_effect
+    est_short_term_Z0 <- all_est_short_term$estimate_Z0
+    est_short_term_Z1 <- all_est_short_term$estimate_Z1
+    
   } else{
     est_short_term <- NULL
+    est_short_term_Z0 <- NULL
+    est_short_term_Z1 <- NULL
   }
   
   return(c(est_short_term = as.numeric(est_short_term),
-                    est_pop = as.numeric(est_pop),
-                    est_long_term = as.numeric(est_long_term)))
+           est_short_term_Z0 = as.numeric(est_short_term_Z0),
+           est_short_term_Z1 = as.numeric(est_short_term_Z1),
+           est_pop = as.numeric(est_pop),
+           est_long_term = as.numeric(est_long_term)))
   
 }

@@ -36,7 +36,9 @@ truth_short_term <- function(data,
   
   E_wt_df <- data.frame(u = 1:umax,
                         wt = rep(NA, umax),
-                        E_hat = rep(NA, umax))
+                        E_hat = rep(NA, umax),
+                        E_hat_Z0 = rep(NA, umax),
+                        E_hat_Z1 = rep(NA, umax))
   
   for(u in 1:umax){
     E_wt_df$wt[u] <- mean(as.numeric(data$S_inf_time_Z0[data$S_inf_Z0 == 1] == u))
@@ -46,12 +48,19 @@ truth_short_term <- function(data,
     Y_V_u_name_Z0 <- paste0("Y_", V_u_months[findInterval(u, V_u_week_interval, rightmost.closed = FALSE, left.open = TRUE)], "_Z0")
     Y_V_u_name_Z1 <- paste0("Y_", V_u_months[findInterval(u, V_u_week_interval, rightmost.closed = FALSE, left.open = TRUE)], "_Z1")
     
+    E_wt_df$E_hat_Z1[u] <- mean(data[[Y_V_u_name_Z1]][idx])
+    E_wt_df$E_hat_Z0[u] <- mean(data[[Y_V_u_name_Z0]][idx])
     E_wt_df$E_hat[u] <- mean(data[[Y_V_u_name_Z1]][idx] - data[[Y_V_u_name_Z0]][idx]) 
     
   }
   
   E_wt_df$wt_x_E_hat <- E_wt_df$wt * E_wt_df$E_hat
-  return(sum(E_wt_df$wt_x_E_hat))
+  E_wt_df$wt_x_E_hat_Z0 <- E_wt_df$wt * E_wt_df$E_hat_Z0
+  E_wt_df$wt_x_E_hat_Z1 <- E_wt_df$wt * E_wt_df$E_hat_Z1
+  
+  return(list(short_term = sum(E_wt_df$wt_x_E_hat),
+                    short_term_Z0 = sum(E_wt_df$wt_x_Ehat_Z0),
+                    short_term_Z1 = sum(E_wt_df$wt_x_Ehat_Z1)))
   
 }
 
