@@ -59,8 +59,8 @@ truth_short_term <- function(data,
   E_wt_df$wt_x_E_hat_Z1 <- E_wt_df$wt * E_wt_df$E_hat_Z1
   
   return(list(short_term = sum(E_wt_df$wt_x_E_hat),
-                    short_term_Z0 = sum(E_wt_df$wt_x_Ehat_Z0),
-                    short_term_Z1 = sum(E_wt_df$wt_x_Ehat_Z1)))
+                    short_term_Z0 = sum(E_wt_df$wt_x_E_hat_Z0),
+                    short_term_Z1 = sum(E_wt_df$wt_x_E_hat_Z1)))
   
 }
 
