@@ -15,8 +15,8 @@ get_bias <- function(results, truth, n){
   
   if(!is.null(results_n$est_short_term)){
     out$bias_short_term <- mean(as.numeric(results_n$est_short_term) - truth$short_term)
-    out$biase_short_term_Z0 <- mean(as.numeric(results_n$est_short_term_Z0) - truth$short_term_Z0)
-    out$biase_short_term_Z0 <- mean(as.numeric(results_n$est_short_term_Z1) - truth$short_term_Z1)
+    out$bias_short_term_Z0 <- mean(as.numeric(results_n$est_short_term_Z0) - truth$short_term_Z0)
+    out$bias_short_term_Z0 <- mean(as.numeric(results_n$est_short_term_Z1) - truth$short_term_Z1)
   }
   
   if(!is.null(results_n$est_pop)){
