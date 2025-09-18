@@ -60,7 +60,7 @@ estimate_short_term <- function(data,
   
   # two separate models for first and second half of trial
   long_data_0_6 <- long_data[long_data$week <= 26,]
-  long_data_6_12 <- long_data[long_data$id %in% unique(long_data$id[long_data$week == 27]),] # remove people who were infected in the first half (they won't have any measurements 27 or later)
+  long_data_6_12 <- long_data[long_data$week >= 27,] # remove people who were infected in the first half (they won't have any measurements 27 or later)
   
   # -------------------------------------------------------
   # Get densities
