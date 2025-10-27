@@ -11,6 +11,33 @@ truth_nat_inf_12mo <- function(data){
   mean((data$Y_12_Z1 - data$Y_12_Z0)[data$S_inf_Z0 == 1])
 }
 
+#' Function to get truth in naturally infected, long-term (9mo) estimand
+#' 
+#' @param data dataset of counterfactual data from simulate_data_short_term
+#' 
+#' @returns long-term effect in naturally infected
+truth_nat_inf_9mo <- function(data){
+  mean((data$Y_9_Z1 - data$Y_9_Z0)[data$S_inf_Z0 == 1 & data$S_inf_time_Z0 < 39]) 
+}
+
+#' Function to get truth in naturally infected, long-term (6mo) estimand
+#' 
+#' @param data dataset of counterfactual data from simulate_data_short_term
+#' 
+#' @returns long-term effect in naturally infected
+truth_nat_inf_6mo <- function(data){
+  mean((data$Y_6_Z1 - data$Y_6_Z0)[data$S_inf_Z0 == 1 & data$S_inf_time_Z0 < 26])
+}
+
+#' Function to get truth in naturally infected, long-term (3mo) estimand
+#' 
+#' @param data dataset of counterfactual data from simulate_data_short_term
+#' 
+#' @returns long-term effect in naturally infected
+truth_nat_inf_3mo <- function(data){
+  mean((data$Y_3_Z1 - data$Y_3_Z0)[data$S_inf_Z0 == 1 & data$S_inf_time_Z0 < 13])
+}
+
 #' Function to get truth in population, long-term (12mo)
 #' 
 #' @param data dataset of counterfactual data from simulate_data_short_term
