@@ -5,80 +5,88 @@ one_boot <- function(data, config, parameters){
   n <- dim(data)[1]
   boot_row_idx <- sample(1:n, replace=TRUE)
   boot_data <- data[boot_row_idx,]
-  boot_data$og_id <- boot_data$id
-  boot_data$id <- 1:nrow(boot_data)
-  
-  # Long term & population effect estimation -----------------------------
+  #boot_data$og_id <- boot_data$id
+  #boot_data$id <- 1:nrow(boot_data)
   
   # 1. Fit Models
-  if(config$long_term | config$population){
-    estimand <- c()
-    if(config$long_term){
-      estimand <- c(estimand, "nat_inf")
-    } 
+  estimand <- c()
+  
+  if(config$nat_inf){
+    estimand <- c(estimand, "nat_inf")
+  } 
+  
+  if(config$population){
+    estimand <- c(estimand, "pop")
+  }
+  
+  # Get unique timepoints needed in config$intervals
+  Y_out <- unique(do.call(c, config$intervals))
+  
+  results <- data.frame(Y_out = paste0("Y_", Y_out),
+                        nat_inf = NA,
+                        pop = NA)
+  
+  # Get effect for all individual Y_outs
+  for(i in 1:length(Y_out)){
     
-    if(config$population){
-      estimand <- c(estimand, "pop")
-    }
+    # Name of outcome variable
+    Y_name <- paste0("Y_", Y_out[i])
     
+    # Fit models 
     pkg_models <- vegrowth::fit_models(data = boot_data,
-                                       Y_name = "Y_12",
+                                       Y_name = Y_name, 
                                        Z_name = "Z", 
                                        X_name = "X", 
                                        S_name = "S_inf", 
                                        estimand = estimand, 
-                                       method = "gcomp",
+                                       method = "gcomp", 
+                                       exclusion_restriction = TRUE, 
                                        family = "gaussian")
-  } else{
-    pkg_models <- NULL
-  }
-  
-  # 2. Call estimation functions from package
-  if(config$long_term){
-    est_long_term <- vegrowth::do_gcomp_nat_inf(data = boot_data, models = pkg_models)['additive_effect']
-  } else{
-    est_long_term <- NULL
-  }
-  
-  if(config$population){
-    est_pop <- vegrowth::do_gcomp_pop(data = boot_data, models = pkg_models, Z_name = "Z", X_name = "X")['additive_effect']
-  } else{
-    est_pop <- NULL
-  }
-  
-  # Short-term effect estimation -----------------------------
-  
-  # 1. Call effect estimation function (models fit within)
-  if(config$short_term){
-    all_est_short_term <- tryCatch(estimate_short_term(data = boot_data, 
-                                          parameters = parameters, 
-                                          V_u_months = as.numeric(config$V_u_months), 
-                                          V_u_week_interval = as.numeric(config$V_u_week_interval), 
-                                          pool = config$pool, 
-                                          I_S__X_Z0_0_6_formula = config$I_S__X_Z0_0_6_formula,
-                                          I_S__X_Z0_6_12_formula = config$I_S__X_Z0_6_12_formula, 
-                                          Y_out__Z1_Suminus10_X_formula = config$Y_out__Z1_Suminus10_X_formula,
-                                          Y_out__Z0_Suminus11_X_T_formula = config$Y_out__Z0_Suminus11_X_T_formula, 
-                                          Y_out__Z0_Suminus11_X_T_V_formula = config$Y_out__Z0_Suminus11_X_T_V_formula),
-                               error = function(e){
-                                 message("Error in bootstrap replicate")
-                                 return(NA)
-                               })
     
-    est_short_term <- all_est_short_term$growth_effect
-    est_short_term_Z0 <- all_est_short_term$estimate_Z0
-    est_short_term_Z1 <- all_est_short_term$estimate_Z1
+    # Call vegrowth functions for given outcome, nat inf and pop estimators
+    if(config$nat_inf){
+      results$nat_inf[i] <-  vegrowth::do_gcomp_nat_inf(data = boot_data, 
+                                                        models = pkg_models,
+                                                        Z_name = "Z",
+                                                        X_name = "X", 
+                                                        exclusion_restriction = TRUE)['additive_effect']
+    }
     
-  } else{
-    est_short_term <- NULL
-    est_short_term_Z0 <- NULL
-    est_short_term_Z1 <- NULL
+    if(config$population){
+      results$pop[i] <- vegrowth::do_gcomp_pop(data = boot_data, 
+                                               models = pkg_models,
+                                               Z_name = "Z",
+                                               X_name = "X")['additive_effect']
+    } 
+    
+    
   }
   
-  return(c(est_short_term = as.numeric(est_short_term),
-           est_short_term_Z0 = as.numeric(est_short_term_Z0),
-           est_short_term_Z1 = as.numeric(est_short_term_Z1),
-           est_pop = as.numeric(est_pop),
-           est_long_term = as.numeric(est_long_term)))
+  # Get effect for averaged Y_outs
+  which_intervals <- do.call(c, lapply(config$intervals, function(x) length(x) > 1))
+  avg_intervals <- config$intervals[which_intervals]
+  
+  for(i in avg_intervals){
+    # Create a name for the averaged interval (e.g., "Y_6_9")
+    avg_name <- paste0("Y_", paste(i, collapse = "_"))
+    
+    # Get the corresponding Y_ variable names
+    Y_names <- paste0("Y_", i)
+    
+    # Get the subset of results corresponding to those outcomes
+    sub_df <- results[results$Y_out %in% Y_names, ]
+    
+    # Create a new row with the averaged estimates
+    new_row <- data.frame(
+      Y_out = avg_name,
+      nat_inf = if ("nat_inf" %in% names(sub_df)) mean(sub_df$nat_inf, na.rm = TRUE) else NA,
+      pop = if ("pop" %in% names(sub_df)) mean(sub_df$pop, na.rm = TRUE) else NA
+    )
+    
+    # Append to results
+    results <- rbind(results, new_row)
+  }
+  
+  return(results)
   
 }

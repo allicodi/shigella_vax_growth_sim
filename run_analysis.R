@@ -3,9 +3,6 @@
 # ------------------------------------------------------------------------------
 
 .libPaths(c("/apps/R/4.4.0/lib64/R/site/library","/apps/R/4.4.0/lib64/R/library", "~/Rlibs_ve_trial"))
-#.libPaths("/apps/R/4.4.0/lib64/R/site/library")
-#.libPaths(c("/home/acodi/Rlibs", "/apps/R/4.4.0/lib64/R/site/library", .libPaths()))
-#.libPaths(c("~/Rlibs", .libPaths()))
 
 options(echo = TRUE)
 
@@ -40,154 +37,135 @@ results <- lapply(config$n_sample_size, function(n){
   # Long term & population effect estimation -----------------------------
   
   # 1. Fit Models
-  if(config$long_term | config$population){
-    estimand <- c()
-    if(config$long_term){
-      estimand <- c(estimand, "nat_inf")
-    } 
+  estimand <- c()
+  
+  if(config$nat_inf){
+    estimand <- c(estimand, "nat_inf")
+  } 
+  
+  if(config$population){
+    estimand <- c(estimand, "pop")
+  }
+  
+  # Get unique timepoints needed in config$intervals
+  Y_out <- unique(do.call(c, config$intervals))
+  
+  results <- data.frame(Y_out = paste0("Y_", Y_out),
+                        nat_inf = NA,
+                        pop = NA)
+  
+  # Get effect for all individual Y_outs
+  for(i in 1:length(Y_out)){
     
-    if(config$population){
-      estimand <- c(estimand, "pop")
-    }
+    # Name of outcome variable
+    Y_name <- paste0("Y_", Y_out[i])
     
+    # Fit models 
     pkg_models <- vegrowth::fit_models(data = data,
-                                       Y_name = "Y_12",
+                                       Y_name = Y_name, 
                                        Z_name = "Z", 
                                        X_name = "X", 
                                        S_name = "S_inf", 
                                        estimand = estimand, 
-                                       method = "gcomp",
+                                       method = "gcomp", 
+                                       exclusion_restriction = TRUE, 
                                        family = "gaussian")
-  } else{
-    pkg_models <- NULL
+    
+    # Call vegrowth functions for given outcome, nat inf and pop estimators
+    if(config$nat_inf){
+      results$nat_inf[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
+                                                        models = pkg_models,
+                                                        Z_name = "Z",
+                                                        X_name = "X", 
+                                                        exclusion_restriction = TRUE)['additive_effect']
+    }
+    
+    if(config$population){
+      results$pop[i] <- vegrowth::do_gcomp_pop(data = data, 
+                                               models = pkg_models,
+                                               Z_name = "Z",
+                                               X_name = "X")['additive_effect']
+    } 
+    
+  
   }
   
-  # 2. Call estimation functions from package
-  if(config$long_term){
-    est_long_term <- vegrowth::do_gcomp_nat_inf(data = data, models = pkg_models)['additive_effect']
-  } else{
-    est_long_term <- NULL
-  }
+  # Get effect for averaged Y_outs
+  which_intervals <- do.call(c, lapply(config$intervals, function(x) length(x) > 1))
+  avg_intervals <- config$intervals[which_intervals]
   
-  if(config$population){
-    est_pop <- vegrowth::do_gcomp_pop(data = data, models = pkg_models, Z_name = "Z", X_name = "X")['additive_effect']
-  } else{
-    est_pop <- NULL
-  }
-  
-  # Short-term effect estimation -----------------------------
-  
-  # 1. Call effect estimation function (models fit within)
-  if(config$short_term){
-    all_est_short_term <- estimate_short_term(data = data, 
-                                          parameters = paramaters, 
-                                          V_u_months = as.numeric(config$V_u_months), 
-                                          V_u_week_interval = as.numeric(config$V_u_week_interval), 
-                                          pool = config$pool, 
-                                          I_S__X_Z0_0_6_formula = config$I_S__X_Z0_0_6_formula,
-                                          I_S__X_Z0_6_12_formula = config$I_S__X_Z0_6_12_formula, 
-                                          Y_out__Z1_Suminus10_X_formula = config$Y_out__Z1_Suminus10_X_formula,
-                                          Y_out__Z0_Suminus11_X_T_formula = config$Y_out__Z0_Suminus11_X_T_formula, 
-                                          Y_out__Z0_Suminus11_X_T_V_formula = config$Y_out__Z0_Suminus11_X_T_V_formula)
-    est_short_term <- all_est_short_term$growth_effect
-    est_short_term_Z0 <- all_est_short_term$estimate_Z0
-    est_short_term_Z1 <- all_est_short_term$estimate_Z1
-  } else{
-    est_short_term <- NULL
+  for(i in avg_intervals){
+    # Create a name for the averaged interval (e.g., "Y_6_9")
+    avg_name <- paste0("Y_", paste(i, collapse = "_"))
+    
+    # Get the corresponding Y_ variable names
+    Y_names <- paste0("Y_", i)
+    
+    # Get the subset of results corresponding to those outcomes
+    sub_df <- results[results$Y_out %in% Y_names, ]
+    
+    # Create a new row with the averaged estimates
+    new_row <- data.frame(
+      Y_out = avg_name,
+      nat_inf = if ("nat_inf" %in% names(sub_df)) mean(sub_df$nat_inf, na.rm = TRUE) else NA,
+      pop = if ("pop" %in% names(sub_df)) mean(sub_df$pop, na.rm = TRUE) else NA
+    )
+    
+    # Append to results
+    results <- rbind(results, new_row)
   }
   
   # Bootstrap Estimates ----------------------------------------
   
   # 1. Do n_boot bootstrap replicates
   
-  boot_res <- replicate(config$n_boot, one_boot(data, config, parameters))
-  boot_res_df <- as.data.frame(t(boot_res))
+  boot_res_list <- replicate(config$n_boot, one_boot(data, config, parameters), simplify = FALSE)
+  boot_res_df <- bind_rows(boot_res_list, .id = "boot_id")
   
-  # ^^ if any are NA, should I repeat?
-  any_NA <- any(is.na(boot_res_df$est_short_term))
-  attempt <- 1
+  # STOPPED HERE -- restructure se and quantiles by Y_out type
   
-  # return sum(any_NA)
-  while(any_NA & attempt <= 5){
-    idx <- which(is.na(boot_res_df$est_short_term))
-    
-    boot_res_2 <- replicate(length(idx), one_boot(data, config, parameters))
-    boot_res_df_2 <- as.data.frame(t(boot_res_2))
-    
-    boot_res_df[idx,] <- boot_res_df_2
-    
-    any_NA <- any(is.na(boot_res_df$est_short_term))
-    attempt <- attempt + 1
-    
+  # 1. Do n_boot bootstrap replicates
+  boot_res_list <- replicate(config$n_boot, one_boot(data, config, parameters), simplify = FALSE)
+  boot_res_df <- dplyr::bind_rows(boot_res_list, .id = "boot_id")
+  
+  # 2. Compute SEs, CIs, and rejection indicators per Y_out and estimand
+  boot_summary <- boot_res_df %>%
+    dplyr::group_by(Y_out) %>%
+    dplyr::summarise(
+      nat_inf_se = if ("nat_inf" %in% names(.)) sd(nat_inf, na.rm = TRUE) else NA_real_,
+      nat_inf_lower = if ("nat_inf" %in% names(.)) quantile(nat_inf, 0.025, na.rm = TRUE) else NA_real_,
+      nat_inf_upper = if ("nat_inf" %in% names(.)) quantile(nat_inf, 0.975, na.rm = TRUE) else NA_real_,
+      pop_se = if ("pop" %in% names(.)) sd(pop, na.rm = TRUE) else NA_real_,
+      pop_lower = if ("pop" %in% names(.)) quantile(pop, 0.025, na.rm = TRUE) else NA_real_,
+      pop_upper = if ("pop" %in% names(.)) quantile(pop, 0.975, na.rm = TRUE) else NA_real_,
+      .groups = "drop"
+    )
+  
+  # 3. Merge bootstrap summaries with point estimates
+  results_full <- dplyr::left_join(results, boot_summary, by = "Y_out")
+  
+  # 4. Add reject indicator columns
+  if (config$nat_inf) {
+    results_full <- results_full %>%
+      dplyr::mutate(
+        nat_inf_reject = (abs(nat_inf - config$null_hypothesis_value) / nat_inf_se) > qnorm(1 - config$alpha_level / 2)
+      )
   }
   
-  # 2. Get bootstrap CIs & hypothesis test
-  if(config$long_term){
-    long_term_se <- sd(boot_res_df$est_long_term)
-    long_term_lower_ci <- quantile(boot_res_df$est_long_term, p = 0.025)
-    long_term_upper_ci <- quantile(boot_res_df$est_long_term, p = 0.975)
-    
-    long_term_reject <- (abs(est_long_term - config$null_hypothesis_value) / long_term_se) > qnorm(1 - config$alpha_level/2)
-    
-  } else{
-    long_term_se <- NULL
-    long_term_lower_ci <- NULL
-    long_term_upper_ci <- NULL
-    
-    long_term_reject <- NULL
+  if (config$population) {
+    results_full <- results_full %>%
+      dplyr::mutate(
+        pop_reject = (abs(pop - config$null_hypothesis_value) / pop_se) > qnorm(1 - config$alpha_level / 2)
+      )
   }
   
-  if(config$pop){
-    pop_se <- sd(boot_res_df$est_pop)
-    pop_lower_ci <- quantile(boot_res_df$est_pop, p = 0.025)
-    pop_upper_ci <- quantile(boot_res_df$est_pop, p = 0.975)
-    
-    pop_reject <- (abs(est_pop - config$null_hypothesis_value) / pop_se) > qnorm(1 - config$alpha_level/2)
-  } else{
-    pop_se <- NULL
-    pop_lower_ci <- NULL
-    pop_upper_ci <- NULL
-    
-    pop_reject <- NULL
-  }
+  # 5. Final combined result
+  result <- data.frame(
+    seed = seed,
+    n = n,
+    results_full
+  )
   
-  if(config$short_term){
-    short_term_se <- sd(boot_res_df$est_short_term)
-    short_term_lower_ci <- quantile(boot_res_df$est_short_term, p = 0.025)
-    short_term_upper_ci <- quantile(boot_res_df$est_short_term, p = 0.975)
-    
-    short_term_reject <- (abs(est_short_term - config$null_hypothesis_value) / short_term_se) > qnorm(1 - config$alpha_level/2)
-  } else{
-    short_term_se <- NULL
-    short_term_lower_ci <- NULL
-    short_term_upper_ci <- NULL
-    
-    short_term_reject <- NULL
-  }
-  
-  result <- list(seed = seed, 
-                 n = n, 
-                 est_long_term = est_long_term, 
-                 long_term_se = long_term_se,
-                 long_term_lower_ci = long_term_lower_ci, 
-                 long_term_upper_ci = long_term_upper_ci, 
-                 long_term_reject = long_term_reject, 
-                 est_pop = est_pop,
-                 pop_se = pop_se,
-                 pop_lower_ci = pop_lower_ci, 
-                 pop_upper_ci = pop_upper_ci, 
-                 pop_reject = pop_reject,
-                 est_short_term = est_short_term,
-                 est_short_term_Z0 = est_short_term_Z0,
-                 est_short_term_Z1 = est_short_term_Z1,
-                 short_term_se = short_term_se,
-                 short_term_lower_ci = short_term_lower_ci, 
-                 short_term_upper_ci = short_term_upper_ci,
-                 short_term_reject = short_term_reject)
-  
-  # save list incrementally too so if gets killed don't need to start from scratch
-  saveRDS(result, paste0("/projects/dbenkes/allison/shigella_vaccine_trial/results/", setting, "_n_", n, "_seed_", seed, ".Rds"))
-
   return(result)
   
 })

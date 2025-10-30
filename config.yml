@@ -15,189 +15,15 @@ default:
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
   VE_mild: 0.40
   VE_severe: 0.60
-  long_term: TRUE
+  nat_inf: TRUE
   population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ X"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V"
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-debug_default:
-  n_boot: 100
-  n_sample_size: 
-    - 5000
-    - 7500
-    - 10000
-  dose_schedule: "6mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0253
-  incidence_severe_shigella_0_6: 0.0147
-  incidence_shigella_6_12: 0.0373
-  incidence_severe_shigella_6_12: 0.0203
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  VE_mild: 0.40
-  VE_severe: 0.60
-  long_term: TRUE
-  population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ ns(X, 3)"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V"
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-debug_default2:
-  n_boot: 100
-  n_sample_size: 
-    - 5000
-    - 7500
-    - 10000
-  dose_schedule: "6mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0253
-  incidence_severe_shigella_0_6: 0.0147
-  incidence_shigella_6_12: 0.0373
-  incidence_severe_shigella_6_12: 0.0203
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  VE_mild: 0.40
-  VE_severe: 0.60
-  long_term: TRUE
-  population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ ns(X, 3)"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ ns(X,3) * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * ns(Ti,3) + Ti2 * X"
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-debug_default_original:
-  n_boot: 100
-  n_sample_size: 
-    - 5000
-    - 10000
-  dose_schedule: "6mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0253
-  incidence_severe_shigella_0_6: 0.0147
-  incidence_shigella_6_12: 0.0373
-  incidence_severe_shigella_6_12: 0.0203
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  VE_mild: 0.40
-  VE_severe: 0.60
-  long_term: TRUE
-  population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ X"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti + Ti2 * X "
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-debug_fix_weights:
-  n_boot: 3
-  n_sample_size: 
-    - 5000
-    - 10000
-    - 100000
-  dose_schedule: "6mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0253
-  incidence_severe_shigella_0_6: 0.0147
-  incidence_shigella_6_12: 0.0373
-  incidence_severe_shigella_6_12: 0.0203
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  VE_mild: 0.40
-  VE_severe: 0.60
-  long_term: TRUE
-  population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ X"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V "
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-debug_fix_weights_spline_Z1:
-  n_boot: 3
-  n_sample_size: 
-    - 5000
-    - 10000
-    - 100000
-  dose_schedule: "6mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0253
-  incidence_severe_shigella_0_6: 0.0147
-  incidence_shigella_6_12: 0.0373
-  incidence_severe_shigella_6_12: 0.0203
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  VE_mild: 0.40
-  VE_severe: 0.60
-  long_term: TRUE
-  population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ ns(X,3)"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V "
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-debug_add_T2:
-  n_boot: 100
-  n_sample_size: 
-    - 5000
-    - 10000
-  dose_schedule: "6mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0253
-  incidence_severe_shigella_0_6: 0.0147
-  incidence_shigella_6_12: 0.0373
-  incidence_severe_shigella_6_12: 0.0203
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  VE_mild: 0.40
-  VE_severe: 0.60
-  long_term: TRUE
-  population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ X"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti + Ti2 * X "
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
   
@@ -218,17 +44,15 @@ vax_6mo__measure_6mo:
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
   VE_mild: 0.40
   VE_severe: 0.60
-  long_term: FALSE
-  population: FALSE
-  short_term: TRUE
-  V_u_months: [6, 12]
-  V_u_week_interval: [0, 17.3, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ X"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V"
+  nat_inf: TRUE
+  population: TRUE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
   
@@ -249,17 +73,15 @@ vax_12mo__measure_3mo:
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
   VE_mild: 0.40
   VE_severe: 0.60
-  long_term: TRUE
+  nat_inf: TRUE
   population: TRUE
-  short_term: TRUE
-  V_u_months: [3, 6, 9, 12]
-  V_u_week_interval: [0, 4.3, 17.3, 30.4, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ X"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V"
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
   
@@ -280,16 +102,14 @@ vax_12mo__measure_6mo:
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
   VE_mild: 0.40
   VE_severe: 0.60
-  long_term: FALSE
-  population: FALSE
-  short_term: TRUE
-  V_u_months: [6, 12]
-  V_u_week_interval: [0, 17.3, 52]
-  pool: TRUE
-  I_S__X_Z0_0_6_formula: "I_shig_all ~ X"
-  I_S__X_Z0_6_12_formula: "I_shig_all ~ X"
-  Y_out__Z1_Suminus10_X_formula: "Y_out ~ X"
-  Y_out__Z0_Suminus11_X_T_formula: "Y_out ~ X * Ti"
-  Y_out__Z0_Suminus11_X_T_V_formula: "Y_out ~ X * Ti * V"
+  nat_inf: TRUE
+  population: TRUE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
