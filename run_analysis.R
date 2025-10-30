@@ -118,13 +118,6 @@ results <- lapply(config$n_sample_size, function(n){
   # Bootstrap Estimates ----------------------------------------
   
   # 1. Do n_boot bootstrap replicates
-  
-  boot_res_list <- replicate(config$n_boot, one_boot(data, config, parameters), simplify = FALSE)
-  boot_res_df <- bind_rows(boot_res_list, .id = "boot_id")
-  
-  # STOPPED HERE -- restructure se and quantiles by Y_out type
-  
-  # 1. Do n_boot bootstrap replicates
   boot_res_list <- replicate(config$n_boot, one_boot(data, config, parameters), simplify = FALSE)
   boot_res_df <- dplyr::bind_rows(boot_res_list, .id = "boot_id")
   
