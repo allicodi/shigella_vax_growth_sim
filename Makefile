@@ -1,11 +1,11 @@
 CONFIG_FILE := config.yml
-SETTING := debug_default
+SETTING := default
 PARAMETERS_DIR := /projects/dbenkes/allison/shigella_vaccine_trial/parameters
 PARAMETERS_FILE := $(PARAMETERS_DIR)/parameters_$(SETTING).Rds
 TRUTH_DIR := /projects/dbenkes/allison/shigella_vaccine_trial/truth
 TRUTH_FILE := $(TRUTH_DIR)/truth_$(SETTING).Rds
 PARTITION := empire
-NSEEDS := 100
+NSEEDS := 1000
 
 full_analysis: run_analysis evaluate_performance
 
