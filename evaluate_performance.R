@@ -34,11 +34,11 @@ coverage_df <- data.frame()
 power_df <- data.frame()
 prop_neg_df <- data.frame()
 
-for(n in unique(results$n)){
-  bias_df <- rbind(bias_df, do.call(cbind, get_bias(results, truth_df, config, n)))
-  coverage_df <- rbind(coverage_df, do.call(cbind, get_coverage(results, truth_df, config, n)))
-  power_df <- rbind(power_df, do.call(cbind, get_power(results, truth_df, config, n)))
-  prop_neg_df <- rbind(prop_neg_df, do.call(cbind, get_neg_pt_est(results, truth_df, config, n)))
+for (n in unique(results$n)) {
+  bias_df     <- rbind(bias_df, get_bias(results, truth_df, config, n))
+  coverage_df <- rbind(coverage_df, get_coverage(results, truth_df, config, n))
+  power_df    <- rbind(power_df, get_power(results, truth_df, config, n))
+  prop_neg_df <- rbind(prop_neg_df, get_neg_pt_est(results, truth_df, config, n))
 }
 
 final_results <- list(
