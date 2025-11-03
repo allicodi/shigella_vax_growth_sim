@@ -47,6 +47,33 @@ truth_pop_12mo <- function(data){
   mean(data$Y_12_Z1 - data$Y_12_Z0)
 }
 
+#' Function to get truth in population, long-term (9mo)
+#' 
+#' @param data dataset of counterfactual data from simulate_data_short_term
+#' 
+#' @returns population-level effect
+truth_pop_9mo <- function(data){
+  mean(data$Y_9_Z1 - data$Y_9_Z0)
+}
+
+#' Function to get truth in population, long-term (6mo)
+#' 
+#' @param data dataset of counterfactual data from simulate_data_short_term
+#' 
+#' @returns population-level effect
+truth_pop_6mo <- function(data){
+  mean(data$Y_6_Z1 - data$Y_6_Z0)
+}
+
+#' Function to get truth in population, long-term (3mo)
+#' 
+#' @param data dataset of counterfactual data from simulate_data_short_term
+#' 
+#' @returns population-level effect
+truth_pop_3mo <- function(data){
+  mean(data$Y_3_Z1 - data$Y_3_Z0)
+}
+
 
 #' Function to get truth in naturally infected, short-term (V_u_months intervals)
 #' 
