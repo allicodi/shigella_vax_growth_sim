@@ -73,11 +73,20 @@ results <- lapply(config$n_sample_size, function(n){
     
     # Call vegrowth functions for given outcome, nat inf and pop estimators
     if(config$nat_inf){
-      results$nat_inf[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
-                                                        models = pkg_models,
-                                                        Z_name = "Z",
-                                                        X_name = "X", 
-                                                        exclusion_restriction = TRUE)['additive_effect']
+      if(!config$debug){
+        results$nat_inf[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
+                                                          models = pkg_models,
+                                                          Z_name = "Z",
+                                                          X_name = "X", 
+                                                          exclusion_restriction = TRUE)['additive_effect']
+      } else{
+        results$nat_inf[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
+                                                          models = pkg_models,
+                                                          Z_name = "Z",
+                                                          X_name = "X", 
+                                                          exclusion_restriction = FALSE)['additive_effect']
+      }
+      
     }
     
     if(config$population){
