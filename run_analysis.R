@@ -92,7 +92,7 @@ results <- lapply(config$n_sample_size, function(n){
                                                         exclusion_restriction = FALSE)['additive_effect']
     }
     
-    if(config$unadj_nat_inf){
+    if(config$nat_inf_unadj){
       results$nat_inf_unadj <- vegrowth::do_unadj_nat_inf(data = data,
                                                           Z_name = "Z",
                                                           Y_name = Y_name,
