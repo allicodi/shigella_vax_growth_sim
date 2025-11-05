@@ -131,6 +131,9 @@ debug_two_part:
   n_sample_size: 
     - 5000
     - 10000
+    - 20000
+    - 30000
+    - 40000
   dose_schedule: "12mo"
   site: "Overall"
   incidence_shigella_0_6: 0.0373
