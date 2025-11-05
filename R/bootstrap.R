@@ -36,7 +36,7 @@ one_boot <- function(data, config, parameters){
     
     # Fit models 
     if(any(c(config$nat_inf_ER, config$nat_inf_no_ER, config$population) == TRUE)){
-      pkg_models <- vegrowth::fit_models(data = data,
+      pkg_models <- vegrowth::fit_models(data = boot_data,
                                          Y_name = Y_name, 
                                          Z_name = "Z", 
                                          X_name = "X", 
@@ -49,7 +49,7 @@ one_boot <- function(data, config, parameters){
     
     # Call vegrowth functions for given outcome, nat inf and pop estimators
     if(config$nat_inf_ER){
-      results$nat_inf_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
+      results$nat_inf_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = boot_data, 
                                                            models = pkg_models,
                                                            Z_name = "Z",
                                                            X_name = "X", 
@@ -57,7 +57,7 @@ one_boot <- function(data, config, parameters){
     }
     
     if(config$nat_inf_no_ER){
-      results$nat_inf_no_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
+      results$nat_inf_no_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = boot_data, 
                                                               models = pkg_models,
                                                               Z_name = "Z",
                                                               X_name = "X", 
@@ -65,14 +65,14 @@ one_boot <- function(data, config, parameters){
     }
     
     if(config$nat_inf_unadj){
-      results$nat_inf_unadj <- vegrowth::do_unadj_nat_inf(data = data,
+      results$nat_inf_unadj <- vegrowth::do_unadj_nat_inf(data = boot_data,
                                                           Z_name = "Z",
                                                           Y_name = Y_name,
                                                           S_name = "S_inf")['additive_effect']
     }
     
     if(config$population){
-      results$pop[i] <- vegrowth::do_gcomp_pop(data = data, 
+      results$pop[i] <- vegrowth::do_gcomp_pop(data = boot_data, 
                                                models = pkg_models,
                                                Z_name = "Z",
                                                X_name = "X")['additive_effect']
