@@ -39,7 +39,7 @@ results <- lapply(config$n_sample_size, function(n){
   # 1. Fit Models
   estimand <- c()
   
-  if(config$nat_inf){
+  if(any(c(config$nat_inf_ER, config$nat_inf_no_ER) == TRUE)){
     estimand <- c(estimand, "nat_inf")
   } 
   
