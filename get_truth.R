@@ -34,7 +34,7 @@ Y_out <- unique(do.call(c, config$intervals))
 
 # Get truth for all individual times
 for(Y in Y_out){
-  if(config$nat_inf){
+  if(any(c(config$nat_inf_ER, config$nat_inf_no_ER, config$nat_inf_unadj) == TRUE)){
     
     if(Y == 3){
       truth$nat_inf_Y_3 <- truth_nat_inf_3mo(data = data)
@@ -75,7 +75,7 @@ for (i in avg_intervals) {
   Y_names <- paste0("Y_", i)
   
   # For each type of truth that applies
-  if (config$nat_inf) {
+  if (any(c(config$nat_inf_ER, config$nat_inf_no_ER, config$nat_inf_unadj) == TRUE)) {
     # Collect available nat_inf_Y_* entries for this interval
     nat_vals <- unlist(truth[paste0("nat_inf_", Y_names)])
     if (length(nat_vals) > 0) {
