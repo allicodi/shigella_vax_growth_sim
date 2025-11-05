@@ -15,9 +15,10 @@ default:
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
   VE_mild: 0.40
   VE_severe: 0.60
-  nat_inf: TRUE
+  nat_inf_no_ER: TRUE
+  nat_inf_ER: TRUE
+  nat_inf_unadj: TRUE
   population: TRUE
-  debug: FALSE
   intervals:
     - 3
     - 6
@@ -45,9 +46,10 @@ vax_12mo:
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
   VE_mild: 0.40
   VE_severe: 0.60
-  nat_inf: TRUE
+  nat_inf_no_ER: TRUE
+  nat_inf_ER: TRUE
+  nat_inf_unadj: TRUE
   population: TRUE
-  debug: FALSE
   intervals:
     - 3
     - 6
@@ -72,9 +74,38 @@ debug_ER:
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
   VE_mild: 0.40
   VE_severe: 0.60
-  nat_inf: TRUE
+  nat_inf_no_ER: TRUE
+  nat_inf_ER: FALSE
+  nat_inf_unadj: FALSE
   population: FALSE
-  debug: TRUE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  
+debug_unadj:
+  n_boot: 1000
+  n_sample_size: 
+    - 5000
+    - 10000
+  dose_schedule: "12mo"
+  site: "Overall"
+  incidence_shigella_0_6: 0.0373
+  incidence_severe_shigella_0_6: 0.0203
+  incidence_shigella_6_12: 0.0580
+  incidence_severe_shigella_6_12: 0.0255
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  VE_mild: 0.40
+  VE_severe: 0.60
+  nat_inf_no_ER: FALSE
+  nat_inf_ER: FALSE
+  nat_inf_unadj: TRUE
+  population: FALSE
   intervals:
     - 3
     - 6
