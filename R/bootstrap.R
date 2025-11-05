@@ -49,11 +49,21 @@ one_boot <- function(data, config, parameters){
     
     # Call vegrowth functions for given outcome, nat inf and pop estimators
     if(config$nat_inf_ER){
-      results$nat_inf_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = boot_data, 
-                                                           models = pkg_models,
-                                                           Z_name = "Z",
-                                                           X_name = "X", 
-                                                           exclusion_restriction = TRUE)['additive_effect']
+      if(!config$two_part){
+        results$nat_inf_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = boot_data, 
+                                                             models = pkg_models,
+                                                             Z_name = "Z",
+                                                             X_name = "X", 
+                                                             exclusion_restriction = TRUE)['additive_effect']
+      } else {
+        results$nat_inf_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = boot_data, 
+                                                             models = pkg_models,
+                                                             Z_name = "Z",
+                                                             X_name = "X", 
+                                                             exclusion_restriction = TRUE,
+                                                             two_part_model = TRUE)['additive_effect']
+      }
+      
     }
     
     if(config$nat_inf_no_ER){
@@ -72,10 +82,19 @@ one_boot <- function(data, config, parameters){
     }
     
     if(config$population){
-      results$pop[i] <- vegrowth::do_gcomp_pop(data = boot_data, 
-                                               models = pkg_models,
-                                               Z_name = "Z",
-                                               X_name = "X")['additive_effect']
+      if(!config$two_part){
+        results$pop[i] <- vegrowth::do_gcomp_pop(data = boot_data, 
+                                                 models = pkg_models,
+                                                 Z_name = "Z",
+                                                 X_name = "X")['additive_effect']
+      } else{
+        results$pop[i] <- vegrowth::do_gcomp_pop(data = boot_data, 
+                                                 models = pkg_models,
+                                                 Z_name = "Z",
+                                                 X_name = "X",
+                                                 two_part_model = TRUE)['additive_effect']
+      }
+      
     } 
     
     
