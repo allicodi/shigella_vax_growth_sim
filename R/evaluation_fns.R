@@ -10,8 +10,22 @@ get_bias <- function(results, truth, config, n) {
     int <- config$intervals[[i]]
     Y_out <- paste0("Y_", paste0(int, collapse = "_"))
     
-    # nat_inf
-    if (config$nat_inf) {
+    # nat_inf_ER
+    if (config$nat_inf_ER) {
+      bias_nat_inf <- mean(
+        as.numeric(results_n$nat_inf_ER[results_n$Y_out == Y_out]) -
+          truth[[paste0("nat_inf_", Y_out)]]
+      )
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_ER",
+        bias = bias_nat_inf
+      ))
+    }
+    
+    # nat_inf_no_ER
+    if (config$nat_inf_no_ER) {
       bias_nat_inf <- mean(
         as.numeric(results_n$nat_inf[results_n$Y_out == Y_out]) -
           truth[[paste0("nat_inf_", Y_out)]]
@@ -19,7 +33,21 @@ get_bias <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf",
+        estimand = "nat_inf_no_ER",
+        bias = bias_nat_inf
+      ))
+    }
+    
+    # nat_inf_unadj
+    if (config$nat_inf_unadj) {
+      bias_nat_inf <- mean(
+        as.numeric(results_n$nat_inf_unadj[results_n$Y_out == Y_out]) -
+          truth[[paste0("nat_inf_", Y_out)]]
+      )
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_unadj",
         bias = bias_nat_inf
       ))
     }
@@ -51,15 +79,44 @@ get_coverage <- function(results, truth, config, n) {
     int <- config$intervals[[i]]
     Y_out <- paste0("Y_", paste0(int, collapse = "_"))
     
-    if (config$nat_inf) {
+    # No ER
+    if (config$nat_inf_no_ER) {
       cov_nat_inf <- mean(
-        as.numeric(results_n$nat_inf_lower[results_n$Y_out == Y_out]) < truth[[paste0("nat_inf_", Y_out)]] &
-          as.numeric(results_n$nat_inf_upper[results_n$Y_out == Y_out]) > truth[[paste0("nat_inf_", Y_out)]]
+        as.numeric(results_n$nat_inf_no_ER_lower[results_n$Y_out == Y_out]) < truth[[paste0("nat_inf_", Y_out)]] &
+          as.numeric(results_n$nat_inf_no_ER_upper[results_n$Y_out == Y_out]) > truth[[paste0("nat_inf_", Y_out)]]
       )
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf",
+        estimand = "nat_inf_no_ER",
+        coverage = cov_nat_inf
+      ))
+    }
+    
+    # ER
+    if (config$nat_inf_ER) {
+      cov_nat_inf <- mean(
+        as.numeric(results_n$nat_inf_ER_lower[results_n$Y_out == Y_out]) < truth[[paste0("nat_inf_", Y_out)]] &
+          as.numeric(results_n$nat_inf_ER_upper[results_n$Y_out == Y_out]) > truth[[paste0("nat_inf_", Y_out)]]
+      )
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_ER",
+        coverage = cov_nat_inf
+      ))
+    }
+    
+    # unadj
+    if (config$nat_inf_unadj) {
+      cov_nat_inf <- mean(
+        as.numeric(results_n$nat_inf_unadj_lower[results_n$Y_out == Y_out]) < truth[[paste0("nat_inf_", Y_out)]] &
+          as.numeric(results_n$nat_inf_unadj_upper[results_n$Y_out == Y_out]) > truth[[paste0("nat_inf_", Y_out)]]
+      )
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_unadj",
         coverage = cov_nat_inf
       ))
     }
@@ -90,12 +147,35 @@ get_power <- function(results, truth, config, n) {
     int <- config$intervals[[i]]
     Y_out <- paste0("Y_", paste0(int, collapse = "_"))
     
-    if (config$nat_inf) {
-      power_nat_inf <- mean(results_n$nat_inf_reject[results_n$Y_out == Y_out])
+    # No ER
+    if (config$nat_inf_no_ER) {
+      power_nat_inf <- mean(results_n$nat_inf_no_ER_reject[results_n$Y_out == Y_out])
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf",
+        estimand = "nat_inf_no_ER",
+        power = power_nat_inf
+      ))
+    }
+    
+    # ER
+    if (config$nat_inf_ER) {
+      power_nat_inf <- mean(results_n$nat_inf_ER_reject[results_n$Y_out == Y_out])
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_ER",
+        power = power_nat_inf
+      ))
+    }
+    
+    # unadj
+    if (config$nat_inf_unadj) {
+      power_nat_inf <- mean(results_n$nat_inf_unadj_reject[results_n$Y_out == Y_out])
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_unadj",
         power = power_nat_inf
       ))
     }
@@ -123,12 +203,32 @@ get_neg_pt_est <- function(results, truth, config, n) {
     int <- config$intervals[[i]]
     Y_out <- paste0("Y_", paste0(int, collapse = "_"))
     
-    if (config$nat_inf) {
-      neg_nat_inf <- mean(results_n$nat_inf[results_n$Y_out == Y_out] < 0)
+    if (config$nat_inf_ER) {
+      neg_nat_inf <- mean(results_n$nat_inf_ER[results_n$Y_out == Y_out] < 0)
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf",
+        estimand = "nat_inf_ER",
+        prop_neg = neg_nat_inf
+      ))
+    }
+    
+    if (config$nat_inf_no_ER) {
+      neg_nat_inf <- mean(results_n$nat_inf_no_ER[results_n$Y_out == Y_out] < 0)
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_no_ER",
+        prop_neg = neg_nat_inf
+      ))
+    }
+    
+    if (config$nat_inf_unadj) {
+      neg_nat_inf <- mean(results_n$nat_inf_unadj[results_n$Y_out == Y_out] < 0)
+      out <- rbind(out, data.frame(
+        n = n,
+        Y_out = Y_out,
+        estimand = "nat_inf_unadj",
         prop_neg = neg_nat_inf
       ))
     }
