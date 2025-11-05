@@ -93,7 +93,7 @@ results <- lapply(config$n_sample_size, function(n){
     }
     
     if(config$nat_inf_unadj){
-      results$nat_inf_unadj <- vegrowth::do_unadj_nat_inf(data = data,
+      results$nat_inf_unadj[i] <- vegrowth::do_unadj_nat_inf(data = data,
                                                           Z_name = "Z",
                                                           Y_name = Y_name,
                                                           S_name = "S_inf")['additive_effect']
