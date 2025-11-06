@@ -39,22 +39,25 @@ results <- lapply(config$n_sample_size, function(n){
   # 1. Fit Models
   estimand <- c()
   
-  if(any(c(config$nat_inf_ER, config$nat_inf_no_ER) == TRUE)){
+  if(any(c(config$nat_inf_ER_1, config$nat_inf_ER_2, config$nat_inf_no_ER) == TRUE)){
     estimand <- c(estimand, "nat_inf")
   } 
   
-  if(config$population){
+  if(any(config$population_1, config$population_2) == TRUE){
     estimand <- c(estimand, "pop")
   }
   
   # Get unique timepoints needed in config$intervals
   Y_out <- unique(do.call(c, config$intervals))
   
-  results <- data.frame(Y_out = paste0("Y_", Y_out),
-                        nat_inf_ER = NA,
-                        nat_inf_no_ER = NA,
-                        nat_inf_unadj = NA,
-                        pop = NA)
+  results <- expand.grid(Y_out = paste0("Y_", Y_out),
+                         estimator = config$estimators,
+                         nat_inf_ER_1 = NA,
+                         nat_inf_ER_2 = NA,
+                         nat_inf_no_ER = NA,
+                         nat_inf_unadj = NA,
+                         pop_1 = NA,
+                         pop_2 = NA)
   
   # Get effect for all individual Y_outs
   for(i in 1:length(Y_out)){
@@ -62,70 +65,79 @@ results <- lapply(config$n_sample_size, function(n){
     # Name of outcome variable
     Y_name <- paste0("Y_", Y_out[i])
     
-    # Fit models 
-    if(any(c(config$nat_inf_ER, config$nat_inf_no_ER, config$population) == TRUE)){
+    # Fit models
+    if(any(c(config$nat_inf_ER_1, config$nat_inf_ER_2, config$nat_inf_no_ER, config$population_1, config$population_2) == TRUE)){
       pkg_models <- vegrowth::fit_models(data = data,
                                          Y_name = Y_name, 
                                          Z_name = "Z", 
                                          X_name = "X", 
                                          S_name = "S_inf", 
                                          estimand = estimand, 
-                                         method = "gcomp", 
+                                         method = config$estimators, 
                                          exclusion_restriction = TRUE, 
                                          family = "gaussian")
     }
     
-    # Call vegrowth functions for given outcome, nat inf and pop estimators
-    if(config$nat_inf_ER){
-      if(!config$two_part){
-        results$nat_inf_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
-                                                             models = pkg_models,
-                                                             Z_name = "Z",
-                                                             X_name = "X", 
-                                                             exclusion_restriction = TRUE)['additive_effect']
-      } else{
-        results$nat_inf_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
-                                                             models = pkg_models,
-                                                             Z_name = "Z",
-                                                             X_name = "X", 
-                                                             exclusion_restriction = TRUE,
-                                                             two_part_model = TRUE)['additive_effect']
+    for(j in 1:length(config$estimators)){
+      
+      estimator <- config$estimators[j]
+      
+      if(config$nat_inf_ER_1){
+        results$nat_inf_ER_1[results$Y_out == Y_name & results$estimator == estimator] <- est_nat_inf(data = data, 
+                                                                                                      pkg_models = pkg_models,
+                                                                                                      Y_name = Y_name, 
+                                                                                                      exclusion_restriction = TRUE, 
+                                                                                                      two_part_model = FALSE, 
+                                                                                                      estimator = estimator)
+      }
+      
+      if(config$nat_inf_ER_2){
+        results$nat_inf_ER_2[results$Y_out == Y_name & results$estimator == estimator] <- est_nat_inf(data = data, 
+                                                                                                     pkg_models = pkg_models,
+                                                                                                     Y_name = Y_name, 
+                                                                                                     exclusion_restriction = TRUE, 
+                                                                                                     two_part_model = TRUE, 
+                                                                                                     estimator = estimator)
+      }
+      
+      if(config$nat_inf_no_ER){
+        results$nat_inf_no_ER[results$Y_out == Y_name & results$estimator == estimator] <- est_nat_inf(data = data, 
+                                                                                                       pkg_models = pkg_models,
+                                                                                                       Y_name = Y_name, 
+                                                                                                       exclusion_restriction = FALSE, 
+                                                                                                       two_part_model = FALSE, 
+                                                                                                       estimator = estimator)
+      }
+      
+      if(config$nat_inf_unadj){
+        # same regardless of estimator; just do for j == 1
+        if(j == 1){
+          results$nat_inf_unadj[results$Y_out == Y_name & results$estimator == estimator] <-  vegrowth::do_unadj_nat_inf(data = data,
+                                                                                                                        Z_name = "Z",
+                                                                                                                        Y_name = Y_name,
+                                                                                                                        S_name = "S_inf")['additive_effect']
+        } 
+        
+      }
+      
+      if(config$population_1){
+        results$pop_1[results$Y_out == Y_name & results$estimator == estimator] <- est_pop(data = data,
+                                                                                            pkg_models = pkg_models,
+                                                                                            Y_name = Y_name, 
+                                                                                            estimator = estimator, 
+                                                                                            two_part_model = FALSE)
+      }
+      
+      if(config$population_2){
+        results$pop_2[results$Y_out == Y_name & results$estimator == estimator] <- est_pop(data = data,
+                                                                                            pkg_models = pkg_models,
+                                                                                            Y_name = Y_name, 
+                                                                                            estimator = estimator, 
+                                                                                            two_part_model = TRUE)
       }
       
     }
-      
-    if(config$nat_inf_no_ER){
-      results$nat_inf_no_ER[i] <-  vegrowth::do_gcomp_nat_inf(data = data, 
-                                                        models = pkg_models,
-                                                        Z_name = "Z",
-                                                        X_name = "X", 
-                                                        exclusion_restriction = FALSE)['additive_effect']
-    }
     
-    if(config$nat_inf_unadj){
-      results$nat_inf_unadj[i] <- vegrowth::do_unadj_nat_inf(data = data,
-                                                          Z_name = "Z",
-                                                          Y_name = Y_name,
-                                                          S_name = "S_inf")['additive_effect']
-    }
-    
-    if(config$population){
-      if(!config$two_part){
-        results$pop[i] <- vegrowth::do_gcomp_pop(data = data, 
-                                                 models = pkg_models,
-                                                 Z_name = "Z",
-                                                 X_name = "X")['additive_effect']
-      } else{
-        results$pop[i] <- vegrowth::do_gcomp_pop(data = data, 
-                                                 models = pkg_models,
-                                                 Z_name = "Z",
-                                                 X_name = "X", 
-                                                 two_part_model = TRUE)['additive_effect']
-      }
-      
-    } 
-    
-  
   }
   
   # Get effect for averaged Y_outs
@@ -140,19 +152,27 @@ results <- lapply(config$n_sample_size, function(n){
     Y_names <- paste0("Y_", i)
     
     # Get the subset of results corresponding to those outcomes
-    sub_df <- results[results$Y_out %in% Y_names, ]
     
-    # Create a new row with the averaged estimates
-    new_row <- data.frame(
-      Y_out = avg_name,
-      nat_inf_ER = if ("nat_inf_ER" %in% names(sub_df)) mean(sub_df$nat_inf_ER, na.rm = TRUE) else NA,
-      nat_inf_no_ER = if ("nat_inf_no_ER" %in% names(sub_df)) mean(sub_df$nat_inf_no_ER, na.rm = TRUE) else NA,
-      nat_inf_unadj = if ("nat_inf_unadj" %in% names(sub_df)) mean(sub_df$nat_inf_unadj, na.rm = TRUE) else NA,
-      pop = if ("pop" %in% names(sub_df)) mean(sub_df$pop, na.rm = TRUE) else NA
-    )
-    
-    # Append to results
-    results <- rbind(results, new_row)
+    for(estimator in config$estimators){
+      sub_df <- results[results$Y_out %in% Y_names &
+                          results$estimator == estimator, ]
+      
+      # Create a new row with the averaged estimates
+      new_row <- data.frame(
+        Y_out = avg_name,
+        estimator = estimator, 
+        nat_inf_ER_1 =  mean(sub_df$nat_inf_ER_1),
+        nat_inf_ER_2 =  mean(sub_df$nat_inf_ER_2),
+        nat_inf_no_ER = mean(sub_df$nat_inf_no_ER),
+        nat_inf_unadj = mean(sub_df$nat_inf_unadj),
+        pop_1 = mean(sub_df$pop_1),
+        pop_2 = mean(sub_df$pop_2)
+      )
+      
+      # Append to results
+      results <- rbind(results, new_row)
+    }
+   
   }
   
   # Bootstrap Estimates ----------------------------------------
@@ -163,34 +183,50 @@ results <- lapply(config$n_sample_size, function(n){
   
   # 2. Compute SEs, CIs, and rejection indicators per Y_out and estimand
   boot_summary <- boot_res_df %>%
-    dplyr::group_by(Y_out) %>%
+    dplyr::group_by(Y_out, estimator) %>%
     dplyr::summarise(
-      nat_inf_ER_se = if ("nat_inf_ER" %in% names(.)) sd(nat_inf_ER, na.rm = TRUE) else NA_real_,
-      nat_inf_ER_lower = if ("nat_inf_ER" %in% names(.)) quantile(nat_inf_ER, 0.025, na.rm = TRUE) else NA_real_,
-      nat_inf_ER_upper = if ("nat_inf_ER" %in% names(.)) quantile(nat_inf_ER, 0.975, na.rm = TRUE) else NA_real_,
+      nat_inf_ER_1_se = sd(nat_inf_ER_1, na.rm = TRUE),
+      nat_inf_ER_1_lower = quantile(nat_inf_ER_1, 0.025, na.rm = TRUE),
+      nat_inf_ER_1_upper = quantile(nat_inf_ER_1, 0.975, na.rm = TRUE),
       
-      nat_inf_no_ER_se = if ("nat_inf_no_ER" %in% names(.)) sd(nat_inf_no_ER, na.rm = TRUE) else NA_real_,
-      nat_inf_no_ER_lower = if ("nat_inf_no_ER" %in% names(.)) quantile(nat_inf_no_ER, 0.025, na.rm = TRUE) else NA_real_,
-      nat_inf_no_ER_upper = if ("nat_inf_no_ER" %in% names(.)) quantile(nat_inf_no_ER, 0.975, na.rm = TRUE) else NA_real_,
+      nat_inf_ER_2_se = sd(nat_inf_ER_2, na.rm = TRUE),
+      nat_inf_ER_2_lower = quantile(nat_inf_ER_2, 0.025, na.rm = TRUE),
+      nat_inf_ER_2_upper = quantile(nat_inf_ER_2, 0.975, na.rm = TRUE),
       
-      nat_inf_unadj_se = if ("nat_inf_unadj" %in% names(.)) sd(nat_inf_unadj, na.rm = TRUE) else NA_real_,
-      nat_inf_unadj_lower = if ("nat_inf_unadj" %in% names(.)) quantile(nat_inf_unadj, 0.025, na.rm = TRUE) else NA_real_,
-      nat_inf_unadj_upper = if ("nat_inf_unadj" %in% names(.)) quantile(nat_inf_unadj, 0.975, na.rm = TRUE) else NA_real_,
+      nat_inf_no_ER_se = sd(nat_inf_no_ER, na.rm = TRUE),
+      nat_inf_no_ER_lower = quantile(nat_inf_no_ER, 0.025, na.rm = TRUE),
+      nat_inf_no_ER_upper = quantile(nat_inf_no_ER, 0.975, na.rm = TRUE),
       
-      pop_se = if ("pop" %in% names(.)) sd(pop, na.rm = TRUE) else NA_real_,
-      pop_lower = if ("pop" %in% names(.)) quantile(pop, 0.025, na.rm = TRUE) else NA_real_,
-      pop_upper = if ("pop" %in% names(.)) quantile(pop, 0.975, na.rm = TRUE) else NA_real_,
+      nat_inf_unadj_se = sd(nat_inf_unadj, na.rm = TRUE),
+      nat_inf_unadj_lower = quantile(nat_inf_unadj, 0.025, na.rm = TRUE),
+      nat_inf_unadj_upper = quantile(nat_inf_unadj, 0.975, na.rm = TRUE),
+      
+      pop_1_se = sd(pop_1, na.rm = TRUE),
+      pop_1_lower = quantile(pop_1, 0.025, na.rm = TRUE) ,
+      pop_1_upper = quantile(pop_1, 0.975, na.rm = TRUE) ,
+      
+      pop_2_se = sd(pop_2, na.rm = TRUE),
+      pop_2_lower = quantile(pop_2, 0.025, na.rm = TRUE) ,
+      pop_2_upper = quantile(pop_2, 0.975, na.rm = TRUE) ,
+      
       .groups = "drop"
     )
   
   # 3. Merge bootstrap summaries with point estimates
-  results_full <- dplyr::left_join(results, boot_summary, by = "Y_out")
+  results_full <- dplyr::left_join(results, boot_summary, by = c("Y_out", "estimator"))
   
   # 4. Add reject indicator columns
-  if (config$nat_inf_ER) {
+  if (config$nat_inf_ER_1) {
     results_full <- results_full %>%
       dplyr::mutate(
-        nat_inf_ER_reject = (abs(nat_inf_ER - config$null_hypothesis_value) / nat_inf_ER_se) > qnorm(1 - config$alpha_level / 2)
+        nat_inf_ER_1_reject = (abs(nat_inf_ER_1 - config$null_hypothesis_value) / nat_inf_ER_1_se) > qnorm(1 - config$alpha_level / 2)
+      )
+  }
+  
+  if (config$nat_inf_ER_2) {
+    results_full <- results_full %>%
+      dplyr::mutate(
+        nat_inf_ER_2_reject = (abs(nat_inf_ER_2 - config$null_hypothesis_value) / nat_inf_ER_2_se) > qnorm(1 - config$alpha_level / 2)
       )
   }
   
@@ -208,10 +244,17 @@ results <- lapply(config$n_sample_size, function(n){
       )
   }
   
-  if (config$population) {
+  if (config$population_1) {
     results_full <- results_full %>%
       dplyr::mutate(
-        pop_reject = (abs(pop - config$null_hypothesis_value) / pop_se) > qnorm(1 - config$alpha_level / 2)
+        pop_1_reject = (abs(pop_1 - config$null_hypothesis_value) / pop_1_se) > qnorm(1 - config$alpha_level / 2)
+      )
+  }
+  
+  if (config$population_2) {
+    results_full <- results_full %>%
+      dplyr::mutate(
+        pop_2_reject = (abs(pop_2 - config$null_hypothesis_value) / pop_2_se) > qnorm(1 - config$alpha_level / 2)
       )
   }
   

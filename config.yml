@@ -16,10 +16,14 @@ default:
   VE_mild: 0.40
   VE_severe: 0.60
   nat_inf_no_ER: TRUE
-  nat_inf_ER: TRUE
+  nat_inf_ER_1: TRUE
+  nat_inf_ER_2: TRUE
   nat_inf_unadj: TRUE
-  population: TRUE
-  two_part: FALSE
+  population_1: TRUE
+  population_2: TRUE
+  estimators: 
+    - "gcomp"
+    - "aipw"
   intervals:
     - 3
     - 6
@@ -48,10 +52,14 @@ vax_12mo:
   VE_mild: 0.40
   VE_severe: 0.60
   nat_inf_no_ER: TRUE
-  nat_inf_ER: TRUE
+  nat_inf_ER_1: TRUE
+  nat_inf_ER_2: TRUE
   nat_inf_unadj: TRUE
-  population: TRUE
-  two_part: FALSE
+  population_1: TRUE
+  population_2: TRUE
+  estimators: 
+    - "gcomp"
+    - "aipw"
   intervals:
     - 3
     - 6
@@ -80,10 +88,14 @@ debug_ER:
   VE_mild: 0.40
   VE_severe: 0.60
   nat_inf_no_ER: TRUE
-  nat_inf_ER: FALSE
+  nat_inf_ER_1: FALSE
+  nat_inf_ER_2: FALSE
   nat_inf_unadj: FALSE
-  population: FALSE
-  two_part: FALSE
+  population_1: FALSE
+  population_2: FALSE
+  estimators: 
+    - "gcomp"
+    - "aipw"
   intervals:
     - 3
     - 6
@@ -112,10 +124,14 @@ debug_unadj:
   VE_mild: 0.40
   VE_severe: 0.60
   nat_inf_no_ER: FALSE
-  nat_inf_ER: FALSE
+  nat_inf_ER_1: FALSE
+  nat_inf_ER_2: FALSE
   nat_inf_unadj: TRUE
-  population: FALSE
-  two_part: FALSE
+  population_1: FALSE
+  population_2: FALSE
+  estimators: 
+    - "gcomp"
+    - "aipw"
   intervals:
     - 3
     - 6
@@ -144,10 +160,14 @@ debug_two_part:
   VE_mild: 0.40
   VE_severe: 0.60
   nat_inf_no_ER: FALSE
-  nat_inf_ER: TRUE
+  nat_inf_ER_1: FALSE
+  nat_inf_ER_2: TRUE
   nat_inf_unadj: FALSE
-  population: TRUE
-  two_part: TRUE
+  population_1: FALSE
+  population_2: TRUE
+  estimators: 
+    - "gcomp"
+    - "aipw"
   intervals:
     - 3
     - 6

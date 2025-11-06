@@ -268,3 +268,77 @@ estimate_short_term <- function(data,
               estimate_Z0 = final_estimate_Z0,
               estimate_Z1 = final_estimate_Z1))
 }
+
+#' Function for nat inf estimation - call gcomp or aipw with appropriate args
+#' 
+#' @returns additive effect estimate
+est_nat_inf <- function(data,
+                        estimator,
+                        pkg_models,
+                        Y_name,
+                        exclusion_restriction,
+                        two_part_model, 
+                        Z_name = "Z", 
+                        X_name = "X",
+                        S_name = "S_inf"){
+  
+  if(estimator == "gcomp"){
+    est <- vegrowth::do_gcomp_nat_inf(data = data, 
+                                      models = pkg_models,
+                                      Z_name = Z_name,
+                                      X_name = X_name, 
+                                      exclusion_restriction = exclusion_restriction,
+                                      two_part_model = two_part_model)['additive_effect']
+  } else if(estimator == "aipw"){
+    est <- vegrowth::do_aipw_nat_inf(data = data, 
+                                     models = pkg_models, 
+                                     Y_name = Y_name,
+                                     exclusion_restriction = exclusion_restriction,
+                                     Z_name = Z_name, 
+                                     X_name = X_name, 
+                                     S_name = S_name,
+                                     return_se = FALSE,
+                                     two_part_model = two_part_model)['additive_effect']  
+  } else{
+    stop("Unknown estimator: ", estimator)
+  }
+  
+  return(est)
+  
+}
+
+
+#' Function for population effect estimation - call gcomp or aipw with appropriate args
+#' 
+#' @returns additive effect estimate
+est_pop <- function(data,
+                    estimator,
+                    pkg_models,
+                    Y_name,
+                    two_part_model, 
+                    Z_name = "Z", 
+                    X_name = "X",
+                    S_name = "S_inf"){
+  
+  if(estimator == "gcomp"){
+    est <- vegrowth::do_gcomp_pop(data = data, 
+                                  models = pkg_models,
+                                  Z_name = Z_name,
+                                  X_name = X_name,
+                                  two_part_model = two_part_model)['additive_effect']
+  } else if(estimator == "aipw"){
+    est <- vegrowth::do_aipw_pop(data = data, 
+                                 models = pkg_models, 
+                                 Y_name = Y_name,
+                                 Z_name = Z_name, 
+                                 X_name = X_name, 
+                                 return_se = FALSE,
+                                 two_part_model = two_part_model)['additive_effect']  
+  } else{
+    stop("Unknown estimator: ", estimator)
+  }
+  
+  return(est)
+  
+}
+
