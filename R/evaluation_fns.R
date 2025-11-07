@@ -116,7 +116,7 @@ get_coverage <- function(results, truth, config, n, estimator) {
     Y_out <- paste0("Y_", paste0(int, collapse = "_"))
     
     # No ER
-    if (config$nat_inf_no_ER_1) {
+    if (config$nat_inf_no_ER) {
       cov_nat_inf <- mean(
         as.numeric(results_n$nat_inf_no_ER_lower[results_n$Y_out == Y_out]) < truth[[paste0("nat_inf_", Y_out)]] &
           as.numeric(results_n$nat_inf_no_ER_upper[results_n$Y_out == Y_out]) > truth[[paste0("nat_inf_", Y_out)]]
