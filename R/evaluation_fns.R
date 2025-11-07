@@ -79,6 +79,7 @@ get_bias <- function(results, truth, config, n, estimator) {
       )
       out <- rbind(out, data.frame(
         n = n,
+        estimator = estimator,
         Y_out = Y_out,
         method = "pop_1",
         bias = bias_pop
@@ -245,6 +246,7 @@ get_power <- function(results, truth, config, n, estimator) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
+        estimator = estimator,
         method = "nat_inf_ER_2",
         power = power_nat_inf
       ))
@@ -303,6 +305,7 @@ get_neg_pt_est <- function(results, truth, config, n, estimator) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
+        estimator = estimator,
         method = "nat_inf_ER_1",
         prop_neg = neg_nat_inf
       ))
