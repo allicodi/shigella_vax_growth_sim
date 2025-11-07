@@ -34,7 +34,7 @@ Y_out <- unique(do.call(c, config$intervals))
 
 # Get truth for all individual times
 for(Y in Y_out){
-  if(any(c(config$nat_inf_ER, config$nat_inf_no_ER, config$nat_inf_unadj) == TRUE)){
+  if(any(c(config$nat_inf_ER_1, config$nat_inf_ER_2, config$nat_inf_no_ER, config$nat_inf_unadj) == TRUE)){
     
     if(Y == 3){
       truth$nat_inf_Y_3 <- truth_nat_inf_3mo(data = data)
@@ -48,7 +48,7 @@ for(Y in Y_out){
     
   } 
   
-  if(config$pop){
+  if(any(c(config$population_1, config$population_2) == TRUE)){
     
     if(Y == 3){
       truth$pop_Y_3 <- truth_pop_3mo(data = data)
