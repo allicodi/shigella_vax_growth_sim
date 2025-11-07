@@ -2,8 +2,9 @@
 # Functions for evaluating performance for growth effect estimation
 # ----------------------------------------------------------------------------
 
-get_bias <- function(results, truth, config, n) {
-  results_n <- results[results$n == n, ]
+get_bias <- function(results, truth, config, n, estimator) {
+  results_n <- results[results$n == n &
+                         results$estimator == estimator, ]
   out <- data.frame()
   
   for (i in seq_along(config$intervals)) {
@@ -19,7 +20,8 @@ get_bias <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_1",
+        estimator = estimator,
+        method = "nat_inf_ER_1",
         bias = bias_nat_inf
       ))
     }
@@ -33,7 +35,8 @@ get_bias <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_2",
+        estimator = estimator,
+        method = "nat_inf_ER_2",
         bias = bias_nat_inf
       ))
     }
@@ -47,7 +50,8 @@ get_bias <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_no_ER",
+        estimator = estimator,
+        method = "nat_inf_no_ER",
         bias = bias_nat_inf
       ))
     }
@@ -61,7 +65,8 @@ get_bias <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_unadj",
+        estimator = estimator,
+        method = "nat_inf_unadj",
         bias = bias_nat_inf
       ))
     }
@@ -75,7 +80,7 @@ get_bias <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_1",
+        method = "pop_1",
         bias = bias_pop
       ))
     }
@@ -89,7 +94,8 @@ get_bias <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_2",
+        estimator = estimator,
+        method = "pop_2",
         bias = bias_pop
       ))
     }
@@ -99,8 +105,9 @@ get_bias <- function(results, truth, config, n) {
 }
 
 
-get_coverage <- function(results, truth, config, n) {
-  results_n <- results[results$n == n, ]
+get_coverage <- function(results, truth, config, n, estimator) {
+  results_n <- results[results$n == n &
+                         results$estimator == estimator, ]
   out <- data.frame()
   
   for (i in seq_along(config$intervals)) {
@@ -116,7 +123,8 @@ get_coverage <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_no_ER",
+        estimator = estimator,
+        method = "nat_inf_no_ER",
         coverage = cov_nat_inf
       ))
     }
@@ -130,7 +138,8 @@ get_coverage <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_1",
+        estimator = estimator,
+        method = "nat_inf_ER_1",
         coverage = cov_nat_inf
       ))
     }
@@ -143,7 +152,8 @@ get_coverage <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_2",
+        estimator = estimator,
+        method = "nat_inf_ER_2",
         coverage = cov_nat_inf
       ))
     }
@@ -157,7 +167,8 @@ get_coverage <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_unadj",
+        estimator = estimator,
+        method = "nat_inf_unadj",
         coverage = cov_nat_inf
       ))
     }
@@ -170,7 +181,8 @@ get_coverage <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_1",
+        estimator = estimator,
+        method = "pop_1",
         coverage = cov_pop
       ))
     }
@@ -183,7 +195,8 @@ get_coverage <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_2",
+        estimator = estimator,
+        method = "pop_2",
         coverage = cov_pop
       ))
     }
@@ -193,8 +206,9 @@ get_coverage <- function(results, truth, config, n) {
 }
 
 
-get_power <- function(results, truth, config, n) {
-  results_n <- results[results$n == n, ]
+get_power <- function(results, truth, config, n, estimator) {
+  results_n <- results[results$n == n &
+                         results$estimator == estimator, ]
   out <- data.frame()
   
   for (i in seq_along(config$intervals)) {
@@ -207,7 +221,8 @@ get_power <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_no_ER",
+        estimator = estimator,
+        method = "nat_inf_no_ER",
         power = power_nat_inf
       ))
     }
@@ -218,7 +233,8 @@ get_power <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_1",
+        estimator = estimator,
+        method = "nat_inf_ER_1",
         power = power_nat_inf
       ))
     }
@@ -229,7 +245,7 @@ get_power <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_2",
+        method = "nat_inf_ER_2",
         power = power_nat_inf
       ))
     }
@@ -240,7 +256,8 @@ get_power <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_unadj",
+        estimator = estimator,
+        method = "nat_inf_unadj",
         power = power_nat_inf
       ))
     }
@@ -250,7 +267,8 @@ get_power <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_1",
+        estimator = estimator,
+        method = "pop_1",
         power = power_pop
       ))
     }
@@ -260,7 +278,8 @@ get_power <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_2",
+        estimator = estimator,
+        method = "pop_2",
         power = power_pop
       ))
     }
@@ -270,8 +289,9 @@ get_power <- function(results, truth, config, n) {
 }
 
 
-get_neg_pt_est <- function(results, truth, config, n) {
-  results_n <- results[results$n == n, ]
+get_neg_pt_est <- function(results, truth, config, n, estimator) {
+  results_n <- results[results$n == n &
+                         results$estimator == estimator, ]
   out <- data.frame()
   
   for (i in seq_along(config$intervals)) {
@@ -283,7 +303,7 @@ get_neg_pt_est <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_1",
+        method = "nat_inf_ER_1",
         prop_neg = neg_nat_inf
       ))
     }
@@ -293,7 +313,8 @@ get_neg_pt_est <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_ER_2",
+        estimator = estimator,
+        method = "nat_inf_ER_2",
         prop_neg = neg_nat_inf
       ))
     }
@@ -303,7 +324,8 @@ get_neg_pt_est <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_no_ER",
+        estimator = estimator,
+        method = "nat_inf_no_ER",
         prop_neg = neg_nat_inf
       ))
     }
@@ -313,7 +335,8 @@ get_neg_pt_est <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "nat_inf_unadj",
+        estimator = estimator,
+        method = "nat_inf_unadj",
         prop_neg = neg_nat_inf
       ))
     }
@@ -323,7 +346,8 @@ get_neg_pt_est <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_1",
+        estimator = estimator,
+        method = "pop_1",
         prop_neg = neg_pop
       ))
     }
@@ -333,7 +357,8 @@ get_neg_pt_est <- function(results, truth, config, n) {
       out <- rbind(out, data.frame(
         n = n,
         Y_out = Y_out,
-        estimand = "pop_2",
+        estimator = estimator,
+        method = "pop_2",
         prop_neg = neg_pop
       ))
     }
