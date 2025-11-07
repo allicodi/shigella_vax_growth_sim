@@ -35,10 +35,12 @@ power_df <- data.frame()
 prop_neg_df <- data.frame()
 
 for (n in unique(results$n)) {
-  bias_df     <- rbind(bias_df, get_bias(results, truth_df, config, n))
-  coverage_df <- rbind(coverage_df, get_coverage(results, truth_df, config, n))
-  power_df    <- rbind(power_df, get_power(results, truth_df, config, n))
-  prop_neg_df <- rbind(prop_neg_df, get_neg_pt_est(results, truth_df, config, n))
+  for(estimator in unique(reuslts$estimator)){
+    bias_df     <- rbind(bias_df, get_bias(results, truth_df, config, n, estimator))
+    coverage_df <- rbind(coverage_df, get_coverage(results, truth_df, config, n, estimator))
+    power_df    <- rbind(power_df, get_power(results, truth_df, config, n, estimator))
+    prop_neg_df <- rbind(prop_neg_df, get_neg_pt_est(results, truth_df, config, n, estimator))
+  }
 }
 
 final_results <- list(

@@ -75,7 +75,7 @@ for (i in avg_intervals) {
   Y_names <- paste0("Y_", i)
   
   # For each type of truth that applies
-  if (any(c(config$nat_inf_ER, config$nat_inf_no_ER, config$nat_inf_unadj) == TRUE)) {
+  if (any(c(config$nat_inf_ER_1, config$nat_inf_ER_2, config$nat_inf_no_ER, config$nat_inf_unadj) == TRUE)) {
     # Collect available nat_inf_Y_* entries for this interval
     nat_vals <- unlist(truth[paste0("nat_inf_", Y_names)])
     if (length(nat_vals) > 0) {
@@ -83,7 +83,7 @@ for (i in avg_intervals) {
     }
   }
   
-  if (config$pop) {
+  if (any(c(config$population_1, config$population_2) == TRUE)) {
     # Collect available pop_Y_* entries for this interval
     pop_vals <- unlist(truth[paste0("pop_", Y_names)])
     if (length(pop_vals) > 0) {
