@@ -277,6 +277,7 @@ est_nat_inf <- function(data,
                         pkg_models,
                         Y_name,
                         exclusion_restriction,
+                        cross_world,
                         two_part_model, 
                         Z_name = "Z", 
                         X_name = "X",
@@ -288,17 +289,24 @@ est_nat_inf <- function(data,
                                       Z_name = Z_name,
                                       X_name = X_name, 
                                       exclusion_restriction = exclusion_restriction,
+                                      cross_world = cross_world,
                                       two_part_model = two_part_model)['additive_effect']
   } else if(estimator == "aipw"){
     est <- vegrowth::do_aipw_nat_inf(data = data, 
                                      models = pkg_models, 
                                      Y_name = Y_name,
                                      exclusion_restriction = exclusion_restriction,
+                                     cross_world = cross_world,
                                      Z_name = Z_name, 
                                      X_name = X_name, 
                                      S_name = S_name,
                                      return_se = FALSE,
                                      two_part_model = two_part_model)['additive_effect']  
+  } else if (estimator == "unadj"){
+    est <- vegrowth::do_unadj_nat_inf(data = data,
+                                      Z_name = "Z",
+                                      Y_name = Y_name,
+                                      S_name = "S_inf")['additive_effect']
   } else{
     stop("Unknown estimator: ", estimator)
   }
