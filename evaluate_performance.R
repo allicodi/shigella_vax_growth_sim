@@ -29,19 +29,10 @@ all_files <- list.files(dir, pattern = pattern, full.names = TRUE)
 results_list <- lapply(all_files, readRDS)
 results <- bind_rows(results_list)
 
-bias_df <- data.frame()
-coverage_df <- data.frame()
-power_df <- data.frame()
-prop_neg_df <- data.frame()
-
-for (n in unique(results$n)) {
-  for(estimator in unique(results$estimator)){
-    bias_df     <- rbind(bias_df, get_bias(results, truth_df, config, n, estimator))
-    coverage_df <- rbind(coverage_df, get_coverage(results, truth_df, config, n, estimator))
-    power_df    <- rbind(power_df, get_power(results, truth_df, config, n, estimator))
-    prop_neg_df <- rbind(prop_neg_df, get_neg_pt_est(results, truth_df, config, n, estimator))
-  }
-}
+bias_df     <- get_bias(results, truth_df, config)
+coverage_df <- get_coverage(results, truth_df, config)
+power_df    <- get_power(results, truth_df, config)
+prop_neg_df <-  get_neg_pt_est(results, truth_df, config)
 
 final_results <- list(
   results = results,
