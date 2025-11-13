@@ -23,6 +23,7 @@ get_bias <- function(results, truth, config) {
     dplyr::group_by(Y_out, estimand, estimator, er, cw, two_stage, n) %>%
     dplyr::summarise(
       bias = mean(bias, na.rm = TRUE),
+      sd_bias = sd(bias, na.rm = TRUE),
       .groups = "drop"
     )
   
