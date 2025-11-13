@@ -11,8 +11,8 @@ library(SuperLearner)
 library(survival)
 
 # not ideal but don't want to deal w HPC install issues rn
-devtools::load_all("~/abxGrowth/")
-#devtools::load_all("~/Documents/shigella_projects/packages/abxGrowth/")
+#devtools::load_all("~/abxGrowth/")
+devtools::load_all("~/Documents/shigella_projects/packages/abxGrowth/")
 
 source(here::here("misc/SL.wrappers.R"))
 

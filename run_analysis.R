@@ -31,9 +31,9 @@ setting_grid <- expand.grid(estimand = config$estimand,
                             two_stage = config$two_stage)
 
 # elim any settings that do not exist (ex. where ER & CW both == FALSE, CW + 2 part, ER + CW + 2part)
-elim <- which((setting_grid$cw == FALSE & setting_grid$er == FALSE) | # both false
-                (setting_grid$cw == TRUE & setting_grid$two_stage == TRUE) | # only 1part for cross world
-                (setting_grid$estimand == "pop" & !(setting_grid$cw == TRUE & setting_grid$er == TRUE))) # only need to run pop once (ER + CW do not apply; no assumptions)
+elim <- which(((setting_grid$estimand == "nat_inf" & setting_grid$cw == FALSE & setting_grid$er == FALSE)) | # nat inf both false
+                (setting_grid$estimand == "nat_inf" & setting_grid$cw == TRUE & setting_grid$two_stage == TRUE) | # only 1part for cross world
+                (setting_grid$estimand == "pop" & (setting_grid$cw == TRUE | setting_grid$er == TRUE))) # only need to run pop once (ER + CW do not apply; no assumptions)
 
 setting_grid <- setting_grid[-elim,]
 
