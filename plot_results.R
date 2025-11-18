@@ -90,15 +90,10 @@ bias_df <- add_labels(bias_df)
 plot_power <- function(power_df, setting = "default") {
   
   color_map <- c(
-    "(CW)" = "#89CFF0",
-    "(ER)" = "#4682B4",          
-    "(ER, two-part)" = "#6495ED",
-    "(ER, CW)" =  "#191970",
-    
-    # "(CW)" = "#D8BFD8",
-    # "(ER)" = "#DE3163",
-    # "(ER, two-part)" = "#E35335",
-    # "(ER, CW)" = "#AD002AFF",
+    "(CW)" = "#191970",
+    "(ER)" = "#6082B6",          
+    "(ER, two-part)" = "#AD002AFF",
+    "(ER, CW)" =  "#925E9FFF",
     
     "(None)" = "#FFC000" # Unadjusted
   )
@@ -178,12 +173,21 @@ plot_prop_neg <- function(prop_neg_df, setting = "default") {
       )
     )
   
+  # color_map <- c(
+  #   "(CW)" = "#89CFF0",
+  #   "(ER)" = "#4682B4",
+  #   "(ER, two-part)" = "#6495ED",
+  #   "(ER, CW)" = "#191970",
+  #   "(None)" = "#FFC000"
+  # )
+  
   color_map <- c(
-    "(CW)" = "#89CFF0",
-    "(ER)" = "#4682B4",
-    "(ER, two-part)" = "#6495ED",
-    "(ER, CW)" = "#191970",
-    "(None)" = "#FFC000"
+    "(CW)" = "#191970",
+    "(ER)" = "#6082B6",          
+    "(ER, two-part)" = "#AD002AFF",
+    "(ER, CW)" =  "#925E9FFF",
+    
+    "(None)" = "#FFC000" # Unadjusted
   )
   
   shape_map <- c(
@@ -229,7 +233,7 @@ plot_prop_neg <- function(prop_neg_df, setting = "default") {
 # -------------------------------------------------
 # Function to create bias plot
 # -------------------------------------------------
-plot_bias <- function(bias_df, setting = "default") {
+plot_bias <- function(bias_df, add_CI = FALSE, setting = "default") {
   
   bias_df <- bias_df %>%
     mutate(
@@ -253,10 +257,10 @@ plot_bias <- function(bias_df, setting = "default") {
     )
   
   color_map <- c(
-    "(CW)" = "#89CFF0",
-    "(ER)" = "#4682B4",
-    "(ER, two-part)" = "#6495ED",
-    "(ER, CW)" = "#191970",
+    "(CW)" = "#191970",
+    "(ER)" = "#6082B6",
+    "(ER, two-part)" = "#AD002AFF",
+    "(ER, CW)" =  "#925E9FFF",
     "(None)" = "#FFC000"
   )
   
@@ -266,12 +270,37 @@ plot_bias <- function(bias_df, setting = "default") {
     "Unadjusted" = 15
   )
   
-  ggplot(bias_df, aes(x = n, y = bias, color = color_label, 
-                      shape = shape_type, linetype = line_type)) +
-    geom_line(aes(group = interaction(color_label, line_type)), linewidth = 1.2, alpha = 0.8) +
+  p <- ggplot(bias_df, aes(x = n, y = bias, color = color_label,
+                           shape = shape_type, linetype = line_type))
+  
+  # -------------------------------------------------
+  # Add CI ribbon if requested
+  # -------------------------------------------------
+  if (add_CI) {
+    p <- p +
+      geom_ribbon(
+        aes(
+          ymin = bias - 1.96 * sd_bias / sqrt(1000),
+          ymax = bias + 1.96 * sd_bias / sqrt(1000),
+          fill = color_label,
+          group = interaction(color_label, line_type)
+        ),
+        alpha = 0.15,
+        color = NA
+      )
+  }
+  
+  # -------------------------------------------------
+  # Main plot
+  # -------------------------------------------------
+  p +
+    geom_line(aes(group = interaction(color_label, line_type)),
+              linewidth = 1.2, alpha = 0.8) +
     geom_point(size = 4, alpha = 0.7) +
-    geom_hline(yintercept = 0, linetype = "dashed", size = 1, color = "gray40") +
-    facet_wrap(~ Y_out, scales = "fixed", ncol = 3, labeller = label_parsed) +
+    geom_hline(yintercept = 0, linetype = "dashed",
+               size = 1, color = "gray40") +
+    facet_wrap(~ Y_out, scales = "fixed", ncol = 3,
+               labeller = label_parsed) +
     scale_y_continuous(name = "Bias") +
     scale_x_continuous(
       name = "Sample Size",
@@ -280,11 +309,14 @@ plot_bias <- function(bias_df, setting = "default") {
       breaks = seq(0, 50000, 10000)
     ) +
     scale_color_manual(values = color_map) +
+    scale_fill_manual(values = color_map) +
     scale_shape_manual(values = shape_map) +
-    scale_linetype_manual(values = c("Naturally Infected" = "solid", "Population" = "dotted")) +
+    scale_linetype_manual(values = c("Naturally Infected" = "solid",
+                                     "Population" = "dotted")) +
     labs(
       title = paste0("Bias (", setting, " setting)"),
       color = "Assumptions & Modeling Approach",
+      fill = "Assumptions & Modeling Approach",
       shape = "Estimator",
       linetype = "Estimand"
     ) +
