@@ -2,7 +2,11 @@
 .Rhistory
 temp_res.Rds
 temp_res_sim_w_doomed.Rds
+results/
+debug_short_term.r
 data
 misc/maled_data
 misc/results
 misc/provide_data
+parameters_default.Rds
+parameters_debug_default_original.Rds
