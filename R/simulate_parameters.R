@@ -44,7 +44,10 @@ simulate_parameters <- function(dose_schedule = "6mo",                      # or
                                 incidence_severe_shigella_0_6 = 0.0147,     # from Maria; 6 month incidence
                                 incidence_shigella_6_12 = 0.0373,           # from Maria; 6 month incidence
                                 incidence_severe_shigella_6_12 = 0.0203,    # from Maria; 6 month incidence
-                                effect_shigella_growth_formula = y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))){
+                                effect_shigella_growth_formula = y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8)),
+                                scale_growth_effect_0_6 = 0, # factor to scale growth effects by between CIs in MALED model aka figure of the year
+                                scale_growth_effect_6_12 = 0  # factor to scale growth effects by between CIs in MALED model aka figure of the year
+                                ){
   
   # ---------------------------------------------------------------------------
   # Baseline HAZ: Mean and standard deviation for given age & site combo ------
@@ -124,8 +127,10 @@ simulate_parameters <- function(dose_schedule = "6mo",                      # or
   shigella_growth_meta_analysis_results <- readRDS(here::here("misc/results/case_control/shigella_growth_effect_data.Rds"))
   
   shigella_growth_fits <- fit_effect_shigella_growth_models(plot_df = shigella_growth_meta_analysis_results,
-                                                            spline_formula = effect_shigella_growth_formula)
-  names(shigella_growth_fits) <- c("lsd", "all", "msd")
+                                                            spline_formula = effect_shigella_growth_formula,
+                                                            scale_growth_effect_0_6 = scale_growth_effect_0_6, 
+                                                            scale_growth_effect_6_12 = scale_growth_effect_6_12,
+                                                            dose_schedule = config$dose_schedule)
   
   # ---------------------------------------------------------------------------
   # Monthly HAZ outcome (Y_m) in absence of Shigella 

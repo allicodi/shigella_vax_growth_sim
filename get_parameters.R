@@ -29,6 +29,8 @@ parameters <- simulate_parameters(dose_schedule = config$dose_schedule,
                                   incidence_severe_shigella_0_6 = config$incidence_severe_shigella_0_6, 
                                   incidence_shigella_6_12 = config$incidence_shigella_6_12, 
                                   incidence_severe_shigella_6_12 = config$incidence_severe_shigella_0_6, 
-                                  effect_shigella_growth_formula = config$effect_shigella_growth_formula)
+                                  effect_shigella_growth_formula = config$effect_shigella_growth_formula,
+                                  scale_growth_effect_0_6 = config$scale_growth_effect_0_6,
+                                  scale_growth_effect_6_12 = config$scale_growth_effect_6_12)
 
 saveRDS(parameters, paste0(parameter_dir, "/parameters_", setting, ".Rds"))

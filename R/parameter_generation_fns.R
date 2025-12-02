@@ -1091,20 +1091,66 @@ plot_shigella_growth_effects <- function(plot_df,
 #'
 #' @param plot_df A data frame with columns: month_num, pt_est, group, age_strata.
 #' @param spline_formula A formula object for the spline (e.g., y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))).
+#' @param scale_0_6 scaling factor for first half of trial (age 6-12mo in 6mo trial, age 12-18mo in 12mo trial)
+#' @param scale_6_12 scaling factor for second half of trial (age 12-18mo in 6mo trial, age 18-24mo in 12mo trial)
 #'
 #' @return A named list of glm fits, one for each combination of age_strata and group.
 fit_effect_shigella_growth_models <- function(plot_df,
-                                              spline_formula = y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))) {
-  plot_df %>%
+                                              spline_formula = y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8)),
+                                              scale_growth_effect_0_6 = 0,
+                                              scale_growth_effect_6_12 = 0,
+                                              dose_schedule = "6mo",
+                                              plot_debug = FALSE) {
+  scale_0_6_df <- plot_df %>%
+    mutate(
+      age_strata = if_else(dose_schedule == "6mo", "6-12 months", "12-18 months"),
+      scale_growth_effect_0_6 = scale_growth_effect_0_6
+    ) %>%
+    mutate(
+      pt_est = if_else(scale_growth_effect_0_6 > 0, pt_est + scale_growth_effect_0_6*(upper_ci - pt_est), pt_est + scale_growth_effect_0_6*(pt_est - lower_ci)) 
+    ) 
+  
+  scale_0_6_fits <- scale_0_6_df %>%
     group_by(age_strata, group) %>%
     group_split() %>%
-    set_names(map_chr(., ~ paste(unique(.x$age_strata), unique(.x$group), sep = "_"))) %>%
-    map(~ {
+    map( ~ {
       df <- .x
       x <- df$month_num
       y <- df$pt_est
       glm(formula = spline_formula, data = data.frame(x = x, y = y))
-    }) 
+    })
+  
+  names(scale_0_6_fits) <- c("lsd", "all", "msd")
+  
+  scale_6_12_df <- plot_df %>%
+    mutate(
+      age_strata = if_else(dose_schedule == "6mo", "12-18 months", "18-24 months"),
+      scale_growth_effect_6_12 = scale_growth_effect_6_12
+    ) %>%
+    mutate(
+      pt_est = if_else(scale_growth_effect_6_12 > 0, pt_est + scale_growth_effect_6_12*(upper_ci - pt_est), pt_est + scale_growth_effect_6_12*(pt_est - lower_ci))
+    ) 
+  
+  scale_6_12_fits <- scale_6_12_df %>%
+    group_by(age_strata, group) %>%
+    group_split() %>%
+    map( ~ {
+      df <- .x
+      x <- df$month_num
+      y <- df$pt_est
+      glm(formula = spline_formula, data = data.frame(x = x, y = y))
+    })
+  
+  names(scale_6_12_fits) <- c("lsd", "all", "msd")
+  
+  if(plot_debug){
+    plot_shigella_growth_effects(scale_0_6_df, spline_formula = spline_formula)
+    plot_shigella_growth_effects(scale_6_12_df, spline_formula = spline_formula)
+  }
+  
+  return(list(fits_0_6 = scale_0_6_fits, 
+              fits_6_12 = scale_6_12_fits))
+  
 }
 
 # -----------------------------------------------------------------------------

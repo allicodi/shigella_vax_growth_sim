@@ -187,10 +187,27 @@ simulate_data <- function(parameters,
     adj_df_msd <- matrix(nrow = nrow(Y_t_df), ncol = ncol(Y_t_df)) # adjustment given MSD at time t
     # make 0 if 0
     for (col in 1:ncol(Y_t_df)) {
-      adj_df_lsd[, col] <- predict(parameters$effect_shigella_growth_fits$lsd, 
-                                   newdata = data.frame(x = Y_t_df[, col]))
-      adj_df_msd[, col] <- predict(parameters$effect_shigella_growth_fits$msd, 
-                                   newdata = data.frame(x = Y_t_df[, col]))
+      
+      # Predict for all 4 settings then remake vectors to fill in
+      lsd_0_6 <- predict(parameters$effect_shigella_growth_fits$fits_0_6$lsd, 
+                         newdata = data.frame(x = Y_t_df[, col]))
+      
+      lsd_6_12 <- predict(parameters$effect_shigella_growth_fits$fits_6_12$lsd, 
+                         newdata = data.frame(x = Y_t_df[, col]))
+      
+      msd_0_6 <- predict(parameters$effect_shigella_growth_fits$fits_0_6$msd, 
+                         newdata = data.frame(x = Y_t_df[, col]))
+      
+      msd_6_12 <- predict(parameters$effect_shigella_growth_fits$fits_6_12$msd, 
+                          newdata = data.frame(x = Y_t_df[, col]))
+      
+      adj_df_lsd[, col] <- ifelse(Y_t_df[, col] < 6, lsd_0_6, lsd_6_12)
+      adj_df_msd[, col] <- ifelse(Y_t_df[, col] < 6, msd_0_6, msd_6_12)
+      
+      # adj_df_lsd[, col] <- predict(parameters$effect_shigella_growth_fits$lsd, 
+      #                              newdata = data.frame(x = Y_t_df[, col]))
+      # adj_df_msd[, col] <- predict(parameters$effect_shigella_growth_fits$msd, 
+      #                              newdata = data.frame(x = Y_t_df[, col]))
     }
     
     # Return row of 0s or from lsd or msd matrices depending on infection type
