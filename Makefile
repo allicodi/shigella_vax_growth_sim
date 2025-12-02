@@ -21,3 +21,5 @@ run_analysis: $(PARAMETERS_FILE) run_simulation.sh run_analysis.R
 evaluate_performance: $(TRUTH_FILE) evaluate_performance.R 
 	/apps/R/4.4.0/bin/Rscript evaluate_performance.R $(SETTING) $(TRUTH_FILE)
 
+.PHONY: truth
+truth: $(TRUTH_FILE)
