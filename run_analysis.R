@@ -185,6 +185,8 @@ results <- lapply(config$n_sample_size, function(n){
           if_matrix <- cbind(if_matrix, Y_name_if_matrix)
         }
         
+        # denominator == number of timpoints being averaged. 
+        # ex. Y_6_12 denom = 2, so gradient is 1/2, -1/2, 1/2, -1/2 to average effects from Y_6 and Y_12
         denom <- length(Y_names)
         gradient <- matrix(rep(c(1/denom, -1/denom), length(Y_names)), ncol = 1)
         
