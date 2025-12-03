@@ -284,15 +284,20 @@ est_nat_inf <- function(data,
                         S_name = "S_inf"){
   
   if(estimator == "gcomp"){
-    est <- vegrowth::do_gcomp_nat_inf(data = data, 
+    all_est <- vegrowth::do_gcomp_nat_inf(data = data, 
                                       models = pkg_models,
                                       Z_name = Z_name,
                                       X_name = X_name, 
                                       exclusion_restriction = exclusion_restriction,
                                       cross_world = cross_world,
-                                      two_part_model = two_part_model)['additive_effect']
+                                      two_part_model = two_part_model)
+    
+    est <- list(additive_effect = all_est['additive_effect'],
+                additive_se = NA,
+                if_matrix = NA) 
+    
   } else if(estimator == "aipw"){
-    est <- vegrowth::do_aipw_nat_inf(data = data, 
+    all_est <- vegrowth::do_aipw_nat_inf(data = data, 
                                      models = pkg_models, 
                                      Y_name = Y_name,
                                      exclusion_restriction = exclusion_restriction,
@@ -300,13 +305,22 @@ est_nat_inf <- function(data,
                                      Z_name = Z_name, 
                                      X_name = X_name, 
                                      S_name = S_name,
-                                     return_se = FALSE,
-                                     two_part_model = two_part_model)['additive_effect']  
+                                     return_se = TRUE,
+                                     two_part_model = two_part_model)
+    
+    est <- list(additive_effect = all_est['additive_effect'],
+                additive_se = all_est['additive_se'],
+                if_matrix = attr(all_est, "if_matrix")) # workaround for package typing issues
+
   } else if (estimator == "unadj"){
-    est <- vegrowth::do_unadj_nat_inf(data = data,
+    all_est <- vegrowth::do_unadj_nat_inf(data = data,
                                       Z_name = "Z",
                                       Y_name = Y_name,
-                                      S_name = "S_inf")['additive_effect']
+                                      S_name = "S_inf")
+    
+    est <- list(additive_effect = all_est['additive_effect'],
+                additive_se = NA,
+                if_matrix = NA) 
   } else{
     stop("Unknown estimator: ", estimator)
   }
@@ -329,19 +343,29 @@ est_pop <- function(data,
                     S_name = "S_inf"){
   
   if(estimator == "gcomp"){
-    est <- vegrowth::do_gcomp_pop(data = data, 
+    all_est <- vegrowth::do_gcomp_pop(data = data, 
                                   models = pkg_models,
                                   Z_name = Z_name,
                                   X_name = X_name,
-                                  two_part_model = two_part_model)['additive_effect']
+                                  two_part_model = two_part_model)
+    
+    est <- list(additive_effect = all_est['additive_effect'],
+                additive_se = NA,
+                if_matrix = NA) 
+    
   } else if(estimator == "aipw"){
-    est <- vegrowth::do_aipw_pop(data = data, 
+    all_est <- vegrowth::do_aipw_pop(data = data, 
                                  models = pkg_models, 
                                  Y_name = Y_name,
                                  Z_name = Z_name, 
                                  X_name = X_name, 
-                                 return_se = FALSE,
-                                 two_part_model = two_part_model)['additive_effect']  
+                                 return_se = TRUE,
+                                 two_part_model = two_part_model) 
+    
+    est <- list(additive_effect = all_est['additive_effect'],
+                additive_se = all_est['additive_se'],
+                if_matrix = attr(all_est, "if_matrix")) # workaround for package typing issues
+    
   } else{
     stop("Unknown estimator: ", estimator)
   }

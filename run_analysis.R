@@ -8,6 +8,8 @@ options(echo = TRUE)
 
 here::i_am("run_analysis.R")
 
+library(dplyr)
+
 source(here::here("R/parameter_generation_fns.R"))
 source(here::here("R/simulate_data.R"))
 source(here::here("R/estimation_fn.R"))
@@ -32,10 +34,27 @@ setting_grid <- expand.grid(estimand = config$estimand,
 
 # elim any settings that do not exist (ex. where ER & CW both == FALSE, CW + 2 part, ER + CW + 2part)
 elim <- which(((setting_grid$estimand == "nat_inf" & setting_grid$cw == FALSE & setting_grid$er == FALSE)) | # nat inf both false
-                (setting_grid$estimand == "nat_inf" & setting_grid$cw == TRUE & setting_grid$two_stage == TRUE) | # only 1part for cross world
-                (setting_grid$estimand == "pop" & (setting_grid$cw == TRUE | setting_grid$er == TRUE))) # only need to run pop once (ER + CW do not apply; no assumptions)
+                (setting_grid$estimand == "nat_inf" & setting_grid$cw == TRUE & setting_grid$two_stage == TRUE)  ) #| # only 1part for cross world
+                 #(setting_grid$estimand == "pop" & (setting_grid$cw == TRUE | setting_grid$er == TRUE))) # only need to run pop once (ER + CW do not apply; no assumptions)
 
-setting_grid <- setting_grid[-elim,]
+if(length(elim) > 0){
+  setting_grid <- setting_grid[-elim,]
+}
+
+# if pop in there multiple times for given estimator, eliminate (ER + CW do not apply; no assumptions)
+setting_grid <- setting_grid %>%
+  group_by(estimand, estimator) %>%
+  # keep all non-pop rows; for pop keep only one per estimator
+  filter(
+    estimand != "pop" |
+      row_number() == 1
+  ) %>%
+  ungroup() %>%
+  # for the remaining pop rows, set er and cw to FALSE (no assumptions)
+  mutate(
+    er = if_else(estimand == "pop", FALSE, er),
+    cw = if_else(estimand == "pop", FALSE, cw)
+  )
 
 # add unadj if applicable
 if(config$nat_inf_unadj){
@@ -58,18 +77,26 @@ results <- lapply(config$n_sample_size, function(n){
   
   # Long term & population effect estimation -----------------------------
   
-  res_df <- data.frame()
-  
+  #res_df <- data.frame()
+
   # 1. Fit Models
   
   # Get unique timepoints needed in config$intervals
   Y_out <- unique(do.call(c, config$intervals))
-
+  
+  # list for if matrix, df for ease later on
+  res_list <- vector("list", length = length(Y_out))
+  res_df <- data.frame()
+  
   # Get effect for all individual Y_outs
   for(i in 1:length(Y_out)){
     
     # Name of outcome variable
     Y_name <- paste0("Y_", Y_out[i])
+    
+    # Element in list for each outcome variable, those elements are lists with one item for each setting
+    names(res_list)[i] <- Y_name
+    res_list[[Y_name]] <- vector("list", length = nrow(setting_grid))
     
     # Fit models
     if(nrow(setting_grid > 0)){
@@ -87,7 +114,11 @@ results <- lapply(config$n_sample_size, function(n){
     for(j in 1:nrow(setting_grid)){
       setting <- setting_grid[j,]
       
+      # add settings to element in list
+      res_list[[Y_name]][[j]]$setting <- setting
+      
       if(setting$estimand == "nat_inf"){
+        
         res <- est_nat_inf(data = data,
                            estimator = setting$estimator,
                            pkg_models = pkg_models,
@@ -96,6 +127,7 @@ results <- lapply(config$n_sample_size, function(n){
                            cross_world = setting$cw,
                            two_part_model = setting$two_stage)
         
+        res_list[[Y_name]][[j]]$res <- res
         
       } else{
         res <- est_pop(data = data,
@@ -104,9 +136,11 @@ results <- lapply(config$n_sample_size, function(n){
                        Y_name = Y_name, 
                        two_part_model = setting$two_stage)
         
+        res_list[[Y_name]][[j]]$res <- res
+        
       }
       
-      row <- data.frame(Y_out = Y_name, estimate = res, setting)
+      row <- data.frame(Y_out = Y_name, estimate = res$additive_effect, se = res$additive_se, setting)
       res_df <- rbind(res_df, row)
       
     }
@@ -140,8 +174,31 @@ results <- lapply(config$n_sample_size, function(n){
                            res_df$estimand == setting$estimand,]
       }
       
+      # use influence functions to get standard error
+      if(setting$estimator == "aipw"){
+        
+        if_matrix <- matrix(data = NA, ncol = 0, nrow = nrow(data))
+        
+        for(Y_name in Y_names){
+          Y_name_if_matrix <- res_list[[Y_name]][[j]]$res$if_matrix
+          colnames(Y_name_if_matrix) <- paste0(Y_name, "_", colnames(Y_name_if_matrix))
+          if_matrix <- cbind(if_matrix, Y_name_if_matrix)
+        }
+        
+        denom <- length(Y_names)
+        gradient <- matrix(rep(c(1/denom, -1/denom), length(Y_names)), ncol = 1)
+        
+        cov_matrix <- cov(if_matrix) / nrow(data)
+        se_interval <- sqrt(t(gradient) %*% cov_matrix %*% gradient)
+        
+      } else{
+        # otherwise get with bootstrap later
+        se_interval <- NA
+      }
+      
       row <- data.frame(Y_out = avg_name, 
                         estimate = mean(sub_df$estimate),
+                        se = se_interval,
                         setting)
       
       res_df <- rbind(res_df, row)
@@ -152,7 +209,11 @@ results <- lapply(config$n_sample_size, function(n){
   # Bootstrap Estimates ----------------------------------------
   
   # 1. Do n_boot bootstrap replicates
-  boot_res_list <- replicate(config$n_boot, one_boot(data, config, setting_grid, parameters), simplify = FALSE)
+  
+  setting_grid_no_aipw <- setting_grid %>%
+    filter(estimator != "aipw")
+  
+  boot_res_list <- replicate(config$n_boot, one_boot(data, config, setting_grid_no_aipw, parameters), simplify = FALSE)
   boot_res_df <- dplyr::bind_rows(boot_res_list, .id = "boot_id")
   
   # 2. Compute SEs, CIs, and rejection indicators per Y_out and estimand
@@ -166,7 +227,21 @@ results <- lapply(config$n_sample_size, function(n){
     )
   
   # 3. Merge bootstrap summaries with point estimates
-  results_full <- dplyr::left_join(res_df, boot_summary, by = c("Y_out", "estimand", "estimator", "er", "cw", "two_stage"))
+  results_full <- res_df %>%
+    left_join(
+      boot_summary,
+      by = c("Y_out", "estimand", "estimator", "er", "cw", "two_stage"),
+      suffix = c(".closedform", ".bootstrap")
+    ) %>%
+    mutate(
+      # combine SEs
+      se = coalesce(se.closedform, se.bootstrap),
+      
+      # fill in lower_ci and upper_ci
+      lower_ci = if_else(!is.na(lower_ci), lower_ci, estimate - 1.96 * se),
+      upper_ci = if_else(!is.na(upper_ci), upper_ci, estimate + 1.96 * se)
+    ) %>%
+    select(-se.closedform, -se.bootstrap)
   
   # 4. Add reject indicator columns
   results_full <- results_full %>%

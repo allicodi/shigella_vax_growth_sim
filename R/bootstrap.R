@@ -21,8 +21,8 @@ one_boot <- function(data, config, setting_grid, parameters){
     # Name of outcome variable
     Y_name <- paste0("Y_", Y_out[i])
     
-    # Fit models
-    if(nrow(setting_grid > 0)){
+    # Only fit models for gcomp (aipw uses closed form se, unadj doesn't need models)
+    if(nrow(setting_grid > 0) & c("gcomp" %in% setting_grid$estimator)){
       pkg_models <- vegrowth::fit_models(data = boot_data,
                                          Y_name = Y_name, 
                                          Z_name = "Z", 
@@ -32,6 +32,8 @@ one_boot <- function(data, config, setting_grid, parameters){
                                          method = config$estimators, 
                                          exclusion_restriction = TRUE, 
                                          family = "gaussian")
+    } else{
+      pkg_models <- NULL
     }
     
     for(j in 1:nrow(setting_grid)){
@@ -53,10 +55,9 @@ one_boot <- function(data, config, setting_grid, parameters){
                        pkg_models = pkg_models,
                        Y_name = Y_name, 
                        two_part_model = setting$two_stage)
-        
       }
-      
-      row <- data.frame(Y_out = Y_name, estimate = res, setting)
+          
+      row <- data.frame(Y_out = Y_name, estimate = as.numeric(res['additive_effect']), se = NA, setting)
       res_df <- rbind(res_df, row)
       
     }
@@ -92,6 +93,7 @@ one_boot <- function(data, config, setting_grid, parameters){
       
       row <- data.frame(Y_out = avg_name, 
                         estimate = mean(sub_df$estimate),
+                        se = NA,
                         setting)
       
       res_df <- rbind(res_df, row)

@@ -18,10 +18,10 @@ default: #6 month trial
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
-  estimators: ["gcomp", "aipw"]
-  exclusion_restriction: [TRUE, FALSE]
-  cross_world: [TRUE, FALSE]
-  two_stage: [TRUE, FALSE]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
   nat_inf_unadj: TRUE
   intervals:
     - 3
@@ -53,10 +53,10 @@ vax_12mo:
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
-  estimators: ["gcomp", "aipw"]
-  exclusion_restriction: [TRUE, FALSE]
-  cross_world: [TRUE, FALSE]
-  two_stage: [TRUE, FALSE]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
   nat_inf_unadj: TRUE
   intervals:
     - 3
@@ -88,10 +88,10 @@ vax_6mo_high_inc:
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
-  estimators: ["gcomp", "aipw"]
-  exclusion_restriction: [TRUE, FALSE]
-  cross_world: [TRUE, FALSE]
-  two_stage: [TRUE, FALSE]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
   nat_inf_unadj: TRUE
   intervals:
     - 3
@@ -123,10 +123,10 @@ vax_12mo_high_inc:
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
-  estimators: ["gcomp", "aipw"]
-  exclusion_restriction: [TRUE, FALSE]
-  cross_world: [TRUE, FALSE]
-  two_stage: [TRUE, FALSE]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
   nat_inf_unadj: TRUE
   intervals:
     - 3
