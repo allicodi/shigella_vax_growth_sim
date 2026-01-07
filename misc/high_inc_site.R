@@ -4,7 +4,7 @@ source("R/parameter_generation_fns.R")
 
 trials <- c("6mo", "12mo")
 sites <- c("Bangladesh", "Kenya", "Malawi", "Mali",
-           "Pakistan", "Peru", "The Gambia")
+           "Pakistan", "Peru", "The Gambia", "Total")
 
 combos <- expand.grid(trial = trials,
                       site = sites)

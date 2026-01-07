@@ -11,8 +11,8 @@ library(SuperLearner)
 library(survival)
 
 # not ideal but don't want to deal w HPC install issues rn
-devtools::load_all("~/abxGrowth/")
-#devtools::load_all("~/Documents/shigella_projects/packages/abxGrowth/")
+#devtools::load_all("~/abxGrowth/")
+devtools::load_all("~/Documents/shigella_projects/packages/abxGrowth/")
 
 source(here::here("misc/SL.wrappers.R"))
 
@@ -40,27 +40,87 @@ get_incidence <- function(dose_schedule = "6mo",
                         efgh_sev$tac_culture == "tac" &
                         efgh_sev$inc_type == "quad",]
   
+  # Change all to percentage CIs to match EFGH paper
+  
   if(dose_schedule == "6mo"){
+    # First Half MAD
     mad_inc_0_6 <- mean(as.numeric(mad_inc$est[mad_inc$agegrp == "6-8 months"]),
                         as.numeric(mad_inc$est[mad_inc$agegrp == "9-11 months"])) / 100 / 2
+    
+    mad_inc_0_6_lower <- mean(as.numeric(mad_inc$perc_cis_lower[mad_inc$agegrp == "6-8 months"]),
+                              as.numeric(mad_inc$perc_cis_lower[mad_inc$agegrp == "9-11 months"])) / 100 / 2
+    
+    mad_inc_0_6_upper <- mean(as.numeric(mad_inc$perc_cis_upper[mad_inc$agegrp == "6-8 months"]),
+                              as.numeric(mad_inc$perc_cis_upper[mad_inc$agegrp == "9-11 months"])) / 100 / 2
+    
+    # Second Half MAD
     mad_inc_6_12 <- as.numeric(mad_inc$est[mad_inc$agegrp == "12-17 months"]) / 100 / 2
     
+    mad_inc_6_12_lower <- as.numeric(mad_inc$perc_cis_lower[mad_inc$agegrp == "12-17 months"]) / 100 / 2
+    mad_inc_6_12_upper <- as.numeric(mad_inc$perc_cis_upper[mad_inc$agegrp == "12-17 months"]) / 100 / 2
+    
+    # First Half MSD
     msd_inc_0_6 <- mean(as.numeric(msd_inc$est[mad_inc$agegrp == "6-8 months"]),
                         as.numeric(msd_inc$est[mad_inc$agegrp == "9-11 months"])) / 100 / 2
+    
+    # NA for The Gambia? if NA use percent but idk why it's NA
+    if(enroll_site == "The Gambia"){
+      msd_inc_0_6_lower <- mean(as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "6-8 months"]),
+                                as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "9-11 months"])) / 100 / 2
+      
+      msd_inc_0_6_upper <- mean(as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "6-8 months"]),
+                                as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "9-11 months"])) / 100 / 2
+    } else{
+      msd_inc_0_6_lower <- mean(as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "6-8 months"]),
+                                as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "9-11 months"])) / 100 / 2
+      
+      msd_inc_0_6_upper <- mean(as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "6-8 months"]),
+                                as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "9-11 months"])) / 100 / 2
+    }
+    
+    # Second Half MSD
     msd_inc_6_12 <- as.numeric(msd_inc$est[msd_inc$agegrp == "12-17 months"]) / 100 / 2
+    msd_inc_6_12_lower <- as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "12-17 months"]) / 100 / 2
+    msd_inc_6_12_upper <- as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "12-17 months"]) / 100 / 2
     
   } else{
+    # First half MAD
     mad_inc_0_6 <- as.numeric(mad_inc$est[mad_inc$agegrp == "12-17 months"]) / 100 / 2
+    
+    mad_inc_0_6_lower <- as.numeric(mad_inc$perc_cis_lower[mad_inc$agegrp == "12-17 months"]) / 100 / 2
+    mad_inc_0_6_upper <- as.numeric(mad_inc$perc_cis_upper[mad_inc$agegrp == "12-17 months"]) / 100 / 2
+    
+    # Second half MAD
     mad_inc_6_12 <- as.numeric(mad_inc$est[mad_inc$agegrp == "18-23 months"]) / 100 / 2
     
+    mad_inc_6_12_lower <- as.numeric(mad_inc$perc_cis_lower[mad_inc$agegrp == "18-23 months"]) / 100 / 2
+    mad_inc_6_12_upper <- as.numeric(mad_inc$perc_cis_upper[mad_inc$agegrp == "18-23 months"]) / 100 / 2
+    
+    # First half MSD
     msd_inc_0_6 <- as.numeric(msd_inc$est[mad_inc$agegrp == "12-17 months"]) / 100 / 2
+    
+    msd_inc_0_6_lower <- as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "12-17 months"]) / 100 / 2
+    msd_inc_0_6_upper <- as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "12-17 months"]) / 100 / 2
+    
+    # Second half MSD
     msd_inc_6_12 <- as.numeric(msd_inc$est[msd_inc$agegrp == "18-23 months"]) / 100 / 2
+    
+    msd_inc_6_12_lower <- as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "18-23 months"]) / 100 / 2
+    msd_inc_6_12_upper <- as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "18-23 months"]) / 100 / 2
   }
   
   return(data.frame(mad_inc_0_6 = mad_inc_0_6,
+                    mad_inc_0_6_lower = mad_inc_0_6_lower,
+                    mad_inc_0_6_upper = mad_inc_0_6_upper,
                     mad_inc_6_12 = mad_inc_6_12,
+                    mad_inc_6_12_lower = mad_inc_6_12_lower,
+                    mad_inc_6_12_upper = mad_inc_6_12_upper,
                     msd_inc_0_6 = msd_inc_0_6,
-                    msd_inc_6_12 = msd_inc_6_12))
+                    msd_inc_0_6_lower = msd_inc_0_6_lower,
+                    msd_inc_0_6_upper = msd_inc_0_6_upper,
+                    msd_inc_6_12 = msd_inc_6_12,
+                    msd_inc_6_12_lower = msd_inc_6_12_lower,
+                    msd_inc_6_12_upper = msd_inc_6_12_upper))
 }
 
 # ---------------------------------------------------------------------------
