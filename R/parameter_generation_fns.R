@@ -63,20 +63,11 @@ get_incidence <- function(dose_schedule = "6mo",
     msd_inc_0_6 <- mean(as.numeric(msd_inc$est[mad_inc$agegrp == "6-8 months"]),
                         as.numeric(msd_inc$est[mad_inc$agegrp == "9-11 months"])) / 100 / 2
     
-    # NA for The Gambia? if NA use percent but idk why it's NA
-    if(enroll_site == "The Gambia"){
-      msd_inc_0_6_lower <- mean(as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "6-8 months"]),
-                                as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "9-11 months"])) / 100 / 2
-      
-      msd_inc_0_6_upper <- mean(as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "6-8 months"]),
-                                as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "9-11 months"])) / 100 / 2
-    } else{
-      msd_inc_0_6_lower <- mean(as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "6-8 months"]),
-                                as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "9-11 months"])) / 100 / 2
-      
-      msd_inc_0_6_upper <- mean(as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "6-8 months"]),
-                                as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "9-11 months"])) / 100 / 2
-    }
+    msd_inc_0_6_lower <- mean(as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "6-8 months"]),
+                              as.numeric(msd_inc$perc_cis_lower[msd_inc$agegrp == "9-11 months"])) / 100 / 2
+    
+    msd_inc_0_6_upper <- mean(as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "6-8 months"]),
+                              as.numeric(msd_inc$perc_cis_upper[msd_inc$agegrp == "9-11 months"])) / 100 / 2
     
     # Second Half MSD
     msd_inc_6_12 <- as.numeric(msd_inc$est[msd_inc$agegrp == "12-17 months"]) / 100 / 2

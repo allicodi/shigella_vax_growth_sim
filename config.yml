@@ -1,129 +1,44 @@
-default: #6 month trial
+default: # 6 month trial - The Gambia - default incidence
   n_boot: 1000
   n_sample_size: 
     - 2500
     - 5000
     - 10000
     - 20000
-    - 30000
     - 40000
-    - 60000
-    - 80000
-  dose_schedule: "6mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0253
-  incidence_severe_shigella_0_6: 0.0147
-  incidence_shigella_6_12: 0.0373
-  incidence_severe_shigella_6_12: 0.0203
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.25
-  scale_growth_effect_6_12: 0
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: TRUE
-  intervals:
-    - 3
-    - 6
-    - 9
-    - 12
-    - [6, 12]
-    - [3, 6, 9, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-base_12mo: # 12 month trial
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 30000
-    - 40000
-    - 60000
-    - 80000
-  dose_schedule: "12mo"
-  site: "Overall"
-  incidence_shigella_0_6: 0.0373
-  incidence_severe_shigella_0_6: 0.0203
-  incidence_shigella_6_12: 0.0580
-  incidence_severe_shigella_6_12: 0.0255
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: 0
-  scale_growth_effect_6_12: 0.25
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: TRUE
-  intervals:
-    - 3
-    - 6
-    - 9
-    - 12
-    - [6, 12]
-    - [3, 6, 9, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-# Optimistic settings: The Gambia incidence, larger growth effect sizes, higher VE 
-  
-gambia_6mo: #optimistic 6 month trial = The Gambia incidence, improved VE, larger effect size
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 30000
-    - 40000
-    - 60000
     - 80000
   dose_schedule: "6mo"
   site: "The Gambia"
-  incidence_shigella_0_6: 0.0207
+  incidence_shigella_0_6: 0.0207 # the gambia incidence point estimates from EFGH
   incidence_severe_shigella_0_6: 0.0063
   incidence_shigella_6_12: 0.0656
   incidence_severe_shigella_6_12: 0.0213
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.75
-  scale_growth_effect_6_12: -0.50
-  VE_mild: 0.60
-  VE_severe: 0.80
+  scale_growth_effect_0_6: -0.25 # youngest kids 6-18 mo have larger effect (scale towards lower CI)
+  scale_growth_effect_6_12: 0 # kids 18-24 mo have estimated effect
+  VE_mild: 0.40
+  VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
   estimators: ["aipw"]
   exclusion_restriction: [TRUE]
   cross_world: [TRUE]
   two_stage: [FALSE]
-  nat_inf_unadj: TRUE
+  nat_inf_unadj: FALSE
   intervals:
-    - 3
     - 6
-    - 9
     - 12
     - [6, 12]
-    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
   
-gambia_12mo: # optimistic 12 month trial = The Gambia incidence, improved VE, larger effect size
+base_12mo: # 12 month trial - The Gambia - default incidence
   n_boot: 1000
   n_sample_size: 
     - 2500
     - 5000
     - 10000
     - 20000
-    - 30000
     - 40000
-    - 60000
     - 80000
   dose_schedule: "12mo"
   site: "The Gambia"
@@ -132,48 +47,44 @@ gambia_12mo: # optimistic 12 month trial = The Gambia incidence, improved VE, la
   incidence_shigella_6_12: 0.1239
   incidence_severe_shigella_6_12: 0.0385
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.50
-  scale_growth_effect_6_12: -0.25
-  VE_mild: 0.60
-  VE_severe: 0.80
+  scale_growth_effect_0_6: 0 # kids 18-24 mo have estimated effect
+  scale_growth_effect_6_12: 0.25 # kids 18-24 mo have smaller effect than estimated (scale towards upper CI)
+  VE_mild: 0.40
+  VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
   estimators: ["aipw"]
   exclusion_restriction: [TRUE]
   cross_world: [TRUE]
   two_stage: [FALSE]
-  nat_inf_unadj: TRUE
+  nat_inf_unadj: FALSE
   intervals:
-    - 3
     - 6
-    - 9
     - 12
     - [6, 12]
-    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
   
-# The Gambia incidence, larger growth effect sizes, default VE 
-  
-gambia_default_VE_6mo: #6 month - The Gambia incidence, larger effect size
+# Optimistic settings: The Gambia incidence, larger growth effect sizes, higher VE
+
+# 6 month trial - The Gambia - upper CI incidence - larger effect sizes
+optimistic_6mo: 
   n_boot: 1000
   n_sample_size: 
     - 2500
     - 5000
     - 10000
     - 20000
-    - 30000
     - 40000
-    - 60000
     - 80000
   dose_schedule: "6mo"
   site: "The Gambia"
-  incidence_shigella_0_6: 0.0207
-  incidence_severe_shigella_0_6: 0.0063
-  incidence_shigella_6_12: 0.0656
-  incidence_severe_shigella_6_12: 0.0213
+  incidence_shigella_0_6: 0.043 # the gambia incidence upper CI estimates from EFGH
+  incidence_severe_shigella_0_6: 0.016
+  incidence_shigella_6_12: 0.112
+  incidence_severe_shigella_6_12: 0.038
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.75
-  scale_growth_effect_6_12: -0.50
+  scale_growth_effect_0_6: -0.75 # youngest kids 6-18 mo have largest effect (scale towards lower CI)
+  scale_growth_effect_6_12: -0.50 # kids 18-24 mo scaled too
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
@@ -181,37 +92,33 @@ gambia_default_VE_6mo: #6 month - The Gambia incidence, larger effect size
   exclusion_restriction: [TRUE]
   cross_world: [TRUE]
   two_stage: [FALSE]
-  nat_inf_unadj: TRUE
+  nat_inf_unadj: FALSE
   intervals:
-    - 3
     - 6
-    - 9
     - 12
     - [6, 12]
-    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
   
-gambia_default_VE_12mo: # optimistic 12 month trial = The Gambia incidence, larger growth effect size, default VE
+# 12 month trial - The Gambia - upper CI incidence - larger effect sizes
+optimistic_12mo: 
   n_boot: 1000
   n_sample_size: 
     - 2500
     - 5000
     - 10000
     - 20000
-    - 30000
     - 40000
-    - 60000
     - 80000
   dose_schedule: "12mo"
   site: "The Gambia"
-  incidence_shigella_0_6: 0.0656
-  incidence_severe_shigella_0_6: 0.0213
-  incidence_shigella_6_12: 0.1239
-  incidence_severe_shigella_6_12: 0.0385
+  incidence_shigella_0_6: 0.112
+  incidence_severe_shigella_0_6: 0.038
+  incidence_shigella_6_12: 0.203
+  incidence_severe_shigella_6_12: 0.067
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.50
-  scale_growth_effect_6_12: -0.25
+  scale_growth_effect_0_6: -0.50 # kids 12-18 mo (scale towards upper CI; match 6mo optimistic sim)
+  scale_growth_effect_6_12: -0.25 # kids 18-24 mo (scale towards upper CI)
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
@@ -219,171 +126,80 @@ gambia_default_VE_12mo: # optimistic 12 month trial = The Gambia incidence, larg
   exclusion_restriction: [TRUE]
   cross_world: [TRUE]
   two_stage: [FALSE]
-  nat_inf_unadj: TRUE
+  nat_inf_unadj: FALSE
   intervals:
-    - 3
     - 6
-    - 9
     - 12
     - [6, 12]
-    - [3, 6, 9, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-# Optimistic settings 2: Peru incidence, larger growth effect sizes, higher VE 
-
-peru_6mo: #optimistic 6 month trial = The Gambia incidence, improved VE, larger effect size
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 30000
-    - 40000
-    - 60000
-    - 80000
-  dose_schedule: "6mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.1004
-  incidence_severe_shigella_0_6: 0.0660
-  incidence_shigella_6_12: 0.0773
-  incidence_severe_shigella_6_12: 0.0700
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.75
-  scale_growth_effect_6_12: -0.50
-  VE_mild: 0.60
-  VE_severe: 0.80
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: TRUE
-  intervals:
-    - 3
-    - 6
-    - 9
-    - 12
-    - [6, 12]
-    - [3, 6, 9, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-peru_12mo: # optimistic 12 month trial = The Gambia incidence, improved VE, larger effect size
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 30000
-    - 40000
-    - 60000
-    - 80000
-  dose_schedule: "12mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.0773
-  incidence_severe_shigella_0_6: 0.0700 
-  incidence_shigella_6_12: 0.1139
-  incidence_severe_shigella_6_12: 0.0840 
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.50
-  scale_growth_effect_6_12: -0.25
-  VE_mild: 0.60
-  VE_severe: 0.80
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: TRUE
-  intervals:
-    - 3
-    - 6
-    - 9
-    - 12
-    - [6, 12]
-    - [3, 6, 9, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-# The Gambia incidence, larger growth effect sizes, default VE 
-  
-peru_default_VE_6mo: #6 month - The Gambia incidence, larger effect size
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 30000
-    - 40000
-    - 60000
-    - 80000
-  dose_schedule: "6mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.1004
-  incidence_severe_shigella_0_6: 0.0660
-  incidence_shigella_6_12: 0.0773
-  incidence_severe_shigella_6_12: 0.0700
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.75
-  scale_growth_effect_6_12: -0.50
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: TRUE
-  intervals:
-    - 3
-    - 6
-    - 9
-    - 12
-    - [6, 12]
-    - [3, 6, 9, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-peru_default_VE_12mo: # optimistic 12 month trial = The Gambia incidence, larger growth effect size, default VE
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 30000
-    - 40000
-    - 60000
-    - 80000
-  dose_schedule: "12mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.0773
-  incidence_severe_shigella_0_6: 0.0700 
-  incidence_shigella_6_12: 0.1139
-  incidence_severe_shigella_6_12: 0.0840 
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.50
-  scale_growth_effect_6_12: -0.25
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: TRUE
-  intervals:
-    - 3
-    - 6
-    - 9
-    - 12
-    - [6, 12]
-    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
 
+# 6 month trial - The Gambia - different underlying age incidence structure - larger effect sizes
+# youngest kids (6-18) have optimistic incidence (upper CI); 12-18 lower CI
+optimistic_6mo_age: 
+  n_boot: 1000
+  n_sample_size: 
+    - 2500
+    - 5000
+    - 10000
+    - 20000
+    - 40000
+    - 80000
+  dose_schedule: "6mo"
+  site: "The Gambia"
+  incidence_shigella_0_6: 0.043 # the gambia incidence upper CI estimates from EFGH
+  incidence_severe_shigella_0_6: 0.016
+  incidence_shigella_6_12: 0.041 # the gambia incidence lower CI estimates from EFGH
+  incidence_severe_shigella_6_12: 0.012
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  scale_growth_effect_0_6: -0.75 # youngest kids 6-18 mo have largest effect (scale towards lower CI)
+  scale_growth_effect_6_12: -0.50 # kids 18-24 mo scaled too
+  VE_mild: 0.40
+  VE_severe: 0.60
+  estimand: ["nat_inf", "pop"]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
+  nat_inf_unadj: FALSE
+  intervals:
+    - 6
+    - 12
+    - [6, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  
+# 12 month trial - The Gambia - different underlying age incidence structure - larger effect sizes
+optimistic_12mo_age: 
+  n_boot: 1000
+  n_sample_size: 
+    - 2500
+    - 5000
+    - 10000
+    - 20000
+    - 40000
+    - 80000
+  dose_schedule: "12mo"
+  site: "The Gambia"
+  incidence_shigella_0_6: 0.112 # the gambia incidence upper CI estimates from EFGH
+  incidence_severe_shigella_0_6: 0.038
+  incidence_shigella_6_12: 0.080  # the gambia incidence lower CI estimates from EFGH
+  incidence_severe_shigella_6_12: 0.022
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  scale_growth_effect_0_6: -0.50 # kids 12-18 mo 
+  scale_growth_effect_6_12: -0.25 # kids 18-24 mo 
+  VE_mild: 0.40
+  VE_severe: 0.60
+  estimand: ["nat_inf", "pop"]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
+  nat_inf_unadj: FALSE
+  intervals:
+    - 6
+    - 12
+    - [6, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
   
