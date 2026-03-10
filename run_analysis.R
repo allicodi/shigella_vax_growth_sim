@@ -20,6 +20,9 @@ seed <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
 setting <- Sys.getenv("SETTING")
 parameters <- readRDS(Sys.getenv("PARAMETERS_FILE"))
 
+# set seed
+set.seed(seed)
+
 # ALTERNATIVE
 # get setting from bash script
 # cargs <- commandArgs(TRUE)
