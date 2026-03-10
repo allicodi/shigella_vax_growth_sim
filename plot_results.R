@@ -527,11 +527,18 @@ true_effect_df %>%
 
 # Figure 1 (2? if babies) - Power for Overall  ------------------------------
 
-config_settings <- c("default",
-                     "base_12mo")
+# config_settings <- c("default",
+#                      "base_12mo")
+# 
+# config_setting_names <- c("6 month vaccine schedule",
+#                           "12 month vaccine schedule")
 
-config_setting_names <- c("6 month vaccine schedule",
-                          "12 month vaccine schedule")
+
+config_settings <- c("peru_6mo",
+                     "peru_12mo")
+
+config_setting_names <- c("Peru 6 month vaccine schedule",
+                          "Peru 12 month vaccine schedule")
 
 all_power_df <- purrr::map2_dfr(
   config_settings,
@@ -549,6 +556,8 @@ all_power_df <- purrr::map2_dfr(
   }
 )
 
+
+
 all_power_df <- all_power_df %>%
   mutate(
     color_group = case_when(
@@ -556,9 +565,13 @@ all_power_df <- all_power_df %>%
       line_type == "Naturally Infected"                    ~ "Naturally Infected",
       line_type == "Population"                            ~ "Population"
     ),
-    setting_name = factor(setting_name, levels = c("6 month vaccine schedule",
-                                                   "12 month vaccine schedule"))
+    setting_name = factor(setting_name, levels = c("Peru 6 month vaccine schedule",
+                                                   "Peru 12 month vaccine schedule"))
   )
+
+# FILTER UNADJUSTED
+all_power_df <- all_power_df %>%
+  filter(shape_type != "Unadjusted")
 
 plot_power_combined <- function(power_df) {
   
@@ -566,21 +579,21 @@ plot_power_combined <- function(power_df) {
   power_df <- power_df %>%
     mutate(
       color_label = case_when(
-        line_type == "Naturally Infected" & shape_type == "AIPW"     ~ "Naturally Infected (Covariate Adjusted)",
+        line_type == "Naturally Infected" & shape_type == "AIPW"     ~ "Naturally Infected ",
         line_type == "Naturally Infected" & shape_type == "Unadjusted" ~ "Naturally Infected (Unadjusted)",
         line_type == "Population" ~ "Population"
       )
     )
   
   color_map <- c(
-    "Naturally Infected (Covariate Adjusted)" = "#42b540",
-    "Naturally Infected (Unadjusted)"        = "#00468b",
+    "Naturally Infected " = "#00468b",
+    #"Naturally Infected (Unadjusted)"        = "#00468b",
     "Population"                             = "#ed0000"
   )
   
   linetype_map <- c(
-    "Naturally Infected (Covariate Adjusted)" = "solid",
-    "Naturally Infected (Unadjusted)"        = "dotted",
+    "Naturally Infected " = "solid",
+   # "Naturally Infected (Unadjusted)"        = "dotted",
     "Population"                             = "dashed"
   )
   
@@ -607,8 +620,8 @@ plot_power_combined <- function(power_df) {
     ) +
     
     scale_y_continuous(
-      limits = c(0, 0.4),
-      breaks = seq(0, 0.4, by = 0.1),
+      limits = c(0, 1),
+      breaks = seq(0, 1, by = 0.2),
       labels = scales::percent
     ) +
     scale_x_continuous(
