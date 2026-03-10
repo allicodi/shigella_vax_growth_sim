@@ -107,27 +107,28 @@ simulate_data <- function(parameters,
   # Y_t1 to Y_t12: Monthly HAZ outcome 
   # ---------------------------------------------------------------------------
   
-  # Changed back to 1:12 for each setting for ease of estimation later
+  # 12 months of follow up
   matrix_range <- 1:12
   
-  # if(parameters$dose_schedule == "6mo"){
-  #   matrix_range <- 7:18
-  # } else{
-  #   matrix_range <- 13:24
-  # }
+  # MAL-ED model is in months 0 through end of study. these indices are for which months to use depending on immunization schedule
+  if(parameters$dose_schedule == "6mo"){
+    months <- 7:18
+  } else{
+    months <- 13:24
+  }
   
   # noise first so same for each Z0 and Z1
-  noise_matrix <- sapply(matrix_range, function(i) rnorm(n, mean = 0, sd = parameters$monthly_growth_model$sd[i]))
+  noise_matrix <- sapply(months, function(i) rnorm(n, mean = 0, sd = parameters$monthly_growth_model$sd[i]))
   
   ### Simulate growth in absence of infection ----------------------------------
   Y_vec_no_inf <- vector(mode = "list", length = 12)
-  Y_vec_no_inf[[1]] <- parameters$monthly_growth_model$beta_0[matrix_range[1]] +
-    parameters$monthly_growth_model$beta_1[matrix_range[1]] * X + # baseline growth
+  Y_vec_no_inf[[1]] <- parameters$monthly_growth_model$beta_0[months[1]] +
+    parameters$monthly_growth_model$beta_1[months[1]] * X + # baseline growth
     noise_matrix[,1]
   
   for(i in 2:length(Y_vec_no_inf)){
-    Y_vec_no_inf[[i]] <- parameters$monthly_growth_model$beta_0[matrix_range[i]] +
-      parameters$monthly_growth_model$beta_1[matrix_range[i]] * Y_vec_no_inf[[i-1]] +  # previous month's growth
+    Y_vec_no_inf[[i]] <- parameters$monthly_growth_model$beta_0[months[i]] +
+      parameters$monthly_growth_model$beta_1[months[i]] * Y_vec_no_inf[[i-1]] +  # previous month's growth
       noise_matrix[,i]
   }
   
