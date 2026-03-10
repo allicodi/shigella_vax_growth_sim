@@ -36,6 +36,14 @@ get_bias <- function(results, truth, config) {
 #' @param truth list containing truth for each estimand and endpoint combination
 #' @param config config for given setting
 get_coverage <- function(results, truth, config) {
+  
+  # workaround for bug forgot to add with no boot version 
+  if(is.null(results$lower_ci) | is.null(results$upper_ci)){
+    results <- results %>%
+      mutate(lower_ci = estimate - 1.96 * se,
+             upper_ci = estimate + 1.96 * se)
+  }
+  
   results <- results %>%
     dplyr::mutate(
       truth_val = purrr::map2_dbl(

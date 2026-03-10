@@ -251,7 +251,12 @@ results <- lapply(config$n_sample_size, function(n){
       ) %>%
       select(-se.closedform, -se.bootstrap)
   } else{
-    results_full <- res_df
+    results_full <- res_df %>%
+      mutate(
+        # fill in lower_ci and upper_ci
+        lower_ci = estimate - 1.96 * se,
+        upper_ci = estimate + 1.96 * se
+      )
   }
   
   # 4. Add reject indicator columns
