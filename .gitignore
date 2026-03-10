@@ -1,3 +1,4 @@
+*.Rds
 parameters
 .DS_Store
 .Rhistory
@@ -9,5 +10,8 @@ data
 misc/maled_data
 misc/results
 misc/provide_data
+misc/*.docx
+misc/*.pptx
+misc/*.pdf
 parameters_default.Rds
 parameters_debug_default_original.Rds

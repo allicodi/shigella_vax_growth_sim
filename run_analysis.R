@@ -105,7 +105,7 @@ results <- lapply(config$n_sample_size, function(n){
     res_list[[Y_name]] <- vector("list", length = nrow(setting_grid))
     
     # Fit models
-    if(nrow(setting_grid > 0)){
+    if(nrow(setting_grid) > 0){
       pkg_models <- vegrowth::fit_models(data = data,
                                          Y_name = Y_name, 
                                          Z_name = "Z", 
@@ -216,40 +216,43 @@ results <- lapply(config$n_sample_size, function(n){
   
   # Bootstrap Estimates ----------------------------------------
   
-  # 1. Do n_boot bootstrap replicates
-  
-  setting_grid_no_aipw <- setting_grid %>%
-    filter(estimator != "aipw")
-  
-  boot_res_list <- replicate(config$n_boot, one_boot(data, config, setting_grid_no_aipw, parameters), simplify = FALSE)
-  boot_res_df <- dplyr::bind_rows(boot_res_list, .id = "boot_id")
-  
-  # 2. Compute SEs, CIs, and rejection indicators per Y_out and estimand
-  boot_summary <- boot_res_df %>%
-    dplyr::group_by(Y_out, estimand, estimator, er, cw, two_stage) %>%
-    dplyr::summarise(
-      se = sd(estimate, na.rm = TRUE),
-      lower_ci = quantile(estimate, 0.025, na.rm = TRUE),
-      upper_ci = quantile(estimate, 0.975, na.rm = TRUE),
-      .groups = "drop"
-    )
-  
-  # 3. Merge bootstrap summaries with point estimates
-  results_full <- res_df %>%
-    left_join(
-      boot_summary,
-      by = c("Y_out", "estimand", "estimator", "er", "cw", "two_stage"),
-      suffix = c(".closedform", ".bootstrap")
-    ) %>%
-    mutate(
-      # combine SEs
-      se = coalesce(se.closedform, se.bootstrap),
-      
-      # fill in lower_ci and upper_ci
-      lower_ci = if_else(!is.na(lower_ci), lower_ci, estimate - 1.96 * se),
-      upper_ci = if_else(!is.na(upper_ci), upper_ci, estimate + 1.96 * se)
-    ) %>%
-    select(-se.closedform, -se.bootstrap)
+  # 1. Do n_boot bootstrap replicates (if passed in an estimator requiring bootstrap)
+  if(any(setting_grid$estimator != "aipw")){
+    setting_grid_no_aipw <- setting_grid %>%
+      filter(estimator != "aipw")
+    
+    boot_res_list <- replicate(config$n_boot, one_boot(data, config, setting_grid_no_aipw, parameters), simplify = FALSE)
+    boot_res_df <- dplyr::bind_rows(boot_res_list, .id = "boot_id")
+    
+    # 2. Compute SEs, CIs, and rejection indicators per Y_out and estimand
+    boot_summary <- boot_res_df %>%
+      dplyr::group_by(Y_out, estimand, estimator, er, cw, two_stage) %>%
+      dplyr::summarise(
+        se = sd(estimate, na.rm = TRUE),
+        lower_ci = quantile(estimate, 0.025, na.rm = TRUE),
+        upper_ci = quantile(estimate, 0.975, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    # 3. Merge bootstrap summaries with point estimates
+    results_full <- res_df %>%
+      left_join(
+        boot_summary,
+        by = c("Y_out", "estimand", "estimator", "er", "cw", "two_stage"),
+        suffix = c(".closedform", ".bootstrap")
+      ) %>%
+      mutate(
+        # combine SEs
+        se = coalesce(se.closedform, se.bootstrap),
+        
+        # fill in lower_ci and upper_ci
+        lower_ci = if_else(!is.na(lower_ci), lower_ci, estimate - 1.96 * se),
+        upper_ci = if_else(!is.na(upper_ci), upper_ci, estimate + 1.96 * se)
+      ) %>%
+      select(-se.closedform, -se.bootstrap)
+  } else{
+    results_full <- res_df
+  }
   
   # 4. Add reject indicator columns
   results_full <- results_full %>%
