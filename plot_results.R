@@ -24,6 +24,20 @@ power_df <- results$power_df
 prop_neg_df <- results$prop_neg_df 
 bias_df <- results$bias_df 
 
+config_settings <- c("default",
+                     "base_12mo",
+                     "optimistic_6mo",
+                     "optimistic_12mo",
+                     "optimistic_6mo_age",
+                     "optimistic_12mo_age")
+
+config_setting_names <- c("6 month trial",
+                          "12 month trial",
+                          "6 month trial- optimistic incidence & growth effect",
+                          "12 month trial- optimistic incidence & growth effect",
+                          "6 month trial- different age structure",
+                          "12 month trial- different age structure")
+
 # switch to make estimator = shape (dot for AIPW, triangle for G-Comp, square for unadjusted), and make the colors = to the different er / cw combinations
 # -------------------------------------
 # Helper to generate readable labels
@@ -347,51 +361,6 @@ plot_bias <- function(bias_df, add_CI = FALSE, setting = "default") {
 
 # ---------------------------------------------------------------------------
 
-config_settings <- c("default",
-                     "base_12mo",
-                     # "gambia_6mo",
-                     # "gambia_12mo",
-                     # "peru_6mo",
-                     # "peru_12mo",
-                     "gambia_default_VE_6mo",
-                     "gambia_default_VE_12mo",
-                     "peru_default_VE_6mo",
-                     "peru_default_VE_12mo")
-                     # "optimistic_6mo",
-                     # "optimistic_12mo",
-                     # "high_inc_ge_6mo",
-                     # "high_inc_ge_12mo")
-
-config_setting_names <- c("6 month trial",
-                          "12 month trial",
-                          # "6 month trial- The Gambia, optimistic growth effect, higher VE",
-                          # "12 month trial- The Gambia, optimistic growth effect, higher VE",
-                          # "6 month trial- Peru, optimistic growth effect, higher VE",
-                          # "12 month trial- Peru, optimistic growth effect, higher VE",
-                          "6 month trial- The Gambia, optimistic growth effect",
-                          "12 month trial- The Gambia, optimistic growth effect",
-                          "6 month trial- Peru, optimistic growth effect",
-                          "12 month trial- Peru, optimistic growth effect")
-
-# config_settings <- c("default",
-#                      "vax_12mo",
-#                      "vax_6mo_high_inc",
-#                      "vax_12mo_high_inc",
-#                      "vax_6mo_optimistic_ge",
-#                      "vax_12mo_optimistic_ge",
-#                      "vax_6mo_optimistic_ge_EM",
-#                      "vax_12mo_optimistic_ge_EM",
-#                      "vax_6mo_high_inc_optimistic_ge_EM")
-# 
-# config_setting_names <- c("6 month trial",
-#                           "12 month trial",
-#                           "6 month trial, high incidence (Peru)",
-#                           "12 month trial, high incidence (Peru)",
-#                           "6 month trial, optimistic growth effect",
-#                           "12 month trial, optimistic growth effect",
-#                           "6 month trial, optimistic growth effect,\n effect modification by age",
-#                           "12 month trial, optimistic growth effect,\n effect modification by age",
-#                           "6 month trial, high incidence (Peru),\n optimistic growth effect, effect modification by age")
 
 all_truth_df <- dplyr::tibble()
 
@@ -442,24 +411,22 @@ truth_long <- all_truth_df %>%
       str_detect(parameter, "^pop") ~ "Population"
     ),
     Outcome = case_when(
-      str_detect(parameter, "Y_3_6_9_12") ~ "Y[3-6-9-12]",
       str_detect(parameter, "Y_6_12")     ~ "Y[6-12]",
       str_detect(parameter, "Y_12")       ~ "Y[12]",
-      str_detect(parameter, "Y_9")        ~ "Y[9]",
-      str_detect(parameter, "Y_6")        ~ "Y[6]",
-      str_detect(parameter, "Y_3")        ~ "Y[3]"
+      str_detect(parameter, "Y_6")        ~ "Y[6]"
     )
   )
+
 
 truth_long <- truth_long %>%
   mutate(
     Table_Col = case_when(
-      setting == "default"               ~ "Overall_6mo",
-      setting == "base_12mo"              ~ "Overall_12mo",
-      setting == "gambia_default_VE_6mo"  ~ "The_Gambia_6mo",
-      setting == "gambia_default_VE_12mo" ~ "The_Gambia_12mo",
-      setting == "peru_default_VE_6mo"    ~ "Peru_6mo",
-      setting == "peru_default_VE_12mo"   ~ "Peru_12mo"
+      setting == "default"               ~ "The_Gambia_6mo",
+      setting == "base_12mo"              ~ "The_Gambia_12mo",
+      setting == "optimistic_6mo"  ~ "The_Gambia_6mo_high_inc",
+      setting == "optimistic_12mo" ~ "The_Gambia_12mo_high_inc",
+      setting == "optimistic_6mo_age"    ~ "The_Gambia_6mo_age",
+      setting == "optimistic_12mo_age"   ~ "The_Gambia_12mo_age"
     )
   )
 
@@ -470,8 +437,6 @@ true_effect_df <- truth_long %>%
     values_from = value
   ) %>%
   arrange(Estimand)
-
-
 
 true_effect_df %>%
   mutate(
@@ -484,9 +449,9 @@ true_effect_df %>%
       Outcome == "Y[3-6-9-12]"    ~ "$Y_{3\\text{--}6\\text{--}9\\text{--}12}$"
     ),
     across(
-      c(Overall_6mo, Overall_12mo,
-        The_Gambia_6mo, The_Gambia_12mo,
-        Peru_6mo, Peru_12mo),
+      c(The_Gambia_6mo, The_Gambia_12mo,
+        The_Gambia_6mo_high_inc, The_Gambia_12mo_high_inc,
+        The_Gambia_6mo_age, The_Gambia_12mo_age),
       ~ sprintf("%.4f", .x)
     )
   ) %>%
@@ -506,9 +471,9 @@ true_effect_df %>%
   add_header_above(
     c(
       " " = 2,
-      "Overall" = 2,
-      "The Gambia" = 2,
-      "Peru" = 2
+      "Baseline" = 2,
+      "High Incidence" = 2,
+      "Mixed incidence structure" = 2
     ),
     bold = TRUE
   ) %>%
@@ -653,218 +618,6 @@ plot_power_combined <- function(power_df) {
       linetype = guide_legend(nrow = 1)
     )
 }
-
-
-# -----------------------------------------------
-
-
-# ------------------------------------------------------------------
-# Power heatmap at fixed sample size n = 10,000
-# ------------------------------------------------------------------
-
-library(ggplot2)
-library(dplyr)
-library(tidyr)
-
-# Configuration
-config_settings <- c("default",
-                     "base_12mo",
-                     "gambia_default_VE_6mo",
-                     "gambia_default_VE_12mo",
-                     "peru_default_VE_6mo",
-                     "peru_default_VE_12mo")
-
-config_setting_names <- c("6 month trial - Overall",
-                          "12 month trial - Overall",
-                          "6 month trial - The Gambia",
-                          "12 month trial - The Gambia",
-                          "6 month trial - Peru",
-                          "12 month trial - Peru")
-
-# Fixed sample size
-fixed_n <- 20000
-
-# Collect all power data at fixed n
-all_power_heatmap <- purrr::map2_dfr(
-  config_settings,
-  config_setting_names,
-  ~ {
-    results <- readRDS(here::here(paste0("results/", .x, "_evaluation_results.Rds")))
-    
-    power_df <- results$power_df |> 
-      add_labels() |>
-      filter(n == fixed_n) |>
-      mutate(
-        setting = .x,
-        setting_name = .y
-      )
-    
-    return(power_df)
-  }
-) 
-
-# Create heatmap data - filter for specific estimator/estimand combinations
-heatmap_data <- all_power_heatmap %>%
-  # You can filter for specific combinations here
-  # For example, just AIPW with naturally infected estimand:
-  filter(
-    estimator == "aipw",
-    estimand == "nat_inf"
-  ) %>%
-  mutate(
-    # # Clean up outcome labels
-    # Y_out_clean = case_when(
-    #   Y_out == "Y[3]" ~ "Y₃",
-    #   Y_out == "Y[6]" ~ "Y₆",
-    #   Y_out == "Y[9]" ~ "Y₉",
-    #   Y_out == "Y[12]" ~ "Y₁₂",
-    #   Y_out == "Y[6-12]" ~ "Y₆₋₁₂",
-    #   Y_out == "Y[3-6-9-12]" ~ "Y₃₋₆₋₉₋₁₂"
-    # ),
-    # # Order outcomes
-    # Y_out_clean = factor(
-    #   Y_out_clean,
-    #   levels = c("Y₃", "Y₆", "Y₉", "Y₁₂", "Y₆₋₁₂", "Y₃₋₆₋₉₋₁₂")
-    # ),
-    # Order settings
-    setting_name = factor(
-      setting_name,
-      levels = rev(config_setting_names)
-    )
-  )
-
-# Create heatmap
-power_heatmap <- ggplot(
-  heatmap_data,
-  aes(x = Y_out, y = setting_name, fill = power)
-) +
-  geom_tile(color = "white", linewidth = 1) +
-  geom_text(
-    aes(label = sprintf("%.1f%%", power * 100)),
-    color = "white",
-    size = 5,
-    fontface = "bold"
-  ) +
-  scale_fill_gradient2(
-    low = "#d73027",
-    mid = "#fee090",
-    high = "#1a9850",
-    midpoint = 0.3,
-    limits = c(0, 0.6),
-    breaks = seq(0, 0.6, by = 0.1),
-    labels = scales::percent_format(accuracy = 1),
-    name = "Power"
-  ) +
-  labs(
-    x = "Outcome",
-    y = "Trial Setting",
-    title = paste0("Naturally infected AIPW estimator power"),
-    subtitle = paste0("n = ", scales::comma(fixed_n))
-  ) +
-  theme_minimal(base_size = 14) +
-  scale_x_discrete(labels = scales::label_parse()) + 
-  theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-    plot.subtitle = element_text(hjust = 0.5, size = 12),
-    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 12),
-    axis.text.y = element_text(size = 11),
-    axis.title = element_text(face = "bold", size = 13),
-    legend.position = "right",
-    panel.grid = element_blank()
-  )
-
-# Save the plot
-ggsave(
-  filename = here::here(paste0("results/figures/power_heatmap_n", fixed_n, ".png")),
-  plot = power_heatmap,
-  width = 10,
-  height = 6,
-  dpi = 300
-)
-
-print(power_heatmap)
-
-# Optional: Create separate heatmaps for different estimator/estimand combinations
-create_heatmap_by_group <- function(data, est, estimand_type, n) {
-  
-  heatmap_subset <- data %>%
-    filter(
-      estimator == est,
-      estimand == estimand_type
-    ) %>%
-    mutate(
-      Y_out_clean = case_when(
-        Y_out == "Y[3]" ~ "Y₃",
-        Y_out == "Y[6]" ~ "Y₆",
-        Y_out == "Y[9]" ~ "Y₉",
-        Y_out == "Y[12]" ~ "Y₁₂",
-        Y_out == "Y[6-12]" ~ "Y₆₋₁₂",
-        Y_out == "Y[3-6-9-12]" ~ "Y₃₋₆₋₉₋₁₂"
-      ),
-      Y_out_clean = factor(
-        Y_out_clean,
-        levels = c("Y₃", "Y₆", "Y₉", "Y₁₂", "Y₆₋₁₂", "Y₃₋₆₋₉₋₁₂")
-      ),
-      setting_name = factor(setting_name, levels = config_setting_names)
-    )
-  
-  estimand_label <- ifelse(estimand_type == "nat_inf", "Naturally Infected", "Population")
-  est_label <- ifelse(est == "aipw", "AIPW", ifelse(est == "gcomp", "G-Comp", "Unadjusted"))
-  
-  p <- ggplot(
-    heatmap_subset,
-    aes(x = Y_out_clean, y = setting_name, fill = power)
-  ) +
-    geom_tile(color = "white", linewidth = 1) +
-    geom_text(
-      aes(label = sprintf("%.1f%%", power * 100)),
-      color = "white",
-      size = 4.5,
-      fontface = "bold"
-    ) +
-    scale_fill_gradient2(
-      low = "#d73027",
-      mid = "#fee090",
-      high = "#1a9850",
-      midpoint = 0.4,
-      limits = c(0, 1),
-      breaks = seq(0, 1, by = 0.2),
-      labels = scales::percent_format(accuracy = 1),
-      name = "Power"
-    ) +
-    labs(
-      x = "Outcome",
-      y = "Trial Setting",
-      title = paste0("Power at n = ", scales::comma(n)),
-      subtitle = paste(est_label, "estimator,", estimand_label, "estimand")
-    ) +
-    theme_minimal(base_size = 14) +
-    theme(
-      plot.title = element_text(hjust = 0.5, face = "bold", size = 16),
-      plot.subtitle = element_text(hjust = 0.5, size = 12),
-      axis.text.x = element_text(angle = 0, hjust = 0.5, size = 12),
-      axis.text.y = element_text(size = 11),
-      axis.title = element_text(face = "bold", size = 13),
-      legend.position = "right",
-      panel.grid = element_blank()
-    )
-  
-  ggsave(
-    filename = here::here(paste0("results/figures/power_heatmap_", est, "_", estimand_type, "_n", n, ".png")),
-    plot = p,
-    width = 10,
-    height = 6,
-    dpi = 300
-  )
-  
-  return(p)
-}
-
-# Create heatmaps for all combinations
-create_heatmap_by_group(all_power_heatmap, "aipw", "nat_inf", fixed_n)
-create_heatmap_by_group(all_power_heatmap, "aipw", "pop", fixed_n)
-create_heatmap_by_group(all_power_heatmap, "gcomp", "nat_inf", fixed_n)
-create_heatmap_by_group(all_power_heatmap, "unadj", "nat_inf", fixed_n)
 
 # ----------------------------------------------------------------------
 

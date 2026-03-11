@@ -134,9 +134,8 @@ optimistic_12mo:
   null_hypothesis_value: 0
   alpha_level: 0.05
 
-# 6 month trial - The Gambia - different underlying age incidence structure - larger effect sizes
-# youngest kids (6-18) have optimistic incidence (upper CI); 12-18 lower CI
-optimistic_6mo_age: 
+# 6 month trial - Peru - different underlying age incidence structure 
+peru_6mo: 
   n_boot: 1000
   n_sample_size: 
     - 2500
@@ -146,14 +145,14 @@ optimistic_6mo_age:
     - 40000
     - 80000
   dose_schedule: "6mo"
-  site: "The Gambia"
-  incidence_shigella_0_6: 0.043 # the gambia incidence upper CI estimates from EFGH
-  incidence_severe_shigella_0_6: 0.016
-  incidence_shigella_6_12: 0.041 # the gambia incidence lower CI estimates from EFGH
-  incidence_severe_shigella_6_12: 0.012
+  site: "Peru"
+  incidence_shigella_0_6: 0.100 # peru incidence estimate from EFGH 6-12
+  incidence_severe_shigella_0_6: 0.066
+  incidence_shigella_6_12: 0.077 # peru incidence estimate from EFGH 12-18
+  incidence_severe_shigella_6_12: 0.070
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.75 # youngest kids 6-18 mo have largest effect (scale towards lower CI)
-  scale_growth_effect_6_12: -0.50 # kids 18-24 mo scaled too
+  scale_growth_effect_0_6: -0.25 # youngest kids 6-12 mo have largest effect (scale towards lower CI)
+  scale_growth_effect_6_12: 0 # kids 12-18 estimated effect
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
@@ -169,8 +168,8 @@ optimistic_6mo_age:
   null_hypothesis_value: 0
   alpha_level: 0.05
   
-# 12 month trial - The Gambia - different underlying age incidence structure - larger effect sizes
-optimistic_12mo_age: 
+# 6 month trial - Peru - different underlying age incidence structure 
+peru_12mo: 
   n_boot: 1000
   n_sample_size: 
     - 2500
@@ -180,14 +179,14 @@ optimistic_12mo_age:
     - 40000
     - 80000
   dose_schedule: "12mo"
-  site: "The Gambia"
-  incidence_shigella_0_6: 0.112 # the gambia incidence upper CI estimates from EFGH
-  incidence_severe_shigella_0_6: 0.038
-  incidence_shigella_6_12: 0.080  # the gambia incidence lower CI estimates from EFGH
-  incidence_severe_shigella_6_12: 0.022
+  site: "Peru"
+  incidence_shigella_0_6: 0.077 # the gambia incidence upper CI estimates from EFGH
+  incidence_severe_shigella_0_6: 0.070
+  incidence_shigella_6_12: 0.114  # the gambia incidence lower CI estimates from EFGH
+  incidence_severe_shigella_6_12: 0.084
   effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.50 # kids 12-18 mo 
-  scale_growth_effect_6_12: -0.25 # kids 18-24 mo 
+  scale_growth_effect_0_6: 0 # kids 12-18 mo 
+  scale_growth_effect_6_12: 0.25 # kids 18-24 mo 
   VE_mild: 0.40
   VE_severe: 0.60
   estimand: ["nat_inf", "pop"]
