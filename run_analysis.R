@@ -81,6 +81,13 @@ results <- lapply(config$n_sample_size, function(n){
                         seed = seed, 
                         type = "observed")
   
+  # if dropout, remove dropout% of observations 
+  if(config$dropout > 0){
+    n_drop <- ceiling(nrow(data) * config$dropout)
+    which_drop <- sample(1:nrow(data), n_drop, replace = FALSE)
+    data <- data[-which_drop,]
+  }
+  
   # Long term & population effect estimation -----------------------------
   
   #res_df <- data.frame()

@@ -15,3 +15,7 @@ misc/*.pptx
 misc/*.pdf
 parameters_default.Rds
 parameters_debug_default_original.Rds
+config_old.yml
+misc/draft_figure_2.png
+misc/figure_2.png
+misc/figure_2_supp.png

@@ -25,11 +25,15 @@ default: # 6 month trial - The Gambia - default incidence
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
+  dropout: 0.10
   
 base_12mo: # 12 month trial - The Gambia - default incidence
   n_boot: 1000
@@ -58,11 +62,15 @@ base_12mo: # 12 month trial - The Gambia - default incidence
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
+  dropout: 0.10
   
 # Optimistic settings: The Gambia incidence, larger growth effect sizes, higher VE
 
@@ -94,11 +102,15 @@ optimistic_6mo:
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
+  dropout: 0.10
   
 # 12 month trial - The Gambia - upper CI incidence - larger effect sizes
 optimistic_12mo: 
@@ -128,11 +140,15 @@ optimistic_12mo:
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
+  dropout: 0.10
   
 # 6 month trial - The Gambia - different underlying age incidence structure - larger effect sizes
 # youngest kids (6-18) have optimistic incidence (upper CI); 12-18 lower CI
@@ -163,11 +179,15 @@ optimistic_6mo_age:
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
+  dropout: 0.10
 
 # 12 month trial - The Gambia - different underlying age incidence structure - larger effect sizes
 optimistic_12mo_age: 
@@ -197,11 +217,15 @@ optimistic_12mo_age:
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
+  dropout: 0.10
 
 # 6 month trial - Peru - different underlying age incidence structure 
 peru_6mo: 
@@ -231,11 +255,15 @@ peru_6mo:
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
+  dropout: 0.10
   
 # 12 month trial - Peru - different underlying age incidence structure 
 # except underlying age structure is not different
@@ -266,152 +294,13 @@ peru_12mo:
   two_stage: [FALSE]
   nat_inf_unadj: FALSE
   intervals:
+    - 3
     - 6
+    - 9
     - 12
     - [6, 12]
+    - [3, 6, 9, 12]
   null_hypothesis_value: 0
   alpha_level: 0.05
-  
-  
-# 6 month trial - Peru - different underlying age incidence structure 
-peru_6mo_inc_ge: 
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 40000
-    - 80000
-  dose_schedule: "6mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.100 # peru incidence estimate from EFGH 6-12
-  incidence_severe_shigella_0_6: 0.066
-  incidence_shigella_6_12: 0.077 # peru incidence estimate from EFGH 12-18
-  incidence_severe_shigella_6_12: 0.070
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.75 # youngest kids 6-12 mo have largest effect (scale towards lower CI)
-  scale_growth_effect_6_12: -0.50 # kids 12-18 estimated effect
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: FALSE
-  intervals:
-    - 6
-    - 12
-    - [6, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-# 12 month trial - Peru - different underlying age incidence structure 
-# except underlying age structure is not different
-peru_12mo_inc_ge: 
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 40000
-    - 80000
-  dose_schedule: "12mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.077 # peru incidence estimate from EFGH 12-18
-  incidence_severe_shigella_0_6: 0.070
-  incidence_shigella_6_12: 0.114  # peru incidence estimate from EFGH 18-24
-  incidence_severe_shigella_6_12: 0.084
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.50 # kids 12-18 mo 
-  scale_growth_effect_6_12: -0.25 # kids 18-24 mo 
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: FALSE
-  intervals:
-    - 6
-    - 12
-    - [6, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-  
-# 6 month trial - Peru - different underlying age incidence structure 
-# upper bound for 6-12mo, point est for 12-18 mo
-peru_6mo_inc_ge_incidence: 
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 40000
-    - 80000
-  dose_schedule: "6mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.240 # peru upper bound incidence estimate from EFGH 6-12 
-  incidence_severe_shigella_0_6: 0.172
-  incidence_shigella_6_12: 0.077 # peru incidence estimate from EFGH 12-18
-  incidence_severe_shigella_6_12: 0.070
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.75 # youngest kids 6-12 mo have largest effect (scale towards lower CI)
-  scale_growth_effect_6_12: -0.50 # kids 12-18 estimated effect
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: FALSE
-  intervals:
-    - 6
-    - 12
-    - [6, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-# 12 month trial - Peru - different underlying age incidence structure 
-# upper bound for 12-18mo, point est for 18-24 mo
-peru_12mo_inc_ge_incidence: 
-  n_boot: 1000
-  n_sample_size: 
-    - 2500
-    - 5000
-    - 10000
-    - 20000
-    - 40000
-    - 80000
-  dose_schedule: "12mo"
-  site: "Peru"
-  incidence_shigella_0_6: 0.171 # peru upper bound incidence estimate from EFGH 12-18
-  incidence_severe_shigella_0_6: 0.158
-  incidence_shigella_6_12: 0.114  # peru incidence estimate from EFGH 18-24
-  incidence_severe_shigella_6_12: 0.084
-  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
-  scale_growth_effect_0_6: -0.50 # kids 12-18 mo 
-  scale_growth_effect_6_12: -0.25 # kids 18-24 mo 
-  VE_mild: 0.40
-  VE_severe: 0.60
-  estimand: ["nat_inf", "pop"]
-  estimators: ["aipw"]
-  exclusion_restriction: [TRUE]
-  cross_world: [TRUE]
-  two_stage: [FALSE]
-  nat_inf_unadj: FALSE
-  intervals:
-    - 6
-    - 12
-    - [6, 12]
-  null_hypothesis_value: 0
-  alpha_level: 0.05
-  
-
+  dropout: 0.10
   
