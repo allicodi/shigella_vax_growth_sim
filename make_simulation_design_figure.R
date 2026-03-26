@@ -183,7 +183,7 @@ bl_haz_fig <- ggplot(norm_df, aes(x = enr_haz, y = density)) +
 
 # Panel 3: Effect of BL growth on Shigella infection -----------------------------
 
-X_grid <- c(-2, 0)
+X_grid <- c(-1, -2)
 
 inc_df_0_6 <- expand.grid(
   intercept = params$hazard_S__X_int_0_6,
@@ -191,7 +191,10 @@ inc_df_0_6 <- expand.grid(
   mean_X    = X_grid
 )
 
-inc_ratio_0_6 <- cum_inc_by_row(inc_df_0_6[1,]) / cum_inc_by_row(inc_df_0_6[2,])
+# Any diarrhea
+inc_0_6_neg1 <- cum_inc_by_row(inc_df_0_6[1,])
+inc_0_6_neg2 <- cum_inc_by_row(inc_df_0_6[2,])
+inc_ratio_0_6 <- inc_0_6_neg1 / inc_0_6_neg2
 
 inc_df_6_12 <- expand.grid(
   intercept = params$hazard_S__X_int_6_12,
@@ -199,10 +202,28 @@ inc_df_6_12 <- expand.grid(
   mean_X    = X_grid
 )
 
-inc_ratio_6_12 <- cum_inc_by_row(inc_df_6_12[1,]) / cum_inc_by_row(inc_df_6_12[2,])
+inc_6_12_neg1 <- cum_inc_by_row(inc_df_6_12[1,])
+inc_6_12_neg2 <- cum_inc_by_row(inc_df_6_12[2,])
+inc_ratio_6_12 <- inc_6_12_neg1 / inc_6_12_neg2
+
+# MSD
+
+sev_inc_0_6_neg1 <- inc_0_6_neg1 * plogis(params$hazard_S_sev__X_int_0_6 + params$hazard_S_sev__X_coef_0_6 * X_grid[1])
+sev_inc_0_6_neg2 <- inc_0_6_neg2 * plogis(params$hazard_S_sev__X_int_0_6 + params$hazard_S_sev__X_coef_0_6 * X_grid[2])
+sev_inc_ratio_0_6 <- sev_inc_0_6_neg1 / sev_inc_0_6_neg2
+
+sev_inc_6_12_neg1 <- inc_6_12_neg1 * plogis(params$hazard_S_sev__X_int_6_12 + params$hazard_S_sev__X_coef_6_12 * X_grid[1])
+sev_inc_6_12_neg2 <- inc_6_12_neg2 * plogis(params$hazard_S_sev__X_int_6_12 + params$hazard_S_sev__X_coef_6_12 * X_grid[2])
+sev_inc_ratio_6_12 <- sev_inc_6_12_neg1 / sev_inc_6_12_neg2
+
 
 df <- data.frame(
-  inc_ratio = c(inc_ratio_0_6, inc_ratio_6_12),
+  inc_neg1 = round(round(c(inc_0_6_neg1, inc_6_12_neg1),3) * 100 * 2, 1),
+  inc_neg2 = round(round(c(inc_0_6_neg2, inc_6_12_neg2),3) * 100 * 2, 1),
+  inc_ratio = round(c(inc_ratio_0_6, inc_ratio_6_12), 2),
+  sev_inc_neg1 = round(round(c(sev_inc_0_6_neg1, sev_inc_6_12_neg1),3) * 100 * 2, 1),
+  sev_inc_neg2 = round(round(c(sev_inc_0_6_neg2, sev_inc_6_12_neg2),3) * 100 * 2, 1),
+  sev_inc_ratio = round(c(sev_inc_ratio_0_6, sev_inc_ratio_6_12), 2),
   age_range = age_grp
 )
 
@@ -211,20 +232,53 @@ df$age_range <- factor(
   levels = age_grp
 )
 
+plot_df <- df %>%
+  select(age_range, inc_ratio, sev_inc_ratio) %>%
+  pivot_longer(
+    cols = c(inc_ratio, sev_inc_ratio),
+    names_to = "severity",
+    values_to = "irr"
+  ) %>%
+  mutate(
+    severity = recode(severity,
+                     inc_ratio = "Medically attended diarrhea",
+                     sev_inc_ratio = "Moderate-to-severe diarrhea")
+  )
+
 hazard_fig <- ggplot(
-  df,
+  plot_df,
   aes(
     x = age_range,
-    y = inc_ratio,
-    linetype = age_range
+    y = irr,
+    linetype = age_range,
+    group = severity
   )
 ) +
   geom_col(
-    fill = "#00468BFF",
+    aes(fill = severity),
     color = 'black',
-    width = 0.8,
-    alpha = 0.9
+    position = position_dodge(width = 0.7),
+    width = 0.65,
+    alpha = 0.9,
+    linewidth = 0.6
   ) +
+  
+  geom_text(
+    aes(
+      label = irr
+    ),
+    position = position_dodge(width = 0.7),
+    vjust = -0.3,       # slightly above the bar
+    size = 3.5
+  ) +
+  
+  scale_fill_manual(
+    values = c(
+      "Medically attended diarrhea" = "#00468BFF",
+      "Moderate-to-severe diarrhea" = "#ED0000FF"
+    )
+  ) + 
+
   scale_linetype_manual(
     values = age_linetypes,
     guide = "none"     # no legend for linetype
@@ -236,9 +290,10 @@ hazard_fig <- ggplot(
   ) +
   labs(
     x = "Age Group",
-    y = "Incidence rate ratio\n(HAZ −2 vs 0)"
+    y = "Incidence rate ratio\n(HAZ -1 vs -2)" # one unit increase HAZ -2 to -1
   ) +
   theme_minimal() +
+  coord_cartesian(ylim = c(0.75, 1.25)) +
   theme(
     panel.grid.minor = element_blank(),
     legend.position = "none",
@@ -350,8 +405,8 @@ plot_combined <- plot_combined %>%
 
 growth_effect_fig <- ggplot(plot_combined, aes(x = month_num, y = pt_est, color = severity, fill = severity)) +
   geom_ribbon(aes(ymin = lower_ci, ymax = upper_ci), alpha = 0.2, color = NA) +
-  geom_line(data = filter(plot_combined, line_type == "All ages"), 
-            aes(size = 1.5), linetype = "solid") +
+  # geom_line(data = filter(plot_combined, line_type == "All ages"), 
+  #           aes(size = 1.5), linetype = "solid") +
   geom_point(data = filter(plot_combined, line_type == "All ages"), size = 4) +
   scale_size_identity() +
   scale_color_manual(
@@ -395,7 +450,7 @@ growth_effect_fig <- ggplot(plot_combined, aes(x = month_num, y = pt_est, color 
   ) +
   labs(
     x = "Month",
-    y = "Growth Effect"
+    y = "HAZ difference (95% CI)"
   ) +
   theme_minimal(base_size = 14) +
   theme(
