@@ -18,7 +18,7 @@ library(knitr)
 library(purrr)
 library(kableExtra)
 
-here::i_am("make_results_figures.R")
+here::i_am("R/make_results_figures.R")
 
 config_settings <- c("default",
                      "base_12mo",

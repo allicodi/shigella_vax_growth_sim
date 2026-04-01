@@ -21,4 +21,4 @@ sbatch --array=1-$NSEEDS \
 	--output=/projects/dbenkes/allison/shigella_vaccine_trial/scratch/${SETTING}_%A_%a.out \
 	--job-name=shigella_%a \
 	--export=SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID,SETTING=$SETTING,PARAMETERS_FILE=$PARAMETERS_FILE \
-	--wrap "/apps/R/4.4.0/bin/Rscript run_analysis.R"
+	--wrap "/apps/R/4.4.0/bin/Rscript R/run_analysis.R"

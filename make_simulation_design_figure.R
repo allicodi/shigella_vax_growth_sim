@@ -2,14 +2,14 @@
 # Script to make simulation design figure with consolidated legends
 # ------------------------------------------------------
 
-here::i_am("make_simulation_design_figure.R")
+here::i_am("R/make_simulation_design_figure.R")
 
 library(dplyr)
 library(ggplot2)
 library(patchwork)
 library(ggpattern)
 
-source(here::here("R/parameter_generation_fns.R"))
+source(here::here("R/helpers/parameter_generation_fns.R"))
 
 cargs <- commandArgs(TRUE)
 setting <- cargs[[1]]

@@ -10,10 +10,10 @@ options(echo = TRUE)
 sessionInfo()
 .libPaths()
 
-here::i_am("get_parameters.R")
+here::i_am("R/get_parameters.R")
 
-source(here::here("R/parameter_generation_fns.R"))
-source(here::here("R/simulate_parameters.R"))
+source(here::here("R/helpers/parameter_generation_fns.R"))
+source(here::here("R/helpers/simulate_parameters.R"))
 
 # get setting from bash script
 cargs <- commandArgs(TRUE)

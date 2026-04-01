@@ -6,14 +6,14 @@
 
 options(echo = TRUE)
 
-here::i_am("run_analysis.R")
+here::i_am("R/run_analysis.R")
 
 library(dplyr)
 
-source(here::here("R/parameter_generation_fns.R"))
-source(here::here("R/simulate_data.R"))
-source(here::here("R/estimation_fn.R"))
-source(here::here("R/bootstrap.R"))
+source(here::here("R/helpers/parameter_generation_fns.R"))
+source(here::here("R/helpers/simulate_data.R"))
+source(here::here("R/helpers/estimation_fn.R"))
+source(here::here("R/helpers/bootstrap.R"))
 
 # get seed & config settings from bash script
 seed <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))

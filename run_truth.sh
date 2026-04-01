@@ -18,4 +18,4 @@ sbatch \
     --mem-per-cpu=6G \
     --output=/projects/dbenkes/allison/shigella_vaccine_trial/scratch/truth_${SETTING}_%J.out \
     --job-name=truth_${SETTING} \
-    --wrap "/apps/R/4.4.0/bin/Rscript get_truth.R $SETTING $PARAMETERS_FILE $TRUTH_DIR"
+    --wrap "/apps/R/4.4.0/bin/Rscript R/get_truth.R $SETTING $PARAMETERS_FILE $TRUTH_DIR"
