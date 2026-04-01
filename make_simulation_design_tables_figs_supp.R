@@ -244,7 +244,7 @@ plot_df <- all_IRR_df %>%
   ) %>%
   mutate(
     outcome = recode(outcome,
-                     inc_ratio = "Medically attended diarrhea",
+                     inc_ratio = "Any diarrhea",
                      sev_inc_ratio = "Moderate-to-severe diarrhea")
   )
 
@@ -281,7 +281,7 @@ irr_plot <- ggplot(
   # match your main color style
   scale_fill_manual(
     values = c(
-      "Medically attended diarrhea" = "#00468BFF",
+      "Any diarrhea" = "#00468BFF",
       "Moderate-to-severe diarrhea" = "#ED0000FF"
     )
   ) +

@@ -103,7 +103,7 @@ inc_fig <- ggplot(
     values = severity_colors,
     labels = c(
       "LSD" = "Less-severe diarrhea (LSD)",
-      "MAD" = "Medically attended diarrhea (MAD)",
+      "MAD" = "Any diarrhea",
       "MSD" = "Moderate-to-severe diarrhea (MSD)"
     ),
     name = "Episode severity"
@@ -241,7 +241,7 @@ plot_df <- df %>%
   ) %>%
   mutate(
     severity = recode(severity,
-                     inc_ratio = "Medically attended diarrhea",
+                     inc_ratio = "Any diarrhea",
                      sev_inc_ratio = "Moderate-to-severe diarrhea")
   )
 
@@ -274,7 +274,7 @@ hazard_fig <- ggplot(
   
   scale_fill_manual(
     values = c(
-      "Medically attended diarrhea" = "#00468BFF",
+      "Any diarrhea" = "#00468BFF",
       "Moderate-to-severe diarrhea" = "#ED0000FF"
     )
   ) + 
@@ -479,7 +479,7 @@ dummy_legend <- ggplot(legend_df, aes(x = x, y = y, color = severity, linetype =
     values = severity_colors,
     labels = c(
       "LSD" = "Less-severe diarrhea (LSD)",
-      "MAD" = "Medically attended diarrhea (MAD)",
+      "MAD" = "Any diarrhea",
       "MSD" = "Moderate-to-severe diarrhea (MSD)"
     ),
     name = "Episode severity"

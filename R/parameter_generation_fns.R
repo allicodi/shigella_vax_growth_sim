@@ -284,7 +284,7 @@ hr_maled <- function(dose_schedule = "6mo"){
                             as.numeric(difftime(cens_date_1, bl_date, units = "weeks")))) %>%
     filter(!is.na(ftime1)) 
   
-  # Make dataset for first 6mo, excluding people who had shigella or dropped out of study in the first six months
+  # Make dataset for second 6mo, excluding people who had shigella or dropped out of study in the first six months
   data_2 <- data_1 %>%
     filter(!(shigella_pos_1 == 1)) %>%
     mutate(shigella_pos_2 = if_else(!is.na(diar_date) & as.Date(diar_date) <= as.Date(cens_date_2), 1, 0),
@@ -353,7 +353,7 @@ get_effect_baseline_growth_sev_inf <- function(dose_schedule = "6mo",
   # if dose schedule = 12mo, fit model 12-18 & 18-24
   if(dose_schedule == "6mo"){
     data_0_6 <- inf_data[inf_data[[age_var_name]] >= 6 & inf_data[[age_var_name]] < 12,]
-    data_6_12 <- inf_data[inf_data[[age_var_name]] >= 12 & inf_data[[age_var_name]] < 24,]
+    data_6_12 <- inf_data[inf_data[[age_var_name]] >= 12 & inf_data[[age_var_name]] < 24,] #AGH fix probably?
   } else{
     data_0_6 <- inf_data[inf_data[[age_var_name]] >= 12 & inf_data[[age_var_name]] < 18,]
     data_6_12 <- inf_data[inf_data[[age_var_name]] >= 18 & inf_data[[age_var_name]] < 24,]

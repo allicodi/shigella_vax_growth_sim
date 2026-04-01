@@ -1180,3 +1180,246 @@ ggsave(here::here("results/figures/high_power_endpoint_supp.png"),
        width = 10,
        height = 10)
 
+############################################################
+# Supplement proportion negative figures for all endpoints
+############################################################
+
+# grab all Y[12] endpoints for each setting
+all_prop_neg_df <- pmap_dfr(
+  list(
+    setting = all_settings,
+    setting_name = all_names,
+    immunization_schedule = all_schedule
+  ),
+  function(setting, setting_name, immunization_schedule) {
+    results <- readRDS(here::here(paste0("results/", setting, "_evaluation_results.Rds")))
+    
+    # Get proportion significant -- check if upper bound < 0
+    results$results$sig_neg <- ifelse(results$results$estimate + 1.96*results$results$se < 0, 1, 0)
+    
+    sig_neg_summary <- results$results %>%
+      group_by(estimand, n, Y_out) %>%
+      summarise(
+        prop_sig_neg = mean(sig_neg),
+        prop_sig_neg__neg_est = mean(sig_neg[estimate < 0]),
+        .groups = "drop"
+      )
+    
+    # stopped here, join with reuslts
+    truth_nat_inf <- results$truth_df$nat_inf_Y_12
+    truth_pop <- results$truth_df$pop_Y_12
+    
+    results$prop_neg_df %>%
+      left_join(sig_neg_summary, by = c("estimand", "n", "Y_out")) %>%
+      add_labels() %>%
+      #filter(Y_out == "Y[12]") %>%
+      mutate(
+        setting = setting,
+        setting_name = setting_name,
+        immunization_schedule = immunization_schedule
+      ) 
+    
+  }
+)
+
+all_prop_neg_df <- all_prop_neg_df %>%
+  mutate(immunization_schedule = factor(immunization_schedule, levels = c("6 month immunization schedule",
+                                                                          "12 month immunization schedule")),
+         setting_name = factor(setting_name, levels = c("General recruitment",
+                                                        "Targeted recruitment", 
+                                                        "High early incidence")))
+
+
+all_prop_neg_df <- all_prop_neg_df %>%
+  mutate(
+    sig_neg_label = scales::percent(prop_sig_neg__neg_est, accuracy = 0.1)
+  )
+
+# For making prop_neg plot all settings
+plot_prop_neg_combo <- function(df, plot_title = NULL) {
+  
+  color_map <- c(
+    "Naturally Infected" = "#00468b",
+    "Population" = "#ed0000"
+  )
+  
+  linetype_map <- c(
+    "Naturally Infected" = "solid",
+    "Population" = "solid"
+  )
+  
+  ggplot(
+    df,
+    aes(
+      x = n,
+      y = prop_neg,
+      color = estimand,
+      linetype = estimand,
+      group = estimand
+    )
+  ) +
+    
+    geom_line(linewidth = 1.2) +
+    geom_point(size = 3.5) +
+  
+    facet_grid(
+      Y_out ~ immunization_schedule,
+      labeller = labeller(Y_out = label_parsed)
+    ) + 
+    
+    scale_color_manual(values = color_map) +
+    scale_linetype_manual(values = linetype_map) +
+    
+    scale_y_continuous(
+      limits = c(0,0.60),
+      breaks = seq(0,0.6,0.2),
+      labels = scales::percent
+    ) +
+    
+    scale_x_log10(
+      breaks = c(2500, 5000, 10000, 20000, 40000, 80000),
+      labels = scales::comma
+    ) +
+    
+    labs(
+      x = "Sample Size",
+      y = expression("Proportion negative vaccine effect estimates"),
+      color = "Estimand",
+      linetype = "Estimand",
+      title = plot_title
+    ) +
+    
+    theme_minimal(base_size = 16) +
+    theme(
+      legend.position = "bottom",
+      strip.text = element_text(size = 14, face = "bold"),
+      panel.spacing = unit(14, "pt"),
+      panel.grid.minor = element_blank()
+    )
+}
+
+# For making prop_neg plot all settings
+plot_prop_sig_neg_combo <- function(df, plot_title = NULL) {
+  
+  color_map <- c(
+    "Naturally Infected" = "#00468b",
+    "Population" = "#ed0000"
+  )
+  
+  linetype_map <- c(
+    "Naturally Infected" = "solid",
+    "Population" = "solid"
+  )
+  
+  ggplot(
+    df,
+    aes(
+      x = n,
+      y = prop_sig_neg,
+      color = estimand,
+      linetype = estimand,
+      group = estimand
+    )
+  ) +
+    
+    geom_line(linewidth = 1.2) +
+    geom_point(size = 3.5, fill = "white") +
+    
+    # geom_point(
+    #   aes(y = prop_sig_neg),
+    #   shape = 21,
+    #   stroke = 1.2,
+    #   size = 1,
+    #   fill = "white",
+    #   position = position_nudge(y = 0.02)
+    # ) +
+    
+    # Add truth annotation in top-left, slightly offset to avoid overlap
+    # geom_text(
+    #   aes(
+    #     x = 40000, 
+    #     y = if_else(estimand == "Naturally Infected", 0.45, 0.40),
+    #     label = ifelse(estimand == "Naturally Infected", 
+    #                    paste0("Naturally Infected: ", round(truth, 3)),
+    #                    paste0("Population: ", round(truth, 3))),
+    #     color = estimand
+    #   ),
+    #   hjust = 0,
+    #   size = 4,
+    #   show.legend = FALSE
+    # ) +
+    
+    facet_grid(
+      Y_out ~ immunization_schedule,
+      labeller = labeller(Y_out = label_parsed)
+    ) + 
+    
+    scale_color_manual(values = color_map) +
+    scale_linetype_manual(values = linetype_map) +
+    
+    scale_y_continuous(
+      limits = c(0,0.04),
+      breaks = seq(0,0.04,0.01),
+      labels = scales::percent
+    ) +
+    
+    scale_x_log10(
+      breaks = c(2500, 5000, 10000, 20000, 40000, 80000),
+      labels = scales::comma
+    ) +
+    
+    labs(
+      x = "Sample Size",
+      y = expression("Proportion significant negative vaccine effect estimates at 12 months"),
+      color = "Estimand",
+      linetype = "Estimand",
+      title = plot_title
+    ) +
+    
+    theme_minimal(base_size = 16) +
+    theme(
+      legend.position = "bottom",
+      strip.text = element_text(size = 14, face = "bold"),
+      panel.spacing = unit(14, "pt"),
+      panel.grid.minor = element_blank()
+    )
+}
+
+prop_neg_fig_general <- plot_prop_neg_combo(all_prop_neg_df %>% filter(setting_name == "General recruitment"), plot_title = "General recruitment")
+prop_neg_fig_target <- plot_prop_neg_combo(all_prop_neg_df %>% filter(setting_name == "Targeted recruitment"), plot_title = "Targeted recruitment")
+prop_neg_fig_high_early_inc <- plot_prop_neg_combo(all_prop_neg_df %>% filter(setting_name == "High early incidence"), plot_title = "High early incidence")
+
+prop_neg_sig_fig_general <- plot_prop_sig_neg_combo(all_prop_neg_df %>% filter(setting_name == "General recruitment"), plot_title = "General recruitment")
+prop_neg_sig_fig_target <- plot_prop_sig_neg_combo(all_prop_neg_df %>% filter(setting_name == "Targeted recruitment"), plot_title = "Targeted recruitment")
+prop_neg_sig_fig_high_early_inc <- plot_prop_sig_neg_combo(all_prop_neg_df %>% filter(setting_name == "High early incidence"), plot_title = "High early incidence")
+
+ggsave(here::here("results/figures/prop_neg_figure_general_supp.png"),
+       plot = prop_neg_fig_general,
+       width = 10,
+       height = 10)
+
+ggsave(here::here("results/figures/prop_neg_figure_target_supp.png"),
+       plot = prop_neg_fig_target,
+       width = 10,
+       height = 10)
+
+ggsave(here::here("results/figures/prop_neg_figure_high_early_inc_supp.png"),
+       plot = prop_neg_fig_high_early_inc,
+       width = 10,
+       height = 10)
+
+
+ggsave(here::here("results/figures/prop_sig_neg_figure_general_supp.png"),
+       plot = prop_neg_sig_fig_general,
+       width = 10,
+       height = 10)
+
+ggsave(here::here("results/figures/prop_sig_neg_figure_target_supp.png"),
+       plot = prop_neg_sig_fig_target,
+       width = 10,
+       height = 10)
+
+ggsave(here::here("results/figures/prop_sig_neg_figure_high_early_inc_supp.png"),
+       plot = prop_neg_sig_fig_high_early_inc,
+       width = 10,
+       height = 10)
