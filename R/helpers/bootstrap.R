@@ -23,7 +23,7 @@ one_boot <- function(data, config, setting_grid, parameters){
     
     # Only fit models for gcomp (aipw uses closed form se, unadj doesn't need models)
     if(nrow(setting_grid > 0) & c("gcomp" %in% setting_grid$estimator)){
-      pkg_models <- vegrowth::fit_models(data = boot_data,
+      pkg_models <- vaxstrat::fit_models(data = boot_data,
                                          Y_name = Y_name, 
                                          Z_name = "Z", 
                                          X_name = "X", 

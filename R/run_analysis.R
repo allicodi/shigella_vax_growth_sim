@@ -113,7 +113,7 @@ results <- lapply(config$n_sample_size, function(n){
     
     # Fit models
     if(nrow(setting_grid) > 0){
-      pkg_models <- vegrowth::fit_models(data = data,
+      pkg_models <- vaxstrat::fit_models(data = data,
                                          Y_name = Y_name, 
                                          Z_name = "Z", 
                                          X_name = "X", 
