@@ -5,9 +5,9 @@ options(echo = TRUE)
 
 library(dplyr)
 
-here::i_am("evaluate_performance.R")
+here::i_am("R/evaluate_performance.R")
 
-source(here::here("R/evaluation_fns.R"))
+source(here::here("R/helpers/evaluation_fns.R"))
 
 # get seed & config settings from bash script
 cargs <- commandArgs(TRUE)

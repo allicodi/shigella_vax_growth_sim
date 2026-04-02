@@ -14,7 +14,7 @@ library(stringr)
 library(knitr)
 library(kableExtra)
 
-here::i_am("plot_results.R")
+here::i_am("R/plot_results.R")
 
 setting <- "default"
 

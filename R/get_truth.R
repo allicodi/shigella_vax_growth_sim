@@ -4,11 +4,11 @@
 
 .libPaths(c("/apps/R/4.4.0/lib64/R/site/library","/apps/R/4.4.0/lib64/R/library", "~/Rlibs_ve_trial"))
 
-here::i_am("get_truth.R")
+here::i_am("R/get_truth.R")
 
-source(here::here("R/parameter_generation_fns.R"))
-source(here::here("R/simulate_data.R"))
-source(here::here("R/truth_fns.R"))
+source(here::here("R/helpers/parameter_generation_fns.R"))
+source(here::here("R/helpers/simulate_data.R"))
+source(here::here("R/helpers/truth_fns.R"))
 
 # get setting from bash script
 cargs <- commandArgs(TRUE)

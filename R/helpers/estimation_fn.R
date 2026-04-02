@@ -284,7 +284,7 @@ est_nat_inf <- function(data,
                         S_name = "S_inf"){
   
   if(estimator == "gcomp"){
-    all_est <- vegrowth::do_gcomp_nat_inf(data = data, 
+    all_est <- vaxstrat::do_gcomp_nat_inf(data = data, 
                                       models = pkg_models,
                                       Z_name = Z_name,
                                       X_name = X_name, 
@@ -297,7 +297,7 @@ est_nat_inf <- function(data,
                 if_matrix = NA) 
     
   } else if(estimator == "aipw"){
-    all_est <- vegrowth::do_aipw_nat_inf(data = data, 
+    all_est <- vaxstrat::do_aipw_nat_inf(data = data, 
                                      models = pkg_models, 
                                      Y_name = Y_name,
                                      exclusion_restriction = exclusion_restriction,
@@ -313,7 +313,7 @@ est_nat_inf <- function(data,
                 if_matrix = attr(all_est, "if_matrix")) # workaround for package typing issues
 
   } else if (estimator == "unadj"){
-    all_est <- vegrowth::do_unadj_nat_inf(data = data,
+    all_est <- vaxstrat::do_unadj_nat_inf(data = data,
                                       Z_name = "Z",
                                       Y_name = Y_name,
                                       S_name = "S_inf")
@@ -343,7 +343,7 @@ est_pop <- function(data,
                     S_name = "S_inf"){
   
   if(estimator == "gcomp"){
-    all_est <- vegrowth::do_gcomp_pop(data = data, 
+    all_est <- vaxstrat::do_gcomp_pop(data = data, 
                                   models = pkg_models,
                                   Z_name = Z_name,
                                   X_name = X_name,
@@ -354,7 +354,7 @@ est_pop <- function(data,
                 if_matrix = NA) 
     
   } else if(estimator == "aipw"){
-    all_est <- vegrowth::do_aipw_pop(data = data, 
+    all_est <- vaxstrat::do_aipw_pop(data = data, 
                                  models = pkg_models, 
                                  Y_name = Y_name,
                                  Z_name = Z_name, 

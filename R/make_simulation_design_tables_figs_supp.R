@@ -2,7 +2,7 @@
 # Script to make simulation design table for supplement
 # ------------------------------------------------------
 
-here::i_am("make_simulation_design_tables_figs_supp.R")
+here::i_am("R/make_simulation_design_tables_figs_supp.R")
 
 library(dplyr)
 library(ggplot2)
@@ -10,7 +10,7 @@ library(patchwork)
 library(ggpattern)
 library(kableExtra)
 
-source(here::here("R/parameter_generation_fns.R"))
+source(here::here("R/helpers/parameter_generation_fns.R"))
 
 all_settings <- c("default",
                   "base_12mo",
