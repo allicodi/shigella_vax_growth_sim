@@ -1370,7 +1370,7 @@ plot_prop_sig_neg_combo <- function(df, plot_title = NULL) {
     
     labs(
       x = "Sample Size",
-      y = expression("Proportion significant negative vaccine effect estimates at 12 months"),
+      y = expression("Proportion significant negative vaccine effect estimates"),
       color = "Estimand",
       linetype = "Estimand",
       title = plot_title

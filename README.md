@@ -8,6 +8,34 @@ Below we include a detailed description of the general workflow. The workflow is
 
 ---
 
+## Workflow Overview
+
+The simulation pipeline consists of four main steps, managed through the `Makefile`:
+
+1. **Parameter Generation** (`get_parameters.R`): Creates the data-generating process parameters from settings in `config.yml`
+2. **Simulation Execution** (`run_analysis.R`): Runs the main simulation across multiple seeds and sample sizes
+3. **Truth Calculation** (`get_truth.R`): Computes true causal effects via large Monte Carlo simulation
+4. **Performance Evaluation** (`evaluate_performance.R`): Aggregates results and computes operating characteristics
+
+Steps 1 and 2 must be run in order. Step 3 (truth calculation) can be run anytime before step 4, including after the main simulation completes.
+
+**To run the complete workflow:**
+
+```bash
+make full_analysis SETTING=<scenario_name>
+```
+
+
+**To run individual steps:**
+```bash
+make $(PARAMETERS_FILE) SETTING=  # Generate parameters
+make run_analysis SETTING=         # Run simulations  
+make truth SETTING=                # Compute truth (can run anytime before evaluate)
+make evaluate_performance SETTING= # Compute performance metrics
+```
+
+---
+
 ## `config.yml`
 
 The `config.yml` file is used to define the data-generating process, the scientific assumptions under evaluation, and the analysis strategy for the simulation study. The parameters in `config.yml` can be grouped into several conceptual components that reflect the structure of the simulation study.
@@ -43,7 +71,7 @@ These parameters determine which causal effects are targeted and what assumption
 - `two_stage` governs how growth regression models are estimated for the exclusion restriction only Naturally Infected effect estimator (not ultimately used in the simulation).
 - `nat_inf_unadj` includes an unadjusted estimate of the Naturally Infected effect based on only the exclusion restriction (not ultimately used in the simulation).
 - `estimators` specifies which statistical methods are applied. AIPW only was used in the final simulation.
-- `n_boot` if requested estimators utilize bootstrap, specifies the number of bootstrap replicates used.
+- `n_boot` if requested estimators utilize bootstrap, specifies the number of bootstrap replicates used (not ultimately used by AIPW in the simulation)
 
 ---
 
@@ -60,8 +88,23 @@ These parameters control how statistical inference is conducted.
 - `null_hypothesis_value` defines the null effect used for hypothesis testing.
 - `alpha_level` specifies the significance threshold.
 
+---
 
-## Main Simulation Script: `run_analysis.R`
+## Parameter Generation: `get_parameters.R`
+
+Before running simulations, this script generates and saves the data-generating process parameters for a given scenario. It reads configuration settings from `config.yml` and calls `simulate_parameters()` to:
+
+- Estimate baseline growth distributions from the specified EFGH site
+- Fit hazard models relating baseline HAZ to infection risk
+- Calibrate model intercepts to match target incidence rates
+- Generate monthly growth trajectory parameters
+- Fit models for growth decrement after Shigella infection
+
+The output is saved as `parameters_<SETTING>.Rds` and is required by both the main simulation and truth calculation scripts.
+
+---
+
+## Main Simulation: `run_analysis.R` and `run_simulation.sh`
 
 The script `run_analysis.R` is the primary driver of the simulation pipeline. It is designed to be executed in parallel on a SLURM cluster using array jobs, where each task corresponds to a different random seed.
 
@@ -78,8 +121,6 @@ For a given simulation scenario defined in `config.yml`, this script:
 
 Each SLURM task produces results for a single seed across all sample sizes and estimator configurations.
 
----
-
 ### Inputs
 
 The script expects the following inputs via environment variables (typically set in a SLURM submission script):
@@ -87,6 +128,44 @@ The script expects the following inputs via environment variables (typically set
 - `SLURM_ARRAY_TASK_ID`: Used as the random seed for reproducibility  
 - `SETTING`: Name of the scenario in `config.yml` to run  
 - `PARAMETERS_FILE`: Path to an `.rds` file containing pre-generated parameters for the data-generating process  
+
+### Submission via `run_simulation.sh`
+
+The `run_simulation.sh` shell script submits the main simulation jobs to a SLURM cluster. It sets up the R environment, configures library paths, and launches an array job where each task corresponds to a different random seed.
+
+**Usage:**
+```bash
+./run_simulation.sh    
+```
+
+Key inputs:
+- `PARTITION`: SLURM partition to submit jobs to  
+- `SETTING`: scenario name from `config.yml`  
+- `PARAMETERS_FILE`: path to pre-generated simulation parameters  
+- `NSEEDS`: number of parallel simulation replicates (array size)
+
+---
+
+## Truth Calculation: `get_truth.R` and `run_truth.sh`
+
+To evaluate simulation performance (bias, coverage, power), true causal effects must be computed. The `get_truth.R` script simulates a very large trial (n = 10 million) and computes true effects for all estimands and timepoints specified in the configuration. Truth values can be calculated anytime after parameters are generated, though they are required before running `evaluate_performance.R`.
+
+The script is submitted to SLURM via `run_truth.sh`:
+
+**Usage:**
+```bash
+./run_truth.sh    
+```
+
+Key inputs:
+- `PARTITION`: SLURM partition to submit jobs to  
+- `SETTING`: scenario name from `config.yml`  
+- `PARAMETERS_FILE`: path to pre-generated simulation parameters  
+- `TRUTH_DIR`: directory where truth file will be saved
+
+Output is saved as `truth_<SETTING>.Rds`.
+
+---
 
 
 ## Post-processing and Results Summaries
@@ -114,16 +193,3 @@ This script generates a multi-panel figure summarizing key components of the sim
 ### `make_simulation_design_tables_figs_supp.R`
 
 This script produces supplementary tables and figures describing the simulation design across all scenarios. Outputs include tables of baseline HAZ distributions and incidence rates, as well as figures for growth trajectories and incidence rate ratios by age and recruitment strategy. Results are formatted for manuscript-ready inclusion and saved to `results/figures/`. 
-
----
-
-### `run_simulation.sh`
-
-This shell script submits the main simulation jobs to a SLURM cluster. It sets up the R environment, configures library paths, and launches an array job where each task corresponds to a different random seed. The script passes the selected configuration (`SETTING`) and parameter file (`PARAMETERS_FILE`) to `run_analysis.R`, enabling parallel execution of simulation replicates across compute nodes.
-
-Key inputs:
-- `PARTITION`: SLURM partition to submit jobs to  
-- `SETTING`: scenario name from `config.yml`  
-- `PARAMETERS_FILE`: path to pre-generated simulation parameters  
-- `NSEEDS`: number of parallel simulation replicates (array size)  
-
