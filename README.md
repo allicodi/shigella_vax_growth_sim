@@ -196,3 +196,9 @@ This script generates a multi-panel figure summarizing key components of the sim
 ### `make_simulation_design_tables_figs_supp.R`
 
 This script produces supplementary tables and figures describing the simulation design across all scenarios. Outputs include tables of baseline HAZ distributions and incidence rates, as well as figures for growth trajectories and incidence rate ratios by age and recruitment strategy. Results are formatted for manuscript-ready inclusion and saved to `results/figures/`. 
+
+## Questions and Citation
+
+For questions about this code, please contact Allison Codi at [allison.codi@emory.edu].
+
+If you use this code in your research, please cite the accompanying manuscript (citation forthcoming).
