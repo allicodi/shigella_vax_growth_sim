@@ -6,6 +6,9 @@ Included are all pieces of code needed to reproduce results of the manuscript "E
 
 Below we include a detailed description of the general workflow. The workflow is intended to be executed on an HPC system using a `slurm` scheduler. Note: As configurations of HPC computing environments differ across clusters, it is not expected that this code will run without modification on any HPC system. 
 
+**Note:** All analyses use the **[vaxstrat](https://github.com/allicodi/vaxstrat)** R package, which implements principal stratification methods for estimating causal effects of vaccination on post-infection outcomes. The package supports multiple estimands (Naturally Infected, Doomed, and population-level effects) and estimators (G-computation, AIPW, TMLE, and nonparametric bounds).
+
+
 ---
 
 ## Workflow Overview
