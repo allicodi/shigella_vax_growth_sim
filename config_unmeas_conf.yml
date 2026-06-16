@@ -1,0 +1,218 @@
+# default = 12 month trial - The Gambia - upper CI incidence - larger effect sizes
+default: 
+  n_boot: 1000
+  n_sample_size: 
+    - 2500
+    - 5000
+    - 10000
+    - 20000
+    - 40000
+    - 80000
+  dose_schedule: "12mo"
+  site: "The Gambia"
+  incidence_shigella_0_6: 0.112
+  incidence_severe_shigella_0_6: 0.038
+  incidence_shigella_6_12: 0.203
+  incidence_severe_shigella_6_12: 0.067
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  scale_growth_effect_0_6: -0.50 # kids 12-18 mo (scale towards upper CI; match 6mo optimistic sim)
+  scale_growth_effect_6_12: -0.25 # kids 18-24 mo (scale towards upper CI)
+  VE_mild: 0.40
+  VE_severe: 0.60
+  estimand: ["nat_inf", "pop"]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
+  nat_inf_unadj: FALSE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  dropout: 0.10
+  beta_U_S: 0 # both coefficients = 0, thus no unmeasured confounding
+  beta_U_Y: 0
+  p_U_is_1: 0.5
+  
+# Parameters in this setting:
+# $hazard_S__X_coef_0_6
+# [1] -0.1834354
+
+# $hazard_S__X_coef_6_12
+# [1] 0.09621787
+
+# $hazard_S_sev__X_coef_0_6
+# [1] -0.1046698
+
+# $hazard_S_sev__X_coef_6_12
+# [1] 0.1202493
+
+# U magnitudes approx. half magnitude of X
+# S low: -0.10 (confounder reduces inf probability); S high: 0.06 (confounder increases inf probability)
+# Y low: 0.9 (confounder decreases HAZ); Y high 1.1 (counfounder increases HAZ)
+
+S_low_Y_low:
+  n_boot: 1000
+  n_sample_size: 
+    - 2500
+    - 5000
+    - 10000
+    - 20000
+    - 40000
+    - 80000
+  dose_schedule: "12mo"
+  site: "The Gambia"
+  incidence_shigella_0_6: 0.112
+  incidence_severe_shigella_0_6: 0.038
+  incidence_shigella_6_12: 0.203
+  incidence_severe_shigella_6_12: 0.067
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  scale_growth_effect_0_6: -0.50 # kids 12-18 mo (scale towards upper CI; match 6mo optimistic sim)
+  scale_growth_effect_6_12: -0.25 # kids 18-24 mo (scale towards upper CI)
+  VE_mild: 0.40
+  VE_severe: 0.60
+  estimand: ["nat_inf", "pop"]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
+  nat_inf_unadj: FALSE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  dropout: 0.10
+  beta_U_S: -0.1 
+  beta_U_Y: 0.9
+  p_U_is_1: 0.5
+
+S_low_Y_high:
+  n_boot: 1000
+  n_sample_size: 
+    - 2500
+    - 5000
+    - 10000
+    - 20000
+    - 40000
+    - 80000
+  dose_schedule: "12mo"
+  site: "The Gambia"
+  incidence_shigella_0_6: 0.112
+  incidence_severe_shigella_0_6: 0.038
+  incidence_shigella_6_12: 0.203
+  incidence_severe_shigella_6_12: 0.067
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  scale_growth_effect_0_6: -0.50 # kids 12-18 mo (scale towards upper CI; match 6mo optimistic sim)
+  scale_growth_effect_6_12: -0.25 # kids 18-24 mo (scale towards upper CI)
+  VE_mild: 0.40
+  VE_severe: 0.60
+  estimand: ["nat_inf", "pop"]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
+  nat_inf_unadj: FALSE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  dropout: 0.10
+  beta_U_S: -0.1 
+  beta_U_Y: 1.1
+  p_U_is_1: 0.5
+
+S_high_Y_low:
+  n_boot: 1000
+  n_sample_size: 
+    - 2500
+    - 5000
+    - 10000
+    - 20000
+    - 40000
+    - 80000
+  dose_schedule: "12mo"
+  site: "The Gambia"
+  incidence_shigella_0_6: 0.112
+  incidence_severe_shigella_0_6: 0.038
+  incidence_shigella_6_12: 0.203
+  incidence_severe_shigella_6_12: 0.067
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  scale_growth_effect_0_6: -0.50 # kids 12-18 mo (scale towards upper CI; match 6mo optimistic sim)
+  scale_growth_effect_6_12: -0.25 # kids 18-24 mo (scale towards upper CI)
+  VE_mild: 0.40
+  VE_severe: 0.60
+  estimand: ["nat_inf", "pop"]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
+  nat_inf_unadj: FALSE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  dropout: 0.10
+  beta_U_S: 0.06
+  beta_U_Y: 0.9
+  p_U_is_1: 0.5
+
+S_high_Y_high:
+  n_boot: 1000
+  n_sample_size: 
+    - 2500
+    - 5000
+    - 10000
+    - 20000
+    - 40000
+    - 80000
+  dose_schedule: "12mo"
+  site: "The Gambia"
+  incidence_shigella_0_6: 0.112
+  incidence_severe_shigella_0_6: 0.038
+  incidence_shigella_6_12: 0.203
+  incidence_severe_shigella_6_12: 0.067
+  effect_shigella_growth_formula: "y ~ -1 + x + I(pmax(0, x - 4)) + I(pmax(0, x - 8))"
+  scale_growth_effect_0_6: -0.50 # kids 12-18 mo (scale towards upper CI; match 6mo optimistic sim)
+  scale_growth_effect_6_12: -0.25 # kids 18-24 mo (scale towards upper CI)
+  VE_mild: 0.40
+  VE_severe: 0.60
+  estimand: ["nat_inf", "pop"]
+  estimators: ["aipw"]
+  exclusion_restriction: [TRUE]
+  cross_world: [TRUE]
+  two_stage: [FALSE]
+  nat_inf_unadj: FALSE
+  intervals:
+    - 3
+    - 6
+    - 9
+    - 12
+    - [6, 12]
+    - [3, 6, 9, 12]
+  null_hypothesis_value: 0
+  alpha_level: 0.05
+  dropout: 0.10
+  beta_U_S: 0.06 
+  beta_U_Y: 1.1
+  p_U_is_1: 0.5
+

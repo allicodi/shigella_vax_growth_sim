@@ -91,7 +91,9 @@ simulate_data <- function(parameters,
   hazard_sev_0_6 <- rep(0,n)
   hazard_sev_0_6[S_inf_Z0 == 1 & S_inf_time_Z0 <= 26] <- hazard(intercept = parameters$hazard_S_sev__X_int_0_6,
                                                                 haz_coef = parameters$hazard_S_sev__X_coef_0_6,
-                                                                haz = X[S_inf_Z0 == 1 & S_inf_time_Z0 <= 26])
+                                                                haz = X[S_inf_Z0 == 1 & S_inf_time_Z0 <= 26],
+                                                                u = U[S_inf_Z0 == 1 & S_inf_time_Z0 <= 26],
+                                                                u_coef = beta_U_S)
   
   S_sev_Z0_0_6 <- rbinom(n, 1, prob = hazard_sev_0_6) 
   
@@ -99,7 +101,9 @@ simulate_data <- function(parameters,
   hazard_sev_6_12 <- rep(0, n)
   hazard_sev_6_12[S_inf_Z0 == 1 & S_inf_time_Z0 > 26] <- hazard(intercept = parameters$hazard_S_sev__X_int_6_12,
                                                                  haz_coef = parameters$hazard_S_sev__X_coef_6_12,
-                                                                 haz = X[S_inf_Z0 == 1 & S_inf_time_Z0 > 26])
+                                                                 haz = X[S_inf_Z0 == 1 & S_inf_time_Z0 > 26],
+                                                                 u = U[S_inf_Z0 == 1 & S_inf_time_Z0 > 26],
+                                                                 u_coef = beta_U_S)
   # save separately then combine all the 1s
   S_sev_Z0_6_12 <- rbinom(n, 1, prob = hazard_sev_6_12)
   S_sev_Z0 <- S_sev_Z0_0_6 + S_sev_Z0_6_12
@@ -137,12 +141,14 @@ simulate_data <- function(parameters,
   Y_vec_no_inf <- vector(mode = "list", length = 12)
   Y_vec_no_inf[[1]] <- parameters$monthly_growth_model$beta_0[months[1]] +
     parameters$monthly_growth_model$beta_1[months[1]] * X + # baseline growth
-    noise_matrix[,1] + beta_U_Y * U
+    beta_U_Y * U + # unmeasured confounding (if applicable)
+    noise_matrix[,1] 
   
   for(i in 2:length(Y_vec_no_inf)){
     Y_vec_no_inf[[i]] <- parameters$monthly_growth_model$beta_0[months[i]] +
       parameters$monthly_growth_model$beta_1[months[i]] * Y_vec_no_inf[[i-1]] +  # previous month's growth
-      noise_matrix[,i] + beta_U_Y * U
+      beta_U_Y * U + # unmeasured confounding (if applicable)
+      noise_matrix[,i] 
   }
   
   Y_df_no_inf <- data.frame(Y_vec_no_inf)
