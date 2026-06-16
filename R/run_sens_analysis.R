@@ -42,7 +42,7 @@ setting_grid <- expand.grid(estimand = config$estimand,
                             cw = config$cross_world,
                             two_stage = config$two_stage,
                             beta_U_S = config$beta_U_S,
-                            beta_Y_Y = config$beta_U_Y,
+                            beta_U_Y = config$beta_U_Y,
                             p_U_is_1 = config$p_U_is_1)
 
 # elim any settings that do not exist (ex. where ER & CW both == FALSE, CW + 2 part, ER + CW + 2part)
@@ -77,7 +77,7 @@ if(config$nat_inf_unadj){
                                                  cw = NA,
                                                  two_stage = NA,
                                                  beta_U_S = config$beta_U_S,
-                                                 beta_Y_Y = config$beta_U_Y,
+                                                 beta_U_Y = config$beta_U_Y,
                                                  p_U_is_1 = config$p_U_is_1))
 }
 
@@ -91,7 +91,7 @@ results <- lapply(config$n_sample_size, function(n){
                         seed = seed, 
                         type = "observed",
                         beta_U_S = config$beta_U_S,
-                        beta_Y_Y = config$beta_U_Y,
+                        beta_U_Y = config$beta_U_Y,
                         p_U_is_1 = config$p_U_is_1)
   
   # if dropout, remove dropout% of observations 
