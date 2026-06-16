@@ -172,10 +172,12 @@ cum_inc <- function(hazard, t0){
 #' @param intercept intercept for hazard model
 #' @param haz_coef coefficient for hazard model
 #' @param haz height-for-age z-score
+#' @param u unmeasured confounder
+#' @param u_coef effect of unmeasured confounder on risk
 #' 
 #' @return expit intercept + coefficient*height for age z-score
-hazard <- function(intercept, haz_coef, haz){
-  plogis(intercept + haz_coef * haz)
+hazard <- function(intercept, haz_coef, haz, u, u_coef){
+  plogis(intercept + haz_coef * haz + u * u_coef)
 }
 
 #' Function to get cumulative incidence for given set of parameters

@@ -30,6 +30,10 @@ simulate_data <- function(parameters,
                           VE_mild = 0.40,
                           VE_severe = 0.60,
                           seed = 12345,
+                          # for unmeasured confounder
+                          beta_U_S = 0,
+                          beta_U_Y = 0,
+                          p_U_is_1 = 0.5,
                           type = "counterfactual"){
   set.seed(seed)
   
@@ -46,6 +50,11 @@ simulate_data <- function(parameters,
   X <- rnorm(n, mean = parameters$mean_X, sd = parameters$sd_X)
   
   # ---------------------------------------------------------------------------
+  # U: Possible unmeasured confounder -----------------------------------------
+  # ---------------------------------------------------------------------------
+  U <- rbinom(n, size = 1, prob = p_U_is_1)
+  
+  # ---------------------------------------------------------------------------
   # S: Shigella infection (S_inf / S_sev for regular and severe; S_inf_time) --
   # ---------------------------------------------------------------------------
   
@@ -56,7 +65,9 @@ simulate_data <- function(parameters,
   # Shigella months 0-6 post-baseline
   hazard_inf_0_6 <- hazard(intercept = parameters$hazard_S__X_int_0_6, 
                            haz_coef = parameters$hazard_S__X_coef_0_6,
-                           haz = X)
+                           haz = X,
+                           u = U,
+                           u_coef = beta_U_S)
   
   # SHOULD THIS BE +1 ?? bc could be 0? then those are getting lumped in with the uninfecteds
   S_inf_time_Z0 <- rgeom(n, prob = hazard_inf_0_6) + 1
@@ -65,7 +76,9 @@ simulate_data <- function(parameters,
   # Shigella months 6-12 post-baseline
   hazard_inf_6_12 <- hazard(intercept = parameters$hazard_S__X_int_6_12,
                             haz_coef = parameters$hazard_S__X_coef_6_12,
-                            haz = X)
+                            haz = X,
+                            u = U, 
+                            u_coef = beta_U_S)
   
   S_inf_time_Z0[S_inf_time_Z0 == 0] <- 26 + rgeom(length(S_inf_time_Z0[S_inf_time_Z0 == 0]), hazard_inf_6_12[S_inf_time_Z0 == 0]) + 1
   S_inf_time_Z0 <- ifelse(S_inf_time_Z0 <= 52, S_inf_time_Z0, 0) # if infected after week 52, censor at 52 (0 temp, fill in 52 later)
@@ -124,12 +137,12 @@ simulate_data <- function(parameters,
   Y_vec_no_inf <- vector(mode = "list", length = 12)
   Y_vec_no_inf[[1]] <- parameters$monthly_growth_model$beta_0[months[1]] +
     parameters$monthly_growth_model$beta_1[months[1]] * X + # baseline growth
-    noise_matrix[,1]
+    noise_matrix[,1] + beta_U_Y * U
   
   for(i in 2:length(Y_vec_no_inf)){
     Y_vec_no_inf[[i]] <- parameters$monthly_growth_model$beta_0[months[i]] +
       parameters$monthly_growth_model$beta_1[months[i]] * Y_vec_no_inf[[i-1]] +  # previous month's growth
-      noise_matrix[,i]
+      noise_matrix[,i] + beta_U_Y * U
   }
   
   Y_df_no_inf <- data.frame(Y_vec_no_inf)
