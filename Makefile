@@ -9,6 +9,8 @@ NSEEDS := 1000
 
 full_analysis: run_analysis evaluate_performance
 
+full_sensitivity_analysis: run_unmeas_conf_truth run_unmeas_conf_analysis
+
 $(PARAMETERS_FILE): $(CONFIG_FILE) get_parameters.R
 	/apps/R/4.4.0/bin/Rscript get_parameters.R $(SETTING) $(PARAMETERS_DIR)
 
@@ -23,3 +25,12 @@ evaluate_performance: $(TRUTH_FILE) evaluate_performance.R
 
 .PHONY: truth
 truth: $(TRUTH_FILE)
+
+# ------------------------------------------------------------------ 
+# Unmeasured-confounding sensitivity analyses 
+# ------------------------------------------------------------------ 
+run_unmeas_conf_truth: $(PARAMETERS_FILE) run_unmeas_conf_truth.sh R/get_sens_truth.R 
+	./run_unmeas_conf_truth.sh $(PARTITION) $(SETTING) $(PARAMETERS_FILE) $(TRUTH_DIR) 
+	
+run_unmeas_conf_analysis: $(PARAMETERS_FILE) run_unmeas_conf_simulation.sh R/run_sens_analysis.R 
+	./run_unmeas_conf_simulation.sh $(PARTITION) $(SETTING) $(PARAMETERS_FILE) $(NSEEDS)
