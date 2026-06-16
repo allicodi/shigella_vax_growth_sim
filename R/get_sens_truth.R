@@ -13,8 +13,10 @@ source(here::here("R/helpers/truth_fns.R"))
 # get setting from bash script
 cargs <- commandArgs(TRUE)
 setting <- cargs[1]
-parameters_file <- cargs[2]
-truth_dir <- cargs[3]
+# parameters_file <- cargs[2]
+# Hard code parameters file for sens analysis -- The Gambia 12mo
+parameters_file <- "/projects/dbenkes/allison/shigella_vaccine_trial/parameters/parameters_optimistic_12mo.Rds"
+truth_dir <- cargs[2]
 
 cfg <- yaml::read_yaml("config_unmeas_conf.yml")
 config <- cfg[[setting]]

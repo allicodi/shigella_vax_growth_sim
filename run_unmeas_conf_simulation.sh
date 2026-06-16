@@ -2,8 +2,7 @@
 
 PARTITION=$1
 SETTING=$2
-PARAMETERS_FILE=$3
-NSEEDS=$4
+NSEEDS=$3
 
 module purge
 module load R/4.4.0
@@ -20,5 +19,5 @@ sbatch --array=1-$NSEEDS \
 	--mem-per-cpu=6G \
 	--output=/projects/dbenkes/allison/shigella_vaccine_trial/scratch/${SETTING}_%A_%a.out \
 	--job-name=shigella_%a \
-	--export=SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID,SETTING=$SETTING,PARAMETERS_FILE=$PARAMETERS_FILE \
+	--export=SLURM_ARRAY_TASK_ID=$SLURM_ARRAY_TASK_ID,SETTING=$SETTING \
 	--wrap "/apps/R/4.4.0/bin/Rscript R/run_sens_analysis.R"
