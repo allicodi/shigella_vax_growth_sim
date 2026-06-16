@@ -17,8 +17,12 @@ source(here::here("R/helpers/bootstrap.R"))
 
 # get seed & config settings from bash script
 seed <- as.numeric(Sys.getenv("SLURM_ARRAY_TASK_ID"))
+
+# setting in config_unmeas_conf.yml
 setting <- Sys.getenv("SETTING")
-parameters <- readRDS(Sys.getenv("PARAMETERS_FILE"))
+
+# Parameters hard set to The Gambia - 12mo
+parameters <- readRDS("/projects/dbenkes/allison/shigella_vaccine_trial/parameters/parameters_optimistic_12mo.Rds")
 
 # set seed
 set.seed(seed)
