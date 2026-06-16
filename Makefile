@@ -29,8 +29,8 @@ truth: $(TRUTH_FILE)
 # ------------------------------------------------------------------ 
 # Unmeasured-confounding sensitivity analyses 
 # ------------------------------------------------------------------ 
-run_unmeas_conf_truth: $(PARAMETERS_FILE) run_unmeas_conf_truth.sh R/get_sens_truth.R 
+run_unmeas_conf_truth: run_unmeas_conf_truth.sh R/get_sens_truth.R 
 	./run_unmeas_conf_truth.sh $(PARTITION) $(SETTING) $(TRUTH_DIR) 
 	
-run_unmeas_conf_analysis: $(PARAMETERS_FILE) run_unmeas_conf_simulation.sh R/run_sens_analysis.R 
+run_unmeas_conf_analysis: run_unmeas_conf_simulation.sh R/run_sens_analysis.R 
 	./run_unmeas_conf_simulation.sh $(PARTITION) $(SETTING) $(NSEEDS)
