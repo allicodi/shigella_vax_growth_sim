@@ -20,8 +20,8 @@ $(TRUTH_FILE): $(CONFIG_FILE) $(PARAMETERS_FILE) get_truth.R run_truth.sh
 run_analysis: $(PARAMETERS_FILE) run_simulation.sh run_analysis.R
 	./run_simulation.sh $(PARTITION) $(SETTING) $(PARAMETERS_FILE) $(NSEEDS)
 
-evaluate_performance: $(TRUTH_FILE) evaluate_performance.R 
-	/apps/R/4.4.0/bin/Rscript evaluate_performance.R $(SETTING) $(TRUTH_FILE)
+evaluate_performance: $(TRUTH_FILE) R/evaluate_performance.R 
+	/apps/R/4.4.0/bin/Rscript R/evaluate_performance.R $(SETTING) $(TRUTH_FILE)
 
 .PHONY: truth
 truth: $(TRUTH_FILE)
@@ -34,3 +34,6 @@ run_unmeas_conf_truth: run_unmeas_conf_truth.sh R/get_sens_truth.R
 	
 run_unmeas_conf_analysis: run_unmeas_conf_simulation.sh R/run_sens_analysis.R 
 	./run_unmeas_conf_simulation.sh $(PARTITION) $(SETTING) $(NSEEDS)
+	
+evaluate_sens_performance: $(TRUTH_FILE) R/evaluate_sens_performance.R 
+	/apps/R/4.4.0/bin/Rscript R/evaluate_sens_performance.R $(SETTING) 
