@@ -54,7 +54,7 @@ default:
 
 # U magnitudes approx. half magnitude of X
 # S low: -0.10 (confounder reduces inf probability); S high: 0.06 (confounder increases inf probability)
-# Y low: 0.9 (confounder decreases HAZ); Y high 1.1 (counfounder increases HAZ)
+# Y low: -0.1 (confounder decreases HAZ); Y high 0.1 (counfounder increases HAZ)
 
 S_low_Y_low:
   n_boot: 1000
@@ -93,7 +93,7 @@ S_low_Y_low:
   alpha_level: 0.05
   dropout: 0.10
   beta_U_S: -0.1 
-  beta_U_Y: 0.9
+  beta_U_Y: -0.1
   p_U_is_1: 0.5
 
 S_low_Y_high:
@@ -133,7 +133,7 @@ S_low_Y_high:
   alpha_level: 0.05
   dropout: 0.10
   beta_U_S: -0.1 
-  beta_U_Y: 1.1
+  beta_U_Y: 0.1
   p_U_is_1: 0.5
 
 S_high_Y_low:
@@ -173,7 +173,7 @@ S_high_Y_low:
   alpha_level: 0.05
   dropout: 0.10
   beta_U_S: 0.06
-  beta_U_Y: 0.9
+  beta_U_Y: -0.1
   p_U_is_1: 0.5
 
 S_high_Y_high:
@@ -213,6 +213,6 @@ S_high_Y_high:
   alpha_level: 0.05
   dropout: 0.10
   beta_U_S: 0.06 
-  beta_U_Y: 1.1
+  beta_U_Y: 0.1
   p_U_is_1: 0.5
 
