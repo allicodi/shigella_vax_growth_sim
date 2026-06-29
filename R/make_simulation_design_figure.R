@@ -553,5 +553,5 @@ final_figure
 
 ggsave(here::here(paste0("results/figures/parameterization_", setting, ".png")), 
        plot = final_figure,
-       width = 15, height = 10, dpi = 300)
+       width = 15, height = 10, dpi = 1000)
 

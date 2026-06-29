@@ -11,9 +11,9 @@ library(SuperLearner)
 source(here::here("misc/SL.wrappers.R"))
 
 # change option for age stratified
-age_stratified <- TRUE
+age_stratified <- FALSE
 
-age_6_9 <- TRUE
+age_6_9 <- FALSE
 age_9_12 <- FALSE
 age_12_15 <- FALSE
 

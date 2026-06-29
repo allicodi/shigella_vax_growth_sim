@@ -197,8 +197,12 @@ This script generates a multi-panel figure summarizing key components of the sim
 
 This script produces supplementary tables and figures describing the simulation design across all scenarios. Outputs include tables of baseline HAZ distributions and incidence rates, as well as figures for growth trajectories and incidence rate ratios by age and recruitment strategy. Results are formatted for manuscript-ready inclusion and saved to `results/figures/`. 
 
+## Sensitivity analysis
+
+We also include a sensitivity analysis evaluating violations of the partial principal ignorability assumption (i.e., unmeasured confounding of infection status and post-infection growth outcomes). The analysis follows the same workflow as the primary simulation. The primary configuration file is replaced by `config_unmeas_conf.yml`, and primary bash scripts are replaced by `run_unmeasured_conf_simulation.sh` and `run_unmeas_conf_truth.sh`, with the remaining workflow unchanged.
+
 ## Questions and Citation
 
 For questions about this code, please contact Allison Codi at [allison.codi@emory.edu].
 
-If you use this code in your research, please cite the accompanying manuscript (citation forthcoming).
+If you use this code in your research, please cite the accompanying manuscript (under review, **[medRxiv](https://doi.org/10.64898/2026.04.03.26350105)**).

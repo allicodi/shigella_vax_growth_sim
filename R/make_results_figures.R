@@ -271,9 +271,9 @@ for(i in 1:length(config_settings)){
   
   all_truth_df <- dplyr::bind_rows(all_truth_df, truth_df)
   
-  ggsave(filename = here::here(paste0("results/figures/individual/power_", setting, ".png")), plot = power_fig, width = 14, height = 7)
-  ggsave(filename = here::here(paste0("results/figures/individual/bias_", setting, ".png")), plot = bias_fig, width = 14, height = 7)
-  ggsave(filename = here::here(paste0("results/figures/individual/prop_neg_", setting, ".png")), plot = prop_neg_fig, width = 14, height = 7)
+  ggsave(filename = here::here(paste0("results/figures/individual/power_", setting, ".png")), plot = power_fig, width = 14, height = 7, dpi = 1000)
+  ggsave(filename = here::here(paste0("results/figures/individual/bias_", setting, ".png")), plot = bias_fig, width = 14, height = 7, dpi = 1000)
+  ggsave(filename = here::here(paste0("results/figures/individual/prop_neg_", setting, ".png")), plot = prop_neg_fig, width = 14, height = 7, dpi = 1000)
 }
 
 ############################################################
@@ -604,7 +604,8 @@ power_fig <- plot_power_combo(all_power_df)
 ggsave(here::here("results/figures/power_figure_Y_12.png"),
        plot = power_fig,
        width = 10,
-       height = 10)
+       height = 10, 
+       dpi = 1000)
 
 ############################################################
 # Main results figure 2: Y_12 proportion negative for all settings
@@ -843,12 +844,14 @@ prop_neg_sig_fig <- plot_prop_sig_neg_combo(all_prop_neg_df)
 ggsave(here::here("results/figures/prop_neg_figure_Y_12.png"),
        plot = prop_neg_fig,
        width = 10,
-       height = 10)
+       height = 10,
+       dpi = 1000)
 
 ggsave(here::here("results/figures/prop_sig_neg_Y_12.png"),
        plot = prop_neg_sig_fig,
        width = 10,
-       height = 10)
+       height = 10,
+       dpi = 1000)
 
 ############################################################
 # Main results figure 3: Comparison of power for all settings
@@ -1147,7 +1150,8 @@ main_endpoint_power_plot <- plot_power_all_end(all_power_optimistic_df_text %>%
 ggsave(here::here("results/figures/targeted_all_endpoint.png"),
        plot = main_endpoint_power_plot,
        width = 10,
-       height = 10)
+       height = 10,
+       dpi = 1000)
 
 # All outcomes for the supplement
 targeted_power_plot <- plot_power_all_end(all_power_optimistic_df %>% 

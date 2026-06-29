@@ -11,8 +11,8 @@ library(SuperLearner)
 library(survival)
 
 # not ideal but don't want to deal w HPC install issues rn
-devtools::load_all("~/abxGrowth/")
-#devtools::load_all("~/Documents/shigella_projects/packages/abxGrowth/")
+#devtools::load_all("~/abxGrowth/")
+devtools::load_all("~/Documents/shigella_projects/packages/abxGrowth/")
 
 source(here::here("misc/SL.wrappers.R"))
 
@@ -176,7 +176,7 @@ cum_inc <- function(hazard, t0){
 #' @param u_coef effect of unmeasured confounder on risk
 #' 
 #' @return expit intercept + coefficient*height for age z-score
-hazard <- function(intercept, haz_coef, haz, u, u_coef){
+hazard <- function(intercept, haz_coef, haz, u = 0, u_coef = 0){
   plogis(intercept + haz_coef * haz + u * u_coef)
 }
 
